@@ -6,6 +6,8 @@
 
 #if defined(CONFIG_SOC_SERIES_GD32A50X)
 #include <gd32a50x_i2c.h>
+#elif defined(CONFIG_SOC_SERIES_GD32C2X1)
+#include <gd32c2x1_i2c.h>
 #elif defined(CONFIG_SOC_SERIES_GD32E10X)
 #include <gd32e10x_i2c.h>
 #elif defined(CONFIG_SOC_SERIES_GD32E50X)
@@ -16,6 +18,8 @@
 #include <gd32f403_i2c.h>
 #elif defined(CONFIG_SOC_SERIES_GD32F4XX)
 #include <gd32f4xx_i2c.h>
+#elif defined(CONFIG_SOC_SERIES_GD32F527)
+#include <gd32f527_i2c.h>
 #elif defined(CONFIG_SOC_SERIES_GD32L23X)
 #include <gd32l23x_i2c.h>
 #elif defined(CONFIG_SOC_SERIES_GD32VF103)
