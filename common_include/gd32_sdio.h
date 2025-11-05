@@ -10,4 +10,6 @@
 #include <gd32f403_sdio.h>
 #elif defined(CONFIG_SOC_SERIES_GD32F4XX)
 #include <gd32f4xx_sdio.h>
+#elif defined(CONFIG_SOC_SERIES_GD32F527)
+#include <gd32f527_sdio.h>
 #endif
