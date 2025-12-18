@@ -1,0 +1,678 @@
+# GD32F503 pin definitions
+#
+# Sources:
+# - GD32F503 Datasheet
+#
+# Pin codes:
+#
+# - 48 pins: C
+# - K pins: K
+# - 64 pins: R
+# - 100 pins: V
+#
+# Memory codes:
+#
+# - Memory variant: G
+# - Memory variant: E
+# - Memory variant: C
+#
+# Copyright (c) 2025, GigaDevice Semiconductor Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+model: af
+
+series: gd32f503
+
+variants:
+  - pincode: C
+    memories: [G, E, C]
+  - pincode: K
+    memories: [C]
+  - pincode: R
+    memories: [G, E, C]
+  - pincode: V
+    memories: [E]
+
+pins:
+  PA0:
+    pincodes: [C, K, R, V]
+    afs:
+      ADC012_IN0: ANALOG
+      USART1_CTS: 0
+      TIMER1_CH0_ETI: 1
+      TIMER16_BRKIN: 2
+      TIMER4_CH0: 3
+      TIMER7_ETI: 4
+      CMP0_OUT: 5
+      TRGSEL_IN5: 6
+      EVENTOUT: 8
+  PA1:
+    pincodes: [C, K, R, V]
+    afs:
+      ADC012_IN1: ANALOG
+      USART1_RTS: 0
+      TIMER1_CH1: 1
+      TIMER16_MCH0: 2
+      TIMER4_CH1: 3
+      CMP0_OUT: 5
+      TRGSEL_IN6: 6
+      EVENTOUT: 8
+  PA2:
+    pincodes: [C, K, R, V]
+    afs:
+      ADC012_IN2: ANALOG
+      USART1_TX: 0
+      TIMER1_CH2: 1
+      TIMER16_CH0: 2
+      TIMER4_CH2: 3
+      SPI0_IO2: 5
+      TRGSEL_OUT0: 6
+      EXMC_D4: 7
+      EVENTOUT: 8
+  PA3:
+    pincodes: [C, K, R, V]
+    afs:
+      ADC012_IN3: ANALOG
+      USART1_RX: 0
+      TIMER1_CH3: 1
+      TIMER16_CH1: 2
+      TIMER4_CH3: 3
+      TIMER0_CH3_ON: 4
+      SPI0_IO3: 5
+      TRGSEL_OUT1: 6
+      EXMC_D5: 7
+      EVENTOUT: 8
+  PA4:
+    pincodes: [C, K, R, V]
+    afs:
+      ADC01_IN4: ANALOG
+      DAC0_OUT0: ANALOG
+      SPI0_NSS: 0
+      USART1_CK: 1
+      I2S2_WS: 2
+      SPI2_NSS: 2
+      TIMER15_BRKIN: 3
+      TIMER7_CH1BRKIN: 4
+      EXMC_D6: 7
+      EVENTOUT: 8
+  PA5:
+    pincodes: [C, K, R, V]
+    afs:
+      ADC01_IN5: ANALOG
+      DAC0_OUT0: ANALOG
+      SPI0_SCK: 0
+      TIMER4_ETI: 2
+      TIMER15_MCH0: 3
+      TIMER7_CH0BRKIN: 4
+      EXMC_D7: 7
+      EVENTOUT: 8
+  PA6:
+    pincodes: [C, K, R, V]
+    afs:
+      ADC01_IN6: ANALOG
+      SPI0_MISO: 0
+      TIMER2_CH0: 1
+      TIMER0_BRKIN: 2
+      TIMER15_CH0: 3
+      TIMER7_BRKIN: 4
+      CMP0_OUT: 5
+      TRGSEL_OUT2: 6
+      EVENTOUT: 8
+  PA7:
+    pincodes: [C, K, R, V]
+    afs:
+      ADC01_IN7: ANALOG
+      SPI0_MOSI: 0
+      TIMER2_CH1: 1
+      TIMER0_CH0_ON: 2
+      TIMER15_CH1: 3
+      TIMER7_CH0_ON: 4
+      TRGSEL_OUT3: 6
+      EVENTOUT: 8
+  PA8:
+    pincodes: [C, K, R, V]
+    afs:
+      USART0_CK: 0
+      TIMER0_CH0: 1
+      USBFS_SOF: 2
+      CK_OUT: 3
+      TIMER7_CH0BRKIN: 4
+      CTC_SYNC: 5
+      TRGSEL_OUT4: 6
+      EVENTOUT: 8
+  PA9:
+    pincodes: [C, K, R, V]
+    afs:
+      USART0_TX: 0
+      TIMER0_CH1: 1
+      TIMER7_CH1BRKIN: 4
+      TRGSEL_OUT5: 6
+      EVENTOUT: 8
+  PA10:
+    pincodes: [C, K, R, V]
+    afs:
+      USART0_RX: 0
+      TIMER0_CH2: 1
+      TIMER0_CH3_ON: 2
+      TIMER15_BRKIN: 3
+      TIMER15_CH1: 4
+      TIMER7_CH2BRKIN: 5
+      EVENTOUT: 8
+  PA11:
+    pincodes: [C, K, R, V]
+    afs:
+      USART0_CTS: 0
+      CAN0_RX: 1
+      TIMER0_CH3: 2
+      TIMER7_CH0: 3
+      TIMER15_CH0: 4
+      TRGSEL_IN0: 6
+      EVENTOUT: 8
+  PA12:
+    pincodes: [C, K, R, V]
+    afs:
+      USART0_RTS: 0
+      CAN0_TX: 1
+      TIMER0_ETI: 2
+      TIMER7_CH1: 3
+      TIMER15_MCH0: 4
+      EVENTOUT: 8
+  PA13:
+    pincodes: [C, K, R, V]
+    afs:
+      EVENTOUT: 8
+  PA14:
+    pincodes: [C, K, R, V]
+    afs:
+      EVENTOUT: 8
+  PA15:
+    pincodes: [C, K, R, V]
+    afs:
+      TIMER1_CH0_ETI: 1
+      SPI0_NSS: 2
+      I2S2_WS: 3
+      SPI2_NSS: 3
+      TIMER15_BRKIN: 4
+      TIMER16_BRKIN: 5
+      EVENTOUT: 8
+  PB0:
+    pincodes: [C, K, R, V]
+    afs:
+      ADC01_IN8: ANALOG
+      TIMER0_CH1_ON: 0
+      TIMER2_CH2: 1
+      TIMER7_CH1_ON: 3
+      CMP0_OUT: 5
+      EVENTOUT: 8
+  PB1:
+    pincodes: [C, K, R, V]
+    afs:
+      ADC01_IN9: ANALOG
+      TIMER0_CH2_ON: 0
+      TIMER2_CH3: 1
+      TIMER7_CH2_ON: 3
+      CMP0_OUT: 5
+      EVENTOUT: 8
+  PB2:
+    pincodes: [C, K, R, V]
+    afs:
+      EVENTOUT: 8
+  PB3:
+    pincodes: [C, K, R, V]
+    afs:
+      TRACESWO: 0
+      TIMER1_CH1: 1
+      SPI0_SCK: 2
+      I2S2_CK: 3
+      SPI2_SCK: 3
+      CK_OUT: 4
+      EVENTOUT: 8
+  PB4:
+    pincodes: [C, K, R, V]
+    afs:
+      TIMER2_CH0: 1
+      SPI0_MISO: 2
+      SPI2_MISO: 3
+      TIMER7_CH2: 4
+      TRGSEL_OUT6: 6
+      EVENTOUT: 8
+  PB5:
+    pincodes: [C, K, R, V]
+    afs:
+      TIMER2_CH1: 0
+      SPI0_MOSI: 1
+      I2C0_SMBA: 2
+      CAN1_RX: 3
+      TIMER7_CH0BRKIN: 4
+      I2S2_SD: 5
+      SPI2_MOSI: 5
+      TIMER0_CH0BRKIN: 6
+      EVENTOUT: 8
+  PB6:
+    pincodes: [C, K, R, V]
+    afs:
+      USART0_TX: 0
+      I2C0_SCL: 1
+      TIMER3_CH0: 2
+      CAN1_TX: 3
+      TIMER7_CH1BRKIN: 4
+      SPI0_IO2: 5
+      TIMER0_CH1BRKIN: 6
+      EVENTOUT: 8
+  PB7:
+    pincodes: [C, K, R]
+    afs:
+      USART0_RX: 0
+      I2C0_SDA: 1
+      TIMER3_CH1: 2
+      EXMC_NADV: 3
+      EXMC_NL: 3
+      TIMER7_CH2BRKIN: 4
+      SPI0_IO3: 5
+      TRGSEL_OUT7: 6
+      TIMER0_CH2BRKIN: 7
+      EVENTOUT: 8
+  PB8:
+    pincodes: [C, R]
+    afs:
+      I2C0_SCL: 0
+      CAN0_RX: 1
+      TIMER3_CH2: 2
+      TIMER15_CH0: 4
+      EVENTOUT: 8
+  PB9:
+    pincodes: [C, R]
+    afs:
+      I2C0_SDA: 0
+      CAN0_TX: 1
+      TIMER3_CH3: 2
+      TIMER16_CH0: 4
+      EVENTOUT: 8
+  PB10:
+    pincodes: [C, R, V]
+    afs:
+      ADC1_IN16: ANALOG
+      ADC2_IN15: ANALOG
+      TIMER1_CH2: 0
+      USART2_TX: 1
+      I2C1_SCL: 2
+      TIMER0_CH0BRKIN: 4
+      EVENTOUT: 8
+  PB11:
+    pincodes: [C, R, V]
+    afs:
+      ADC1_IN17: ANALOG
+      ADC2_IN16: ANALOG
+      TIMER1_CH3: 0
+      USART2_RX: 1
+      I2C1_SDA: 2
+      TIMER0_CH1BRKIN: 4
+      TRGSEL_IN1: 6
+      EVENTOUT: 8
+  PB12:
+    pincodes: [C, R, V]
+    afs:
+      USART2_CK: 0
+      I2S1_WS: 1
+      SPI1_NSS: 1
+      I2C1_SMBA: 2
+      CAN1_RX: 3
+      TIMER0_BRKIN: 4
+      TIMER16_CH0: 6
+      EXMC_D13: 7
+      EVENTOUT: 8
+  PB13:
+    pincodes: [C, R, V]
+    afs:
+      USART2_CTS: 0
+      I2S1_CK: 1
+      SPI1_SCK: 1
+      TIMER0_CH0_ON: 2
+      CAN1_TX: 3
+      TIMER16_CH1: 6
+      EVENTOUT: 8
+  PB14:
+    pincodes: [C, R, V]
+    afs:
+      USART2_RTS: 0
+      SPI1_MISO: 1
+      TIMER0_CH1_ON: 2
+      TIMER15_CH0: 4
+      EXMC_D0: 7
+      EVENTOUT: 8
+  PB15:
+    pincodes: [C, R, V]
+    afs:
+      I2S1_SD: 0
+      SPI1_MOSI: 0
+      TIMER0_CH2_ON: 1
+      TIMER15_CH1: 4
+      EVENTOUT: 8
+  PC0:
+    pincodes: [R, V]
+    afs:
+      ADC012_IN10: ANALOG
+      TIMER7_CH0_ON: 0
+      EXMC_NADV: 7
+      EXMC_NL: 7
+      EVENTOUT: 8
+  PC1:
+    pincodes: [R, V]
+    afs:
+      ADC012_IN11: ANALOG
+      TIMER7_CH1_ON: 0
+      EVENTOUT: 8
+  PC2:
+    pincodes: [R, V]
+    afs:
+      ADC012_IN12: ANALOG
+      TIMER7_CH2_ON: 0
+      EXMC_NWE: 7
+      EVENTOUT: 8
+  PC3:
+    pincodes: [C, R, V]
+    afs:
+      ADC012_IN13: ANALOG
+      TIMER7_CH3_ON: 0
+      EXMC_A0: 7
+      EVENTOUT: 8
+  PC4:
+    pincodes: [R, V]
+    afs:
+      ADC01_IN14: ANALOG
+      TIMER7_CH3: 0
+      EXMC_NE0: 7
+      EVENTOUT: 8
+  PC5:
+    pincodes: [R, V]
+    afs:
+      ADC01_IN15: ANALOG
+      EXMC_NOE: 7
+      EVENTOUT: 8
+  PC6:
+    pincodes: [R, V]
+    afs:
+      TIMER2_CH0: 0
+      I2S1_MCK: 1
+      TIMER7_CH0: 3
+      EXMC_D1: 7
+      EVENTOUT: 8
+  PC7:
+    pincodes: [R, V]
+    afs:
+      TIMER2_CH1: 0
+      I2S2_MCK: 1
+      TIMER7_CH3_ON: 2
+      TIMER7_CH1: 3
+      EVENTOUT: 8
+  PC8:
+    pincodes: [R, V]
+    afs:
+      TIMER2_CH2: 0
+      TIMER7_CH2: 2
+      EVENTOUT: 8
+  PC9:
+    pincodes: [C, R, V]
+    afs:
+      TIMER2_CH3: 0
+      TIMER7_CH3: 2
+      EXMC_NADV: 7
+      EXMC_NL: 7
+      EVENTOUT: 8
+  PC10:
+    pincodes: [R, V]
+    afs:
+      USART2_TX: 0
+      UART3_TX: 1
+      I2S2_CK: 2
+      SPI2_SCK: 2
+      TIMER7_CH0BRKIN: 3
+      TIMER0_CH0BRKIN: 4
+      EVENTOUT: 8
+  PC11:
+    pincodes: [R, V]
+    afs:
+      USART2_RX: 0
+      UART3_RX: 1
+      SPI2_MISO: 2
+      TIMER7_CH2BRKIN: 3
+      TIMER16_CH1: 4
+      TRGSEL_IN2: 6
+      EXMC_D2: 7
+      EVENTOUT: 8
+  PC12:
+    pincodes: [R, V]
+    afs:
+      USART2_CK: 0
+      UART4_TX: 1
+      I2S2_SD: 2
+      SPI2_MOSI: 2
+      TIMER16_CH0: 4
+      EXMC_D3: 7
+      EVENTOUT: 8
+  PC13:
+    pincodes: [C, R, V]
+    afs:
+      EVENTOUT: 8
+  PC14:
+    pincodes: [C, R, V]
+    afs:
+      EVENTOUT: 8
+  PC15:
+    pincodes: [C, R, V]
+    afs:
+      EVENTOUT: 8
+  PD0:
+    pincodes: [C, K, R, V]
+    afs:
+      CAN0_RX: 0
+      EXMC_D2: 1
+      EVENTOUT: 8
+  PD1:
+    pincodes: [C, K, R, V]
+    afs:
+      CAN0_TX: 0
+      EXMC_D3: 1
+      EVENTOUT: 8
+  PD2:
+    pincodes: [R, V]
+    afs:
+      TIMER2_ETI: 0
+      UART4_RX: 1
+      TIMER16_MCH0: 4
+      EXMC_NWE: 7
+      EVENTOUT: 8
+  PD3:
+    pincodes: [V]
+    afs:
+      USART1_CTS: 0
+      EXMC_CLK: 1
+      EVENTOUT: 8
+  PD4:
+    pincodes: [V]
+    afs:
+      USART1_RTS: 0
+      EXMC_NOE: 1
+      EVENTOUT: 8
+  PD5:
+    pincodes: [V]
+    afs:
+      USART1_TX: 0
+      EXMC_NWE: 1
+      EVENTOUT: 8
+  PD6:
+    pincodes: [V]
+    afs:
+      USART1_RX: 0
+      EXMC_NWAIT: 1
+      EVENTOUT: 8
+  PD7:
+    pincodes: [V]
+    afs:
+      USART1_CK: 0
+      EXMC_NCE1: 1
+      EXMC_NE0: 1
+      EVENTOUT: 8
+  PD8:
+    pincodes: [V]
+    afs:
+      USART2_TX: 0
+      EXMC_D13: 1
+      TIMER0_CH0BRKIN: 4
+      EVENTOUT: 8
+  PD9:
+    pincodes: [V]
+    afs:
+      USART2_RX: 0
+      EXMC_D14: 1
+      TIMER0_CH1BRKIN: 4
+      EVENTOUT: 8
+  PD10:
+    pincodes: [V]
+    afs:
+      USART2_CK: 0
+      EXMC_D15: 1
+      TIMER0_CH2BRKIN: 4
+      EVENTOUT: 8
+  PD11:
+    pincodes: [V]
+    afs:
+      USART2_CTS: 0
+      EXMC_A16: 1
+      TRGSEL_IN3: 6
+      EVENTOUT: 8
+  PD12:
+    pincodes: [V]
+    afs:
+      USART2_RTS: 0
+      TIMER3_CH0: 1
+      EXMC_A17: 2
+      EVENTOUT: 8
+  PD13:
+    pincodes: [V]
+    afs:
+      TIMER3_CH1: 0
+      EXMC_A18: 1
+      EVENTOUT: 8
+  PD14:
+    pincodes: [V]
+    afs:
+      TIMER3_CH2: 0
+      EXMC_D0: 1
+      EVENTOUT: 8
+  PD15:
+    pincodes: [V]
+    afs:
+      TIMER3_CH3: 0
+      EXMC_D1: 1
+      CTC_SYNC: 2
+      EVENTOUT: 8
+PE0:
+  pincodes: [C, V]
+  afs:
+    TIMER3_ETI: 0
+    EXMC_NBL0: 1
+    TRGSEL_IN7: 6
+    EVENTOUT: 8
+PE1:
+  pincodes: [V]
+  afs:
+    EXMC_NBL1: 0
+    EVENTOUT: 8
+  PE2:
+    pincodes: [V]
+    afs:
+      TRACECK: 0
+      EXMC_A23: 1
+      EVENTOUT: 8
+  PE3:
+    pincodes: [V]
+    afs:
+      TRACED0: 0
+      EXMC_A19: 1
+      TIMER15_BRKIN: 3
+      EVENTOUT: 8
+  PE4:
+    pincodes: [V]
+    afs:
+      TRACED1: 0
+      EXMC_A20: 1
+      TIMER15_MCH0: 3
+      EVENTOUT: 8
+  PE5:
+    pincodes: [R, V]
+    afs:
+      TRACED2: 0
+      EXMC_A21: 1
+      TIMER15_CH0: 3
+      EVENTOUT: 8
+  PE6:
+    pincodes: [R, V]
+    afs:
+      TRACED3: 0
+      EXMC_A22: 1
+      TIMER15_CH1: 3
+      EVENTOUT: 8
+  PE7:
+    pincodes: [V]
+    afs:
+      ADC2_IN4: ANALOG
+      TIMER0_ETI: 0
+      EXMC_D4: 1
+      EVENTOUT: 8
+  PE8:
+    pincodes: [V]
+    afs:
+      ADC2_IN5: ANALOG
+      TIMER0_CH0_ON: 0
+      EXMC_D5: 1
+      EVENTOUT: 8
+  PE9:
+    pincodes: [V]
+    afs:
+      ADC2_IN6: ANALOG
+      TIMER0_CH0: 0
+      EXMC_D6: 1
+      EVENTOUT: 8
+  PE10:
+    pincodes: [V]
+    afs:
+      ADC2_IN7: ANALOG
+      TIMER0_CH1_ON: 0
+      EXMC_D7: 1
+      EVENTOUT: 8
+  PE11:
+    pincodes: [V]
+    afs:
+      ADC2_IN8: ANALOG
+      TIMER0_CH1: 0
+      EXMC_D8: 1
+      TRGSEL_IN4: 6
+      EVENTOUT: 8
+  PE12:
+    pincodes: [V]
+    afs:
+      ADC2_IN9: ANALOG
+      TIMER0_CH2_ON: 0
+      EXMC_D9: 1
+      EVENTOUT: 8
+  PE13:
+    pincodes: [V]
+    afs:
+      TIMER0_CH2: 0
+      EXMC_D10: 1
+      EVENTOUT: 8
+  PE14:
+    pincodes: [V]
+    afs:
+      TIMER0_CH3: 0
+      EXMC_D11: 1
+      TIMER0_CH2BRKIN: 4
+      EVENTOUT: 8
+  PE15:
+    pincodes: [C, V]
+    afs:
+      ADC2_IN14: ANALOG
+      TIMER0_BRKIN: 0
+      EXMC_D12: 1
+      EVENTOUT: 8
