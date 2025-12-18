@@ -860,21 +860,9 @@
 #define I2C2_TXFRAME_PA10 \
 	GD32_PINMUX_AF('A', 10, AF4)
 
-/* I2C3_SCL */
-#define I2C3_SCL_PD4 \
-	GD32_PINMUX_AF('D', 4, AF4)
-#define I2C3_SCL_PD12 \
-	GD32_PINMUX_AF('D', 12, AF4)
-
 /* I2C3_SDA */
 #define I2C3_SDA_PA3 \
 	GD32_PINMUX_AF('A', 3, AF4)
-#define I2C3_SDA_PD13 \
-	GD32_PINMUX_AF('D', 13, AF4)
-
-/* I2C3_SMBA */
-#define I2C3_SMBA_PD11 \
-	GD32_PINMUX_AF('D', 11, AF4)
 
 /* I2S1_ADD_SD */
 #define I2S1_ADD_SD_PB14 \
@@ -1124,7 +1112,7 @@
 #define SPI0_MISO_PB4 \
 	GD32_PINMUX_AF('B', 4, AF5)
 #define SPI0_MISO_PE5 \
-	GD32_PINMUX_AF('E', 5, AF5)
+	GD32_PINMUX_AF('E', 5, AF7)
 
 /* SPI0_MOSI */
 #define SPI0_MOSI_PA7 \
@@ -1321,8 +1309,8 @@
 /* TIMER0_CH0 */
 #define TIMER0_CH0_PA8 \
 	GD32_PINMUX_AF('A', 8, AF1)
-#define TIMER0_CH0_PE8 \
-	GD32_PINMUX_AF('E', 8, AF1)
+#define TIMER0_CH0_PE9 \
+	GD32_PINMUX_AF('E', 9, AF1)
 
 /* TIMER0_CH0_ON */
 #define TIMER0_CH0_ON_PA7 \
@@ -1338,58 +1326,44 @@
 #define TIMER0_CH1_PD12 \
 	GD32_PINMUX_AF('D', 12, AF1)
 #define TIMER0_CH1_PE7 \
-	GD32_PINMUX_AF('E', 7, AF1)
-#define TIMER0_CH1_PE9 \
-	GD32_PINMUX_AF('E', 9, AF1)
+	GD32_PINMUX_AF('E', 7, AF2)
 #define TIMER0_CH1_PE11 \
 	GD32_PINMUX_AF('E', 11, AF1)
 
 /* TIMER0_CH1_ON */
 #define TIMER0_CH1_ON_PB0 \
 	GD32_PINMUX_AF('B', 0, AF1)
+#define TIMER0_CH1_ON_PB1 \
+	GD32_PINMUX_AF('B', 1, AF1)
 #define TIMER0_CH1_ON_PB14 \
 	GD32_PINMUX_AF('B', 14, AF1)
 #define TIMER0_CH1_ON_PC9 \
 	GD32_PINMUX_AF('C', 9, AF1)
 #define TIMER0_CH1_ON_PE1 \
 	GD32_PINMUX_AF('E', 1, AF1)
-#define TIMER0_CH1_ON_PE9 \
-	GD32_PINMUX_AF('E', 9, AF1)
+#define TIMER0_CH1_ON_PE10 \
+	GD32_PINMUX_AF('E', 10, AF1)
 
 /* TIMER0_CH2 */
 #define TIMER0_CH2_PA10 \
 	GD32_PINMUX_AF('A', 10, AF1)
 #define TIMER0_CH2_PB1 \
 	GD32_PINMUX_AF('B', 1, AF4)
-#define TIMER0_CH2_PE10 \
-	GD32_PINMUX_AF('E', 10, AF1)
 #define TIMER0_CH2_PE13 \
 	GD32_PINMUX_AF('E', 13, AF1)
 
 /* TIMER0_CH2_ON */
-#define TIMER0_CH2_ON_PB1 \
-	GD32_PINMUX_AF('B', 1, AF1)
 #define TIMER0_CH2_ON_PB15 \
 	GD32_PINMUX_AF('B', 15, AF1)
 #define TIMER0_CH2_ON_PD6 \
 	GD32_PINMUX_AF('D', 6, AF1)
-#define TIMER0_CH2_ON_PE10 \
-	GD32_PINMUX_AF('E', 10, AF1)
 #define TIMER0_CH2_ON_PE12 \
 	GD32_PINMUX_AF('E', 12, AF1)
 
 /* TIMER0_CH3 */
 #define TIMER0_CH3_PA11 \
 	GD32_PINMUX_AF('A', 11, AF1)
-#define TIMER0_CH3_PE11 \
-	GD32_PINMUX_AF('E', 11, AF1)
-#define TIMER0_CH3_PE13 \
-	GD32_PINMUX_AF('E', 13, AF1)
 #define TIMER0_CH3_PE14 \
-	GD32_PINMUX_AF('E', 14, AF1)
-
-/* TIMER0_CH3_ON */
-#define TIMER0_CH3_ON_PE14 \
 	GD32_PINMUX_AF('E', 14, AF1)
 
 /* TIMER0_ETI */
@@ -1611,14 +1585,10 @@
 	GD32_PINMUX_AF('B', 8, AF3)
 
 /* TLI_B0 */
-#define TLI_B0_PD9 \
-	GD32_PINMUX_AF('D', 9, AF14)
 #define TLI_B0_PE4 \
 	GD32_PINMUX_AF('E', 4, AF14)
 
 /* TLI_B2 */
-#define TLI_B2_PD5 \
-	GD32_PINMUX_AF('D', 5, AF14)
 #define TLI_B2_PD6 \
 	GD32_PINMUX_AF('D', 6, AF14)
 
@@ -1627,8 +1597,6 @@
 	GD32_PINMUX_AF('D', 10, AF14)
 
 /* TLI_B4 */
-#define TLI_B4_PD7 \
-	GD32_PINMUX_AF('D', 7, AF14)
 #define TLI_B4_PE12 \
 	GD32_PINMUX_AF('E', 12, AF14)
 
@@ -1643,46 +1611,30 @@
 /* TLI_B7 */
 #define TLI_B7_PB9 \
 	GD32_PINMUX_AF('B', 9, AF14)
-#define TLI_B7_PD8 \
-	GD32_PINMUX_AF('D', 8, AF14)
-
-/* TLI_CLK */
-#define TLI_CLK_PE14 \
-	GD32_PINMUX_AF('E', 14, AF14)
 
 /* TLI_DE */
 #define TLI_DE_PE13 \
 	GD32_PINMUX_AF('E', 13, AF14)
 
 /* TLI_G0 */
-#define TLI_G0_PD11 \
-	GD32_PINMUX_AF('D', 11, AF14)
 #define TLI_G0_PE5 \
 	GD32_PINMUX_AF('E', 5, AF14)
 
 /* TLI_G1 */
-#define TLI_G1_PD12 \
-	GD32_PINMUX_AF('D', 12, AF14)
 #define TLI_G1_PE6 \
 	GD32_PINMUX_AF('E', 6, AF14)
 
 /* TLI_G2 */
 #define TLI_G2_PA6 \
 	GD32_PINMUX_AF('A', 6, AF14)
-#define TLI_G2_PD13 \
-	GD32_PINMUX_AF('D', 13, AF14)
 
 /* TLI_G3 */
-#define TLI_G3_PD14 \
-	GD32_PINMUX_AF('D', 14, AF14)
 #define TLI_G3_PE11 \
 	GD32_PINMUX_AF('E', 11, AF14)
 
 /* TLI_G4 */
 #define TLI_G4_PB10 \
 	GD32_PINMUX_AF('B', 10, AF14)
-#define TLI_G4_PD15 \
-	GD32_PINMUX_AF('D', 15, AF14)
 
 /* TLI_G5 */
 #define TLI_G5_PB11 \
@@ -1700,13 +1652,9 @@
 #define TLI_HSYNC_PC6 \
 	GD32_PINMUX_AF('C', 6, AF14)
 
-/* TLI_R0 */
-#define TLI_R0_PE0 \
-	GD32_PINMUX_AF('E', 0, AF14)
-
-/* TLI_R1 */
-#define TLI_R1_PD2 \
-	GD32_PINMUX_AF('D', 2, AF14)
+/* TLI_PIXCLK */
+#define TLI_PIXCLK_PE14 \
+	GD32_PINMUX_AF('E', 14, AF14)
 
 /* TLI_R2 */
 #define TLI_R2_PC10 \
@@ -1715,28 +1663,20 @@
 /* TLI_R3 */
 #define TLI_R3_PB0 \
 	GD32_PINMUX_AF('B', 0, AF9)
-#define TLI_R3_PD4 \
-	GD32_PINMUX_AF('D', 4, AF14)
 
 /* TLI_R4 */
 #define TLI_R4_PA11 \
 	GD32_PINMUX_AF('A', 11, AF14)
-#define TLI_R4_PD0 \
-	GD32_PINMUX_AF('D', 0, AF14)
 
 /* TLI_R5 */
 #define TLI_R5_PA12 \
 	GD32_PINMUX_AF('A', 12, AF14)
-#define TLI_R5_PD1 \
-	GD32_PINMUX_AF('D', 1, AF14)
 
 /* TLI_R6 */
 #define TLI_R6_PA8 \
 	GD32_PINMUX_AF('A', 8, AF14)
 #define TLI_R6_PB1 \
 	GD32_PINMUX_AF('B', 1, AF9)
-#define TLI_R6_PE1 \
-	GD32_PINMUX_AF('E', 1, AF14)
 
 /* TLI_R7 */
 #define TLI_R7_PE15 \
@@ -1871,6 +1811,8 @@
 /* USART2_CK */
 #define USART2_CK_PB12 \
 	GD32_PINMUX_AF('B', 12, AF7)
+#define USART2_CK_PC12 \
+	GD32_PINMUX_AF('C', 12, AF7)
 #define USART2_CK_PD10 \
 	GD32_PINMUX_AF('D', 10, AF7)
 
@@ -1907,10 +1849,6 @@
 	GD32_PINMUX_AF('D', 8, AF7)
 #define USART2_TX_PE8 \
 	GD32_PINMUX_AF('E', 8, AF7)
-
-/* USART4_CK */
-#define USART4_CK_PC12 \
-	GD32_PINMUX_AF('C', 12, AF8)
 
 /* USART5_CK */
 #define USART5_CK_PC8 \
