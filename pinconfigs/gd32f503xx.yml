@@ -1,37 +1,37 @@
-# GD32F503 pin definitions
+# GD32F503XX pin definitions
 #
 # Sources:
-# - GD32F503 Datasheet
+# - GD32F503XX Datasheet (Revision 0.9RC3)
 #
 # Pin codes:
 #
-# - 48 pins: C
-# - K pins: K
-# - 64 pins: R
 # - 100 pins: V
+# - 64 pins: R
+# - 48 pins: C
+# - 32 pins: K
 #
 # Memory codes:
 #
-# - Memory variant: G
-# - Memory variant: E
-# - Memory variant: C
+# - 1024Kb Flash, 128Kb SRAM: G
+# - 512Kb  Flash, 128Kb SRAM: E
+# - 256Kb  Flash, 64Kb  SRAM: C
 #
 # Copyright (c) 2025, GigaDevice Semiconductor Inc.
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache 2.0
 
 model: af
 
 series: gd32f503
 
 variants:
+  - pincode: V
+    memories: [G, E, C]
+  - pincode: R
+    memories: [G, E, C]
   - pincode: C
     memories: [G, E, C]
   - pincode: K
-    memories: [C]
-  - pincode: R
-    memories: [G, E, C]
-  - pincode: V
-    memories: [E]
+    memories: [E, C]
 
 pins:
   PA0:
