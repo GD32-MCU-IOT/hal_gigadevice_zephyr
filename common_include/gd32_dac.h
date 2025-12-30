@@ -16,6 +16,8 @@
 #include <gd32f403_dac.h>
 #elif defined(CONFIG_SOC_SERIES_GD32F4XX)
 #include <gd32f4xx_dac.h>
+#elif defined(CONFIG_SOC_SERIES_GD32F50X)
+#include <gd32f50x_dac.h>
 #elif defined(CONFIG_SOC_SERIES_GD32F527)
 #include <gd32f527_dac.h>
 #elif defined(CONFIG_SOC_SERIES_GD32L23X)

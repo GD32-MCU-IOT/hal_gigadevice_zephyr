@@ -6,4 +6,6 @@
 
 #if defined(CONFIG_SOC_SERIES_GD32A50X)
 #include <gd32a50x_trigsel.h>
+#elif defined(CONFIG_SOC_SERIES_GD32F50X)
+#include <gd32f50x_trigsel.h>
 #endif

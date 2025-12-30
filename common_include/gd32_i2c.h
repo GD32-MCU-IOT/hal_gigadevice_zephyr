@@ -18,6 +18,8 @@
 #include <gd32f403_i2c.h>
 #elif defined(CONFIG_SOC_SERIES_GD32F4XX)
 #include <gd32f4xx_i2c.h>
+#elif defined(CONFIG_SOC_SERIES_GD32F50X)
+#include <gd32f50x_i2c.h>
 #elif defined(CONFIG_SOC_SERIES_GD32F527)
 #include <gd32f527_i2c.h>
 #include <gd32f527_i2c_add.h>
