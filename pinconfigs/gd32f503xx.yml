@@ -1,37 +1,37 @@
-# GD32F503 pin definitions
+# GD32F503XX pin definitions
 #
 # Sources:
-# - GD32F503 Datasheet
+# - GD32F503XX Datasheet (Revision 0.9RC3)
 #
 # Pin codes:
 #
-# - 48 pins: C
-# - K pins: K
-# - 64 pins: R
 # - 100 pins: V
+# - 64 pins: R
+# - 48 pins: C
+# - 32 pins: K
 #
 # Memory codes:
 #
-# - Memory variant: G
-# - Memory variant: E
-# - Memory variant: C
+# - 1024Kb Flash, 128Kb SRAM: G
+# - 512Kb  Flash, 128Kb SRAM: E
+# - 256Kb  Flash, 64Kb  SRAM: C
 #
 # Copyright (c) 2025, GigaDevice Semiconductor Inc.
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache 2.0
 
 model: af
 
 series: gd32f503
 
 variants:
+  - pincode: V
+    memories: [G, E, C]
+  - pincode: R
+    memories: [G, E, C]
   - pincode: C
     memories: [G, E, C]
   - pincode: K
-    memories: [C]
-  - pincode: R
-    memories: [G, E, C]
-  - pincode: V
-    memories: [E]
+    memories: [E, C]
 
 pins:
   PA0:
@@ -260,7 +260,7 @@ pins:
       TIMER0_CH1BRKIN: 6
       EVENTOUT: 8
   PB7:
-    pincodes: [C, K, R]
+    pincodes: [C, K, R, V]
     afs:
       USART0_RX: 0
       I2C0_SDA: 1
@@ -273,7 +273,7 @@ pins:
       TIMER0_CH2BRKIN: 7
       EVENTOUT: 8
   PB8:
-    pincodes: [C, R]
+    pincodes: [C, R, V]
     afs:
       I2C0_SCL: 0
       CAN0_RX: 1
@@ -281,7 +281,7 @@ pins:
       TIMER15_CH0: 4
       EVENTOUT: 8
   PB9:
-    pincodes: [C, R]
+    pincodes: [C, R, V]
     afs:
       I2C0_SDA: 0
       CAN0_TX: 1
@@ -561,24 +561,24 @@ pins:
       EXMC_D0: 1
       EVENTOUT: 8
   PD15:
-    pincodes: [V]
+    pincodes: [R, V]
     afs:
       TIMER3_CH3: 0
       EXMC_D1: 1
       CTC_SYNC: 2
       EVENTOUT: 8
-PE0:
-  pincodes: [C, V]
-  afs:
-    TIMER3_ETI: 0
-    EXMC_NBL0: 1
-    TRGSEL_IN7: 6
-    EVENTOUT: 8
-PE1:
-  pincodes: [V]
-  afs:
-    EXMC_NBL1: 0
-    EVENTOUT: 8
+  PE0:
+    pincodes: [C, R, V]
+    afs:
+      TIMER3_ETI: 0
+      EXMC_NBL0: 1
+      TRGSEL_IN7: 6
+      EVENTOUT: 8
+  PE1:
+    pincodes: [V]
+    afs:
+      EXMC_NBL1: 0
+      EVENTOUT: 8
   PE2:
     pincodes: [V]
     afs:
@@ -670,7 +670,7 @@ PE1:
       TIMER0_CH2BRKIN: 4
       EVENTOUT: 8
   PE15:
-    pincodes: [C, V]
+    pincodes: [C, R, V]
     afs:
       ADC2_IN14: ANALOG
       TIMER0_BRKIN: 0
