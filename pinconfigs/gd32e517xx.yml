@@ -84,40 +84,36 @@ signal-configs:
     modes: [inp]
   CAN2_TX:
     modes: [out]
-  CH0:
-    modes: [out]
-  CH0_ON:
-    modes: [out]
   CK_OUT:
     modes: [out]
   CMP1_IM4:
-    modes: [out]
+    modes: [inp]
   CMP1_IM5:
-    modes: [out]
+    modes: [inp]
   CMP1_IM6:
-    modes: [out]
+    modes: [inp]
   CMP1_IP:
-    modes: [out]
+    modes: [inp]
   CMP1_OUT:
     modes: [out]
   CMP3_IM4:
-    modes: [out]
+    modes: [inp]
   CMP3_IM5:
-    modes: [out]
+    modes: [inp]
   CMP3_IM7:
-    modes: [out]
+    modes: [inp]
   CMP3_IP:
-    modes: [out]
+    modes: [inp]
   CMP3_OUT:
     modes: [out]
   CMP5_IM4:
-    modes: [out]
+    modes: [inp]
   CMP5_IM5:
-    modes: [out]
+    modes: [inp]
   CMP5_IM7:
-    modes: [out]
+    modes: [inp]
   CMP5_IP:
-    modes: [out]
+    modes: [inp]
   CMP5_OUT:
     modes: [out]
   CTC_SYNC:
@@ -129,9 +125,9 @@ signal-configs:
   DAC1_OUT0:
     modes: [analog]
   ETH_MII_COL:
-    modes: [out]
+    modes: [inp]
   ETH_MII_CRS:
-    modes: [out]
+    modes: [inp]
   ETH_MII_MDC:
     modes: [out]
   ETH_MII_MDIO:
@@ -161,11 +157,11 @@ signal-configs:
   ETH_MII_TXD3:
     modes: [out]
   ETH_MII_TX_CLK:
-    modes: [out]
+    modes: [inp]
   ETH_MII_TX_EN:
     modes: [out]
   ETH_RMII_CRS_DV:
-    modes: [out]
+    modes: [inp]
   ETH_RMII_MDC:
     modes: [out]
   ETH_RMII_MDIO:
@@ -173,7 +169,7 @@ signal-configs:
   ETH_RMII_PPS_OUT:
     modes: [out]
   ETH_RMII_REF_CLK:
-    modes: [out]
+    modes: [inp]
   ETH_RMII_RXD0:
     modes: [inp]
   ETH_RMII_RXD1:
@@ -237,7 +233,7 @@ signal-configs:
   EXMC_A9:
     modes: [out]
   EXMC_CD:
-    modes: [out]
+    modes: [inp]
   EXMC_CLK:
     modes: [out]
   EXMC_D0:
@@ -273,11 +269,11 @@ signal-configs:
   EXMC_D9:
     modes: [out]
   EXMC_INT1:
-    modes: [analog]
+    modes: [inp]
   EXMC_INT2:
-    modes: [analog]
+    modes: [inp]
   EXMC_INTR:
-    modes: [analog]
+    modes: [inp]
   EXMC_NADV:
     modes: [out]
   EXMC_NBL0:
@@ -303,7 +299,7 @@ signal-configs:
   EXMC_NIORD:
     modes: [out]
   EXMC_NIOS16:
-    modes: [out]
+    modes: [inp]
   EXMC_NIOWR:
     modes: [out]
   EXMC_NOE:
@@ -311,29 +307,29 @@ signal-configs:
   EXMC_NREG:
     modes: [out]
   EXMC_NWAIT:
-    modes: [out]
+    modes: [inp]
   EXMC_NWE:
     modes: [out]
   I2C0_SCL:
-    modes: [inp]
+    modes: [out]
   I2C0_SDA:
-    modes: [inp]
+    modes: [out]
   I2C0_SMBA:
     modes: [out]
   I2C0_TXFRAME:
     modes: [out]
   I2C1_SCL:
-    modes: [inp]
+    modes: [out]
   I2C1_SDA:
-    modes: [inp]
+    modes: [out]
   I2C1_SMBA:
     modes: [out]
   I2C1_TXFRAME:
     modes: [out]
   I2C2_SCL:
-    modes: [inp]
+    modes: [out]
   I2C2_SDA:
-    modes: [inp]
+    modes: [out]
   I2C2_SMBA:
     modes: [out]
   I2S1_ADD_SD:
@@ -359,12 +355,6 @@ signal-configs:
   OSC32IN:
     modes: [inp]
   OSC32OUT:
-    modes: [inp]
-  PA13:
-    modes: [out]
-  PA14:
-    modes: [out]
-  PA15:
     modes: [out]
   SDIO_CK:
     modes: [out]
@@ -387,37 +377,37 @@ signal-configs:
   SDIO_D7:
     modes: [out]
   SHRTIMER_EXEV0:
-    modes: [out]
+    modes: [inp]
   SHRTIMER_EXEV1:
-    modes: [out]
+    modes: [inp]
   SHRTIMER_EXEV2:
-    modes: [out]
+    modes: [inp]
   SHRTIMER_EXEV3:
-    modes: [out]
+    modes: [inp]
   SHRTIMER_EXEV4:
-    modes: [out]
+    modes: [inp]
   SHRTIMER_EXEV5:
-    modes: [out]
+    modes: [inp]
   SHRTIMER_EXEV6:
-    modes: [out]
+    modes: [inp]
   SHRTIMER_EXEV7:
-    modes: [out]
+    modes: [inp]
   SHRTIMER_EXEV8:
-    modes: [out]
+    modes: [inp]
   SHRTIMER_EXEV9:
-    modes: [out]
+    modes: [inp]
   SHRTIMER_FLT0:
-    modes: [out]
+    modes: [inp]
   SHRTIMER_FLT1:
-    modes: [out]
+    modes: [inp]
   SHRTIMER_FLT2:
-    modes: [out]
+    modes: [inp]
   SHRTIMER_FLT3:
-    modes: [out]
+    modes: [inp]
   SHRTIMER_FLT4:
-    modes: [out]
+    modes: [inp]
   SHRTIMER_SCIN:
-    modes: [out]
+    modes: [inp]
   SHRTIMER_SCOUT:
     modes: [out]
   SHRTIMER_ST0CH0:
@@ -480,10 +470,10 @@ signal-configs:
     modes: [out]
   SQPI_D3:
     modes: [out]
-  TAMPER-RTC:
-    modes: [out]
+  TAMPER_RTC:
+    modes: [inp]
   TIMER0_BRKIN:
-    modes: [out]
+    modes: [inp]
   TIMER0_CH0:
     modes: [out]
   TIMER0_CH0_ON:
@@ -511,23 +501,21 @@ signal-configs:
   TIMER13_CH0:
     modes: [out]
   TIMER14_BRKIN:
-    modes: [out]
+    modes: [inp]
   TIMER14_CH0:
     modes: [out]
   TIMER14_CH0_ON:
     modes: [out]
   TIMER14_CH1:
     modes: [out]
-  TIMER15_:
-    modes: [out]
   TIMER15_BRKIN:
-    modes: [out]
+    modes: [inp]
   TIMER15_CH0:
     modes: [out]
   TIMER15_CH0_ON:
     modes: [out]
   TIMER16_BRKIN:
-    modes: [out]
+    modes: [inp]
   TIMER16_CH0:
     modes: [out]
   TIMER16_CH0_ON:
@@ -571,7 +559,7 @@ signal-configs:
   TIMER4_CH3:
     modes: [out]
   TIMER7_BRKIN:
-    modes: [out]
+    modes: [inp]
   TIMER7_CH0:
     modes: [out]
   TIMER7_CH0_ON:
@@ -641,39 +629,39 @@ signal-configs:
   USART5_TX:
     modes: [out]
   USBHS_DM:
-    modes: [out]
+    modes: [inp, out]
   USBHS_DP:
-    modes: [out]
+    modes: [inp, out]
   USBHS_ID:
-    modes: [out]
+    modes: [inp, out]
   USBHS_SOF:
     modes: [out]
   USBHS_ULPI_CK:
-    modes: [out]
+    modes: [inp]
   USBHS_ULPI_D0:
-    modes: [out]
+    modes: [inp, out]
   USBHS_ULPI_D1:
-    modes: [out]
+    modes: [inp, out]
   USBHS_ULPI_D2:
-    modes: [out]
+    modes: [inp, out]
   USBHS_ULPI_D3:
-    modes: [out]
+    modes: [inp, out]
   USBHS_ULPI_D4:
-    modes: [out]
+    modes: [inp, out]
   USBHS_ULPI_D5:
-    modes: [out]
+    modes: [inp, out]
   USBHS_ULPI_D6:
-    modes: [out]
+    modes: [inp, out]
   USBHS_ULPI_D7:
-    modes: [out]
+    modes: [inp, out]
   USBHS_ULPI_DIR:
-    modes: [out]
+    modes: [inp]
   USBHS_ULPI_NXT:
-    modes: [out]
+    modes: [inp]
   USBHS_ULPI_STP:
     modes: [out]
   USBHS_VBUS:
-    modes: [out]
+    modes: [inp]
   WKUP0:
     modes: [inp]
   WKUP1:
@@ -694,7 +682,7 @@ signal-configs:
 pins:
   PA0:
     pincodes: [R, V, Z]
-    afs: [WKUP0, USART1_CTS, ADC012_IN0, TIMER1_CH0, TIMER1_ETI, TIMER4_CH0, TIMER7_ETI, ETH_MII_CRS, TIMER7_ETI]
+    afs: [WKUP0, USART1_CTS, ADC012_IN0, TIMER1_CH0, TIMER1_ETI, TIMER4_CH0, TIMER7_ETI, ETH_MII_CRS]
   PA1:
     pincodes: [R, V, Z]
     afs: [TIMER14_CH0_ON, USART1_RTS, ADC012_IN1, TIMER4_CH1, TIMER1_CH1, ETH_MII_RX_CLK, ETH_RMII_REF_CLK]
@@ -712,10 +700,10 @@ pins:
     afs: [USBHS_ULPI_CK, SPI0_SCK, ADC01_IN5, DAC0_OUT1, CMP1_IM5, CMP3_IM5, CMP5_IM5]
   PA6:
     pincodes: [R, V, Z]
-    afs: [TIMER15_CH0, SPI0_MISO, TIMER7_BRKIN, ADC01_IN6, TIMER2_CH0, TIMER12_CH0, DAC1_OUT0, TIMER0_BRKIN, TIMER7_BRKIN]
+    afs: [TIMER15_CH0, SPI0_MISO, TIMER7_BRKIN, ADC01_IN6, TIMER2_CH0, TIMER12_CH0, DAC1_OUT0, TIMER0_BRKIN]
   PA7:
     pincodes: [R, V, Z]
-    afs: [TIMER16_CH0, SPI0_MOSI, TIMER7_CH0_ON, ADC01_IN7, TIMER2_CH1, TIMER13_CH0, ETH_MII_RX_DV, ETH_RMII_CRS_DV, CMP1_IP, TIMER0_CH0_ON, TIMER7_CH0_ON, TIMER13_CH0]
+    afs: [TIMER16_CH0, SPI0_MOSI, TIMER7_CH0_ON, ADC01_IN7, TIMER2_CH1, TIMER13_CH0, ETH_MII_RX_DV, ETH_RMII_CRS_DV, CMP1_IP, TIMER0_CH0_ON]
   PA8:
     pincodes: [R, V, Z]
     afs: [SHRTIMER_ST0CH0, I2C2_SCL, USART0_CK, TIMER0_CH0, CK_OUT, USBHS_SOF, CTC_SYNC]
@@ -730,22 +718,22 @@ pins:
     afs: [SHRTIMER_ST1CH1, USART5_TX, USART0_CTS, CAN0_RX, TIMER0_CH3, USBHS_DM]
   PA12:
     pincodes: [R, V, Z]
-    afs: [CMP1_OUT, SHRTIMER_FLT0, USART5_RX, TIMER15_, CH0, USART0_RTS, CAN0_TX, TIMER0_ETI, USBHS_DP]
+    afs: [CMP1_OUT, SHRTIMER_FLT0, USART5_RX, TIMER15_CH0, USART0_RTS, CAN0_TX, TIMER0_ETI, USBHS_DP]
   PA13:
     pincodes: [R, V, Z]
-    afs: [TIMER15_, CH0_ON, PA13, TIMER15_CH0_ON]
+    afs: [TIMER15_CH0_ON]
   PA14:
     pincodes: [R, V, Z]
-    afs: [PA14]
+    afs: []
   PA15:
     pincodes: [R, V, Z]
-    afs: [SHRTIMER_FLT1, SPI2_NSS, I2S2_WS, TIMER1_CH0, TIMER1_ETI, PA15, SPI0_NSS]
+    afs: [SHRTIMER_FLT1, SPI2_NSS, I2S2_WS, TIMER1_CH0, TIMER1_ETI, SPI0_NSS]
   PB0:
     pincodes: [R, V, Z]
-    afs: [USBHS_ULPI_D1, ADC01_IN8, TIMER2_CH2, TIMER7_CH1_ON, ETH_MII_RXD2, CMP3_IP, TIMER0_CH1_ON, TIMER7_CH1_ON]
+    afs: [USBHS_ULPI_D1, ADC01_IN8, TIMER2_CH2, TIMER7_CH1_ON, ETH_MII_RXD2, CMP3_IP, TIMER0_CH1_ON]
   PB1:
     pincodes: [R, V, Z]
-    afs: [CMP3_OUT, USBHS_ULPI_D2, SHRTIMER_SCOUT, ADC01_IN9, TIMER2_CH3, TIMER7_CH2_ON, ETH_MII_RXD3, TIMER0_CH2_ON, TIMER7_CH2_ON]
+    afs: [CMP3_OUT, USBHS_ULPI_D2, SHRTIMER_SCOUT, ADC01_IN9, TIMER2_CH3, TIMER7_CH2_ON, ETH_MII_RXD3, TIMER0_CH2_ON]
   PB2:
     pincodes: [R, V, Z]
     afs: [USBHS_ULPI_D4, SHRTIMER_SCIN, CMP3_IM7]
@@ -808,16 +796,16 @@ pins:
     afs: [TIMER14_BRKIN, ADC01_IN15, ETH_MII_RXD1, ETH_RMII_RXD1, WKUP4]
   PC6:
     pincodes: [R, V, Z]
-    afs: [SHRTIMER_EXEV9, CMP5_OUT, USART5_TX, I2S1_MCK, TIMER7_CH0, SDIO_D6, TIMER2_CH0, TIMER7_CH0]
+    afs: [SHRTIMER_EXEV9, CMP5_OUT, USART5_TX, I2S1_MCK, TIMER7_CH0, SDIO_D6, TIMER2_CH0]
   PC7:
     pincodes: [R, V, Z]
-    afs: [SHRTIMER_FLT4, USART5_RX, I2S2_MCK, TIMER7_CH1, SDIO_D7, TIMER2_CH1, TIMER7_CH1]
+    afs: [SHRTIMER_FLT4, USART5_RX, I2S2_MCK, TIMER7_CH1, SDIO_D7, TIMER2_CH1]
   PC8:
     pincodes: [R, V, Z]
-    afs: [SHRTIMER_ST4CH0, USART5_CK, TIMER7_CH2, SDIO_D0, TIMER2_CH2, TIMER7_CH2]
+    afs: [SHRTIMER_ST4CH0, USART5_CK, TIMER7_CH2, SDIO_D0, TIMER2_CH2]
   PC9:
     pincodes: [R, V, Z]
-    afs: [SHRTIMER_ST4CH1, I2C2_SDA, TIMER7_CH3, SDIO_D1, TIMER2_CH3, TIMER7_CH3]
+    afs: [SHRTIMER_ST4CH1, I2C2_SDA, TIMER7_CH3, SDIO_D1, TIMER2_CH3]
   PC10:
     pincodes: [R, V, Z]
     afs: [I2C2_SCL, UART3_TX, SDIO_D2, USART2_TX, SPI2_SCK, I2S2_CK]
@@ -829,7 +817,7 @@ pins:
     afs: [SHRTIMER_EXEV0, UART4_TX, SDIO_CK, USART2_CK, SPI2_MOSI, I2S2_SD]
   PC13:
     pincodes: [R, V, Z]
-    afs: [TAMPER-RTC, WKUP1]
+    afs: [TAMPER_RTC, WKUP1]
   PC14:
     pincodes: [R, V, Z]
     afs: [OSC32IN]
@@ -837,10 +825,10 @@ pins:
     pincodes: [R, V, Z]
     afs: [OSC32OUT]
   PD0:
-    pincodes: [R, V, Z]
+    pincodes: [V, Z]
     afs: [EXMC_D2, CAN0_RX]
   PD1:
-    pincodes: [R, V, Z]
+    pincodes: [V, Z]
     afs: [EXMC_D3, CAN0_TX]
   PD2:
     pincodes: [R, V, Z]

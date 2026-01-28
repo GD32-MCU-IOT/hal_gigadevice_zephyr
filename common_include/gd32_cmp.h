@@ -10,6 +10,8 @@
 #include <gd32c2x1_cmp.h>
 #elif defined(CONFIG_SOC_SERIES_GD32E50X)
 #include <gd32e50x_cmp.h>
+#elif defined(CONFIG_SOC_SERIES_GD32E51X)
+#include <gd32e51x_cmp.h>
 #elif defined(CONFIG_SOC_SERIES_GD32F3X0)
 #include <gd32f3x0_cmp.h>
 #elif defined(CONFIG_SOC_SERIES_GD32F50X)
