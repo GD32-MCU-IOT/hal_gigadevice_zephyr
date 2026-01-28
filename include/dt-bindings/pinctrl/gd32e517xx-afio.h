@@ -107,7 +107,9 @@
 
 /** CTC (no remap) */
 #define GD32_CTC_NORMP		GD32_REMAP(1U, 11U, 0x3U, 0U)
-/** CTC (remap) */
+/** CTC (partial remap) */
 #define GD32_CTC_PRMP		GD32_REMAP(1U, 11U, 0x3U, 1U)
+/** CTC (full remap) */
+#define GD32_CTC_FRMP		GD32_REMAP(1U, 11U, 0x3U, 3U)
 
 #endif /* GD32E517XX_AFIO_H_ */
