@@ -16,6 +16,8 @@
 #include <gd32f3x0_cmp.h>
 #elif defined(CONFIG_SOC_SERIES_GD32F50X)
 #include <gd32f50x_cmp.h>
+#elif defined(CONFIG_SOC_SERIES_GD32H7XX)
+#include <gd32h7xx_cmp.h>
 #elif defined(CONFIG_SOC_SERIES_GD32L23X)
 #include <gd32l23x_cmp.h>
 #endif

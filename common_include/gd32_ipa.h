@@ -8,4 +8,6 @@
 #include <gd32f4xx_ipa.h>
 #elif defined(CONFIG_SOC_SERIES_GD32F527)
 #include <gd32f527_ipa.h>
+#elif defined(CONFIG_SOC_SERIES_GD32H7XX)
+#include <gd32h7xx_ipa.h>
 #endif

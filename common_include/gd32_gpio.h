@@ -24,6 +24,8 @@
 #include <gd32f50x_gpio.h>
 #elif defined(CONFIG_SOC_SERIES_GD32F527)
 #include <gd32f527_gpio.h>
+#elif defined(CONFIG_SOC_SERIES_GD32H7XX)
+#include <gd32h7xx_gpio.h>
 #elif defined(CONFIG_SOC_SERIES_GD32L23X)
 #include <gd32l23x_gpio.h>
 #elif defined(CONFIG_SOC_SERIES_GD32VF103)

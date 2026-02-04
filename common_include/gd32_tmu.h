@@ -8,4 +8,6 @@
 #include <gd32e50x_tmu.h>
 #elif defined(CONFIG_SOC_SERIES_GD32E51X)
 #include <gd32e51x_tmu.h>
+#elif defined(CONFIG_SOC_SERIES_GD32H7XX)
+#include <gd32h7xx_tmu.h>
 #endif
