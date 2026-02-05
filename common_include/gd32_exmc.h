@@ -18,6 +18,8 @@
 #include <gd32f50x_exmc.h>
 #elif defined(CONFIG_SOC_SERIES_GD32F527)
 #include <gd32f527_exmc.h>
+#elif defined(CONFIG_SOC_SERIES_GD32H7XX)
+#include <gd32h7xx_exmc.h>
 #elif defined(CONFIG_SOC_SERIES_GD32VF103)
 #include <gd32vf103_exmc.h>
 #endif
