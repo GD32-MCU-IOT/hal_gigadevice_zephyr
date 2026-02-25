@@ -281,6 +281,10 @@ typedef enum
 #define I2C_ADDFORMAT_7BITS           ((uint32_t)0x00000000U)                  /*!< address:7 bits */
 #define I2C_ADDFORMAT_10BITS          I2C_SADDR0_ADDFORMAT                     /*!< address:10 bits */
 
+/* I2C clock frequency, MHz */
+#define I2CCLK_MAX                    ((uint32_t)0x0000003CU)                  /*!< i2cclk maximum value */
+#define I2CCLK_MIN                    ((uint32_t)0x00000002U)                  /*!< i2cclk minimum value */
+
 /* function declarations */
 /* initialization functions */
 /* reset I2C */

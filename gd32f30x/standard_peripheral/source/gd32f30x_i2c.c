@@ -36,8 +36,6 @@ OF SUCH DAMAGE.
 
 #define I2C_ERROR_HANDLE(s)           do{}while(1)
 
-#define I2CCLK_MAX                    ((uint32_t)0x0000003CU)             /*!< i2cclk maximum value */
-#define I2CCLK_MIN                    ((uint32_t)0x00000002U)             /*!< i2cclk minimum value */
 #define I2C_FLAG_MASK                 ((uint32_t)0x0000FFFFU)             /*!< i2c flag mask */
 #define I2C_ADDRESS_MASK              ((uint32_t)0x000003FFU)             /*!< i2c address mask */
 #define I2C_ADDRESS2_MASK             ((uint32_t)0x000000FEU)             /*!< the second i2c address mask */
