@@ -24,6 +24,8 @@
 #include <gd32f50x_usart.h>
 #elif defined(CONFIG_SOC_SERIES_GD32F527)
 #include <gd32f527_usart.h>
+#elif defined(CONFIG_SOC_SERIES_GD32G5X3)
+#include <gd32g5x3_usart.h>
 #elif defined(CONFIG_SOC_SERIES_GD32H7XX)
 #include <gd32h7xx_usart.h>
 #elif defined(CONFIG_SOC_SERIES_GD32L23X)
