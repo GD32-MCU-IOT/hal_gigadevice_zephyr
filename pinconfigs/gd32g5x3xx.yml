@@ -181,11 +181,11 @@ pins:
       TIMER0_CH0: 6
       USART0_CK: 7
       CMP6_OUT: 8
-      TIMER3_ETI: 10
       EXMC_A21: 9
+      TIMER3_ETI: 10
       CAN2_RX: 11
       SPI1_NSS: 12
-      HRTIMER_ST0CH0: 12
+      HRTIMER_ST0CH0: 13
       UART4_RX: 14
       EVENTOUT: 15
   PA9:
@@ -201,9 +201,9 @@ pins:
       TIMER14_BRKIN0: 9
       TIMER1_CH2: 10
       SPI1_SCK: 12
-      HRTIMER_ST0CH1: 12
-      TRIGSEL_IN13: 13
       EXMC_A22: 11
+      HRTIMER_ST0CH1: 13
+      TRIGSEL_IN13: 14
       EVENTOUT: 15
   PA10:
     pincodes: [Q, V, M, R, C]
@@ -220,8 +220,8 @@ pins:
       EXMC_A23: 9
       TIMER1_CH3: 10
       TIMER7_BRKIN0: 11
-      HRTIMER_ST1CH0: 12
-      TRIGSEL_IN12: 13
+      HRTIMER_ST1CH0: 13
+      TRIGSEL_IN12: 14
       EVENTOUT: 15
   PA11:
     pincodes: [Q, V, M, R, C]
@@ -301,10 +301,10 @@ pins:
       USART1_RX: 7
       UART3_RTS: 8
       UART3_DE: 8
-      TIMER0_BRKIN0: 6
+      TIMER0_BRKIN0: 9
       CAN2_TX: 11
       TRIGSEL_OUT0: 12
-      HRTIMER_FLT1: 12
+      HRTIMER_FLT1: 13
       TIMER1_ETI: 14
       EVENTOUT: 15
   PB0:
@@ -319,11 +319,11 @@ pins:
       TIMER7_MCH1: 4
       HPDF_CKOUT: 5
       TIMER0_MCH1: 6
-      HRTIMER_ST4CH0: 12
+      HRTIMER_ST4CH0: 9
       QSPI_IO1: 10
+      EXMC_A1: 11
       TRIGSEL_OUT3: 12
       HRTIMER_FLT4: 13
-      EXMC_A1: 11
       EVENTOUT: 15
   PB1:
     pincodes: [Q, V, M, R, C]
@@ -338,11 +338,11 @@ pins:
       TIMER0_MCH2: 6
       TIMER19_MCH0: 7
       CMP3_OUT: 8
-      HRTIMER_ST4CH1: 12
+      HRTIMER_ST4CH1: 9
       QSPI_IO0: 10
+      EXMC_A2: 11
       TRIGSEL_OUT4: 12
       HRTIMER_SCOUT: 13
-      EXMC_A2: 11
       EVENTOUT: 15
   PB2:
     pincodes: [Q, V, M, R, C]
@@ -356,10 +356,10 @@ pins:
       TIMER19_CH0: 3
       I2C2_SMBA: 4
       HPDF_CKIN1: 5
-      HRTIMER_ST5CH0: 12
+      HRTIMER_ST5CH0: 9
       QSPI_IO1: 10
-      HRTIMER_SCIN: 13
       EXMC_A3: 11
+      HRTIMER_SCIN: 13
       EVENTOUT: 15
   PB3:
     pincodes: [Q, V, M, R, C]
@@ -396,8 +396,8 @@ pins:
       UART4_DE: 8
       TIMER16_BRKIN0: 10
       CAN2_TX: 11
-      HRTIMER_EXEV6: 12
-      TRIGSEL_OUT6: 13
+      HRTIMER_EXEV6: 13
+      TRIGSEL_OUT6: 14
       EVENTOUT: 15
   PB5:
     pincodes: [Q, V, M, R, C]
@@ -416,7 +416,7 @@ pins:
       TIMER16_CH0: 10
       LPTIMER_IN0: 11
       CLA2OUT: 12
-      HRTIMER_EXEV5: 12
+      HRTIMER_EXEV5: 13
       UART4_CTS: 14
       EVENTOUT: 15
   PB6:
@@ -428,14 +428,14 @@ pins:
       TIMER3_CH0: 2
       I2C0_SCL: 4
       TIMER7_CH0: 5
-      TIMER7_ETI: 5
+      TIMER7_ETI: 6
       USART0_TX: 7
       CMP3_OUT: 8
       CAN1_TX: 9
       TIMER7_BRKIN2: 10
       LPTIMER_ETI0: 11
       HRTIMER_SCIN: 12
-      HRTIMER_EXEV3: 12
+      HRTIMER_EXEV3: 13
       EXMC_A4: 14
       EVENTOUT: 15
   PB7:
@@ -456,14 +456,13 @@ pins:
       LPTIMER_IN1: 11
       EXMC_NL: 12
       EXMC_NADV: 12
-      HRTIMER_EXEV2: 12
+      HRTIMER_EXEV2: 13
       UART3_CTS: 14
       EVENTOUT: 15
   PB8:
     pincodes: [Q, V, M, R, C]
     afs:
       CLAIN6: ANALOG
-      BOOT0: 0
       TIMER15_CH0: 1
       TIMER3_CH2: 2
       HPDF_CKIN7: 3
@@ -474,7 +473,7 @@ pins:
       CAN0_RX: 9
       TIMER7_CH1: 10
       TIMER0_BRKIN0: 12
-      HRTIMER_EXEV7: 12
+      HRTIMER_EXEV7: 13
       EVENTOUT: 15
   PB9:
     pincodes: [Q, V, M, R, C]
@@ -489,9 +488,9 @@ pins:
       CMP1_OUT: 8
       CAN0_TX: 9
       TIMER7_CH2: 10
-      TIMER0_MCH2: 12
-      HRTIMER_EXEV4: 12
       EXMC_A6: 11
+      TIMER0_MCH2: 12
+      HRTIMER_EXEV4: 13
       EVENTOUT: 15
   PB10:
     pincodes: [Q, V, M, R, C]
@@ -502,10 +501,10 @@ pins:
       HPDF_DATAIN7: 6
       USART2_TX: 7
       QSPI_SCK: 10
-      TIMER0_BRKIN0: 12
-      HRTIMER_FLT2: 12
-      TRIGSEL_OUT2: 13
       EXMC_A7: 11
+      TIMER0_BRKIN0: 12
+      HRTIMER_FLT2: 13
+      TRIGSEL_OUT2: 14
       EVENTOUT: 15
   PB11:
     pincodes: [Q, V, M, R, C]
@@ -517,8 +516,8 @@ pins:
       HPDF_CKIN7: 6
       USART2_RX: 7
       QSPI_CSN: 10
-      HRTIMER_FLT3: 13
       EXMC_A8: 11
+      HRTIMER_FLT3: 13
       EVENTOUT: 15
   PB12:
     pincodes: [Q, V, M, R, C]
@@ -533,8 +532,8 @@ pins:
       USART2_CK: 7
       CAN1_RX: 9
       HPDF_DATAIN1: 10
-      HRTIMER_ST2CH0: 12
       EXMC_A9: 11
+      HRTIMER_ST2CH0: 13
       EVENTOUT: 15
   PB13:
     pincodes: [Q, V, M, R, C]
@@ -546,8 +545,8 @@ pins:
       USART2_CTS: 7
       CAN1_TX: 9
       HPDF_CKIN1: 10
-      HRTIMER_ST2CH1: 12
       EXMC_A10: 11
+      HRTIMER_ST2CH1: 13
       EVENTOUT: 15
   PB14:
     pincodes: [Q, V, M, R, C]
@@ -562,9 +561,9 @@ pins:
       USART2_DE: 7
       CMP3_OUT: 8
       HPDF_DATAIN2: 10
-      HRTIMER_ST3CH0: 12
-      TRIGSEL_OUT1: 13
       EXMC_A11: 11
+      HRTIMER_ST3CH0: 13
+      TRIGSEL_OUT1: 14
       EVENTOUT: 15
   PB15:
     pincodes: [Q, V, M, R, C]
@@ -579,9 +578,9 @@ pins:
       TIMER0_MCH2: 6
       SPI1_MOSI: 5
       HPDF_CKIN2: 10
-      HRTIMER_ST3CH1: 12
-      TRIGSEL_OUT5: 13
       EXMC_A12: 11
+      HRTIMER_ST3CH1: 13
+      TRIGSEL_OUT5: 14
       EVENTOUT: 15
   PC0:
     pincodes: [Q, V, M, R]
@@ -594,7 +593,6 @@ pins:
       HPDF_DATAIN4: 10
       EXMC_CLK: 12
       TRIGSEL_IN8: 13
-      USART0_RX: 14
       EVENTOUT: 15
   PC1:
     pincodes: [Q, V, M, R]
@@ -608,7 +606,6 @@ pins:
       QSPI_IO0: 10
       EXMC_NOE: 12
       TRIGSEL_IN9: 13
-      USART0_TX: 14
       EVENTOUT: 15
   PC2:
     pincodes: [Q, V, M, R]
