@@ -10,6 +10,8 @@
 #include <gd32e50x_exmc.h>
 #elif defined(CONFIG_SOC_SERIES_GD32E51X)
 #include <gd32e51x_exmc.h>
+#elif defined(CONFIG_SOC_SERIES_GD32F30X)
+#include <gd32f30x_exmc.h>
 #elif defined(CONFIG_SOC_SERIES_GD32F403)
 #include <gd32f403_exmc.h>
 #elif defined(CONFIG_SOC_SERIES_GD32F4XX)
