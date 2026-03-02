@@ -12,6 +12,8 @@
 #include <gd32f527_trng.h>
 #elif defined(CONFIG_SOC_SERIES_GD32G5X3)
 #include <gd32g5x3_trng.h>
+#elif defined(CONFIG_SOC_SERIES_GD32H75E)
+#include <gd32h75e_trng.h>
 #elif defined(CONFIG_SOC_SERIES_GD32H7XX)
 #include <gd32h7xx_trng.h>
 #elif defined(CONFIG_SOC_SERIES_GD32L23X)

@@ -10,6 +10,8 @@
 #include <gd32f50x_trigsel.h>
 #elif defined(CONFIG_SOC_SERIES_GD32G5X3)
 #include <gd32g5x3_trigsel.h>
+#elif defined(CONFIG_SOC_SERIES_GD32H75E)
+#include <gd32h75e_trigsel.h>
 #elif defined(CONFIG_SOC_SERIES_GD32H7XX)
 #include <gd32h7xx_trigsel.h>
 #endif

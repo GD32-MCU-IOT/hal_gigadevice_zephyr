@@ -10,6 +10,8 @@
 #include <gd32e50x_can.h>
 #elif defined(CONFIG_SOC_SERIES_GD32E51X)
 #include <gd32e51x_can.h>
+#elif defined(CONFIG_SOC_SERIES_GD32F30X)
+#include <gd32f30x_can.h>
 #elif defined(CONFIG_SOC_SERIES_GD32F403)
 #include <gd32f403_can.h>
 #elif defined(CONFIG_SOC_SERIES_GD32F4XX)
@@ -20,6 +22,8 @@
 #include <gd32f527_can.h>
 #elif defined(CONFIG_SOC_SERIES_GD32G5X3)
 #include <gd32g5x3_can.h>
+#elif defined(CONFIG_SOC_SERIES_GD32H75E)
+#include <gd32h75e_can.h>
 #elif defined(CONFIG_SOC_SERIES_GD32H7XX)
 #include <gd32h7xx_can.h>
 #elif defined(CONFIG_SOC_SERIES_GD32VF103)

@@ -10,6 +10,8 @@
 #include <gd32e50x_ctc.h>
 #elif defined(CONFIG_SOC_SERIES_GD32E51X)
 #include <gd32e51x_ctc.h>
+#elif defined(CONFIG_SOC_SERIES_GD32F30X)
+#include <gd32f30x_ctc.h>
 #elif defined(CONFIG_SOC_SERIES_GD32F3X0)
 #include <gd32f3x0_ctc.h>
 #elif defined(CONFIG_SOC_SERIES_GD32F403)
@@ -20,6 +22,8 @@
 #include <gd32f50x_ctc.h>
 #elif defined(CONFIG_SOC_SERIES_GD32F527)
 #include <gd32f527_ctc.h>
+#elif defined(CONFIG_SOC_SERIES_GD32H75E)
+#include <gd32h75e_ctc.h>
 #elif defined(CONFIG_SOC_SERIES_GD32H7XX)
 #include <gd32h7xx_ctc.h>
 #elif defined(CONFIG_SOC_SERIES_GD32L23X)
