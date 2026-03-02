@@ -26,6 +26,8 @@
 #include <gd32f50x_pmu.h>
 #elif defined(CONFIG_SOC_SERIES_GD32F527)
 #include <gd32f527_pmu.h>
+#elif defined(CONFIG_SOC_SERIES_GD32H75E)
+#include <gd32h75e_pmu.h>
 #elif defined(CONFIG_SOC_SERIES_GD32H7XX)
 #include <gd32h7xx_pmu.h>
 #elif defined(CONFIG_SOC_SERIES_GD32L23X)
