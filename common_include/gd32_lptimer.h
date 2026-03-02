@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#if defined(CONFIG_SOC_SERIES_GD32L23X)
+#if defined(CONFIG_SOC_SERIES_GD32G5X3)
+#include <gd32g5x3_lptimer.h>
+#elif defined(CONFIG_SOC_SERIES_GD32L23X)
 #include <gd32l23x_lptimer.h>
 #endif
