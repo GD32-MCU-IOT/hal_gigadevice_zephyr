@@ -262,15 +262,15 @@ signal-configs:
   EXMC_NWE:
     modes: [out]
   I2C0_SCL:
-    modes: [inp]
+    modes: [out]
   I2C0_SDA:
-    modes: [inp]
+    modes: [out]
   I2C0_SMBA:
     modes: [out]
   I2C1_SCL:
-    modes: [inp]
+    modes: [out]
   I2C1_SDA:
-    modes: [inp]
+    modes: [out]
   I2C1_SMBA:
     modes: [out]
   I2S1_CK:
