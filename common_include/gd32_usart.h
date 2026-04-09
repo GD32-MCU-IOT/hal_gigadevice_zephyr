@@ -6,6 +6,8 @@
 
 #if defined(CONFIG_SOC_SERIES_GD32A50X)
 #include <gd32a50x_usart.h>
+#elif defined(CONFIG_SOC_SERIES_GD32C11X)
+#include <gd32c11x_usart.h>
 #elif defined(CONFIG_SOC_SERIES_GD32C2X1)
 #include <gd32c2x1_usart.h>
 #elif defined(CONFIG_SOC_SERIES_GD32E10X)
