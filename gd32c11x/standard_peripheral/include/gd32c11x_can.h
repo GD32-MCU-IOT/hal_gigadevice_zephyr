@@ -1,34 +1,34 @@
 /*!
     \file    gd32c11x_can.h
     \brief   definitions for the CAN
-    
+
     \version 2026-01-30, V1.6.0, firmware for GD32C11x
 */
 
 /*
     Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
-    Redistribution and use in source and binary forms, with or without modification, 
+    Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-    1. Redistributions of source code must retain the above copyright notice, this 
+    1. Redistributions of source code must retain the above copyright notice, this
        list of conditions and the following disclaimer.
-    2. Redistributions in binary form must reproduce the above copyright notice, 
-       this list of conditions and the following disclaimer in the documentation 
+    2. Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the documentation
        and/or other materials provided with the distribution.
-    3. Neither the name of the copyright holder nor the names of its contributors 
-       may be used to endorse or promote products derived from this software without 
+    3. Neither the name of the copyright holder nor the names of its contributors
+       may be used to endorse or promote products derived from this software without
        specific prior written permission.
 
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
-INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 OF SUCH DAMAGE.
 */
 
@@ -372,9 +372,9 @@ typedef enum
     CAN_FLAG_SLPWS    = CAN_REGIDX_BIT(STAT_REG_OFFSET, 1U),            /*!< sleep working state */
     CAN_FLAG_IWS      = CAN_REGIDX_BIT(STAT_REG_OFFSET, 0U),            /*!< initial working state */
     /* flags in TSTAT register */
-    CAN_FLAG_TMLS2    = CAN_REGIDX_BIT(TSTAT_REG_OFFSET, 31U),          /*!< transmit mailbox 2 last sending in Tx FIFO */ 
-    CAN_FLAG_TMLS1    = CAN_REGIDX_BIT(TSTAT_REG_OFFSET, 30U),          /*!< transmit mailbox 1 last sending in Tx FIFO */ 
-    CAN_FLAG_TMLS0    = CAN_REGIDX_BIT(TSTAT_REG_OFFSET, 29U),          /*!< transmit mailbox 0 last sending in Tx FIFO */ 
+    CAN_FLAG_TMLS2    = CAN_REGIDX_BIT(TSTAT_REG_OFFSET, 31U),          /*!< transmit mailbox 2 last sending in Tx FIFO */
+    CAN_FLAG_TMLS1    = CAN_REGIDX_BIT(TSTAT_REG_OFFSET, 30U),          /*!< transmit mailbox 1 last sending in Tx FIFO */
+    CAN_FLAG_TMLS0    = CAN_REGIDX_BIT(TSTAT_REG_OFFSET, 29U),          /*!< transmit mailbox 0 last sending in Tx FIFO */
     CAN_FLAG_TME2     = CAN_REGIDX_BIT(TSTAT_REG_OFFSET, 28U),          /*!< transmit mailbox 2 empty */
     CAN_FLAG_TME1     = CAN_REGIDX_BIT(TSTAT_REG_OFFSET, 27U),          /*!< transmit mailbox 1 empty */
     CAN_FLAG_TME0     = CAN_REGIDX_BIT(TSTAT_REG_OFFSET, 26U),          /*!< transmit mailbox 0 empty */
@@ -391,15 +391,15 @@ typedef enum
     CAN_FLAG_MTF1     = CAN_REGIDX_BIT(TSTAT_REG_OFFSET, 8U),           /*!< mailbox 1 transmit finished */
     CAN_FLAG_MTF0     = CAN_REGIDX_BIT(TSTAT_REG_OFFSET, 0U),           /*!< mailbox 0 transmit finished */
     /* flags in RFIFO0 register */
-    CAN_FLAG_RFO0     = CAN_REGIDX_BIT(RFIFO0_REG_OFFSET, 4U),          /*!< receive FIFO0 overfull */ 
-    CAN_FLAG_RFF0     = CAN_REGIDX_BIT(RFIFO0_REG_OFFSET, 3U),          /*!< receive FIFO0 full */ 
+    CAN_FLAG_RFO0     = CAN_REGIDX_BIT(RFIFO0_REG_OFFSET, 4U),          /*!< receive FIFO0 overfull */
+    CAN_FLAG_RFF0     = CAN_REGIDX_BIT(RFIFO0_REG_OFFSET, 3U),          /*!< receive FIFO0 full */
     /* flags in RFIFO1 register */
-    CAN_FLAG_RFO1     = CAN_REGIDX_BIT(RFIFO1_REG_OFFSET, 4U),          /*!< receive FIFO1 overfull */ 
-    CAN_FLAG_RFF1     = CAN_REGIDX_BIT(RFIFO1_REG_OFFSET, 3U),          /*!< receive FIFO1 full */ 
+    CAN_FLAG_RFO1     = CAN_REGIDX_BIT(RFIFO1_REG_OFFSET, 4U),          /*!< receive FIFO1 overfull */
+    CAN_FLAG_RFF1     = CAN_REGIDX_BIT(RFIFO1_REG_OFFSET, 3U),          /*!< receive FIFO1 full */
     /* flags in ERR register */
-    CAN_FLAG_BOERR    = CAN_REGIDX_BIT(ERR_REG_OFFSET, 2U),             /*!< bus-off error */ 
-    CAN_FLAG_PERR     = CAN_REGIDX_BIT(ERR_REG_OFFSET, 1U),             /*!< passive error */ 
-    CAN_FLAG_WERR     = CAN_REGIDX_BIT(ERR_REG_OFFSET, 0U),             /*!< warning error */ 
+    CAN_FLAG_BOERR    = CAN_REGIDX_BIT(ERR_REG_OFFSET, 2U),             /*!< bus-off error */
+    CAN_FLAG_PERR     = CAN_REGIDX_BIT(ERR_REG_OFFSET, 1U),             /*!< passive error */
+    CAN_FLAG_WERR     = CAN_REGIDX_BIT(ERR_REG_OFFSET, 0U),             /*!< warning error */
 }can_flag_enum;
 
 /* CAN interrupt flags */
@@ -422,14 +422,14 @@ typedef enum
     CAN_INT_FLAG_RFF1  = CAN_REGIDX_BITS(RFIFO1_REG_OFFSET, 3U, 5U),    /*!< receive FIFO1 full interrupt flag */
     CAN_INT_FLAG_RFL1  = CAN_REGIDX_BITS(RFIFO1_REG_OFFSET, 2U, 4U),    /*!< receive FIFO1 not empty interrupt flag */
     /* interrupt flags in ERR register */
-    CAN_INT_FLAG_ERRN  = CAN_REGIDX_BITS(ERR_REG_OFFSET, 3U, 11U),      /*!< error number interrupt flag */ 
-    CAN_INT_FLAG_BOERR = CAN_REGIDX_BITS(ERR_REG_OFFSET, 2U, 10U),      /*!< bus-off error interrupt flag */ 
-    CAN_INT_FLAG_PERR  = CAN_REGIDX_BITS(ERR_REG_OFFSET, 1U, 9U),       /*!< passive error interrupt flag */ 
-    CAN_INT_FLAG_WERR  = CAN_REGIDX_BITS(ERR_REG_OFFSET, 0U, 8U),       /*!< warning error interrupt flag */ 
+    CAN_INT_FLAG_ERRN  = CAN_REGIDX_BITS(ERR_REG_OFFSET, 3U, 11U),      /*!< error number interrupt flag */
+    CAN_INT_FLAG_BOERR = CAN_REGIDX_BITS(ERR_REG_OFFSET, 2U, 10U),      /*!< bus-off error interrupt flag */
+    CAN_INT_FLAG_PERR  = CAN_REGIDX_BITS(ERR_REG_OFFSET, 1U, 9U),       /*!< passive error interrupt flag */
+    CAN_INT_FLAG_WERR  = CAN_REGIDX_BITS(ERR_REG_OFFSET, 0U, 8U),       /*!< warning error interrupt flag */
 }can_interrupt_flag_enum;
 
 /* CAN FD transmitter delay compensation parameters struct */
-typedef struct 
+typedef struct
 {
     uint32_t tdc_mode;                                                  /*!< transmitter delay compensation mode */
     uint8_t tdc_filter;                                                 /*!< transmitter delay compensation filter */
@@ -437,9 +437,9 @@ typedef struct
 }can_fd_tdc_struct;
 
 /* CAN initialize FD frame parameters struct */
-typedef struct 
+typedef struct
 {
-    ControlStatus fd_frame;                                             /*!< FD operation function */              
+    ControlStatus fd_frame;                                             /*!< FD operation function */
     ControlStatus excp_event_detect;                                    /*!< protocol exception event detection function*/
     ControlStatus delay_compensation;                                   /*!< transmitter delay compensation mode */
     can_fd_tdc_struct *p_delay_compensation;                            /*!< pointer to the struct of the transmitter delay compensation */
@@ -454,7 +454,7 @@ typedef struct
 /* CAN initialize parameters struct */
 typedef struct
 {
-    uint8_t working_mode;                                               /*!< CAN working mode */ 
+    uint8_t working_mode;                                               /*!< CAN working mode */
     uint8_t resync_jump_width;                                          /*!< CAN resynchronization jump width */
     uint8_t time_segment_1;                                             /*!< time segment 1 */
     uint8_t time_segment_2;                                             /*!< time segment 2 */
@@ -595,19 +595,19 @@ typedef enum
 /* transmit data byte 2 */
 #define TMDATA0_DB2(regval)                (BITS(16,23) & ((uint32_t)(regval) << 16))
 
-/* transmit data byte 3 */                 
+/* transmit data byte 3 */
 #define TMDATA0_DB3(regval)                (BITS(24,31) & ((uint32_t)(regval) << 24))
 
-/* transmit data byte 4 */                 
+/* transmit data byte 4 */
 #define TMDATA1_DB4(regval)                (BITS(0,7) & ((uint32_t)(regval) << 0))
 
-/* transmit data byte 5 */                 
+/* transmit data byte 5 */
 #define TMDATA1_DB5(regval)                (BITS(8,15) & ((uint32_t)(regval) << 8))
 
-/* transmit data byte 6 */                 
+/* transmit data byte 6 */
 #define TMDATA1_DB6(regval)                (BITS(16,23) & ((uint32_t)(regval) << 16))
 
-/* transmit data byte 7 */                 
+/* transmit data byte 7 */
 #define TMDATA1_DB7(regval)                (BITS(24,31) & ((uint32_t)(regval) << 24))
 
 /* receive mailbox extended identifier*/
@@ -646,13 +646,13 @@ typedef enum
 /* receive data byte 7 */
 #define GET_RFIFOMDATA1_DB7(regval)        GET_BITS((uint32_t)(regval), 24, 31)
 
-/* error number */        
+/* error number */
 #define GET_ERR_ERRN(regval)               GET_BITS((uint32_t)(regval), 4, 6)
 
-/* transmit error count */        
+/* transmit error count */
 #define GET_ERR_TECNT(regval)              GET_BITS((uint32_t)(regval), 16, 23)
 
-/* receive  error count */        
+/* receive  error count */
 #define GET_ERR_RECNT(regval)              GET_BITS((uint32_t)(regval), 24, 31)
 
 /* CAN errors */
@@ -934,17 +934,6 @@ typedef enum
 #define GD32_CAN_MODE_INITIALIZE           ((uint8_t)0x01U)             /*!< CAN initialize mode */
 #define GD32_CAN_MODE_NORMAL               ((uint8_t)0x02U)             /*!< CAN normal mode */
 #define GD32_CAN_MODE_SLEEP                ((uint8_t)0x04U)             /*!< CAN sleep mode */
-
-/* Backward compatibility aliases (deprecated, use GD32_CAN_MODE_* instead) */
-#ifndef CAN_MODE_INITIALIZE
-#define CAN_MODE_INITIALIZE                GD32_CAN_MODE_INITIALIZE
-#endif
-#ifndef CAN_MODE_NORMAL
-#define CAN_MODE_NORMAL                    GD32_CAN_MODE_NORMAL
-#endif
-#ifndef CAN_MODE_SLEEP
-#define CAN_MODE_SLEEP                     GD32_CAN_MODE_SLEEP
-#endif
 
 /* filter bits */
 #define CAN_FILTERBITS_16BIT               ((uint8_t)0x00U)             /*!< CAN filter 16 bits */
