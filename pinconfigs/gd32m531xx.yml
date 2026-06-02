@@ -38,18 +38,18 @@ pins:
       CK_OUT: 0
       TIMER2_CH0: 1
       CFMUREF: 5
-      UART3_RX: 7
-      CMP0_OUT: 9
+      UART3_RX: 6
+      CMP0_OUT: 8
       EVENTOUT: 15
 
   PA1:
     pincodes: [R]
     afs:
       TIMER2_CH2: 1
-      POC_INROC: 5
+      POC_IN5: 4
       ADC2_PROC: 5
-      UART3_TX: 7
-      CMP1_OUT: 9
+      UART3_TX: 6
+      CMP1_OUT: 8
       GTOC0_IN: 10
       GTOC1_IN: 11
       GTOC2_IN: 12
@@ -57,7 +57,7 @@ pins:
       EVENTOUT: 15
 
   PA8:
-    pincodes: [R, C]
+    pincodes: [C]
     afs:
       TIMER2_CH1: 1
       TIMER_ETI3: 2
@@ -100,8 +100,8 @@ pins:
       ADC2_IN7: ANALOG
       TIMER2_CH0: 1
       TIMER_ETI0: 2
-      CMP3_OUT: 9
-      UART3_TX: 11
+      CMP3_OUT: 8
+      UART3_TX: 10
       SPI0_MOSI: 11
       EVENTOUT: 15
 
@@ -111,9 +111,9 @@ pins:
       TIMER1_CH2: 1
       TIMER_ETI3: 2
       ADC2_TRG: 7
-      CMP2_OUT: 9
-      TIMER2_CH1: 10
-      UART3_RX: 11
+      CMP2_OUT: 8
+      TIMER2_CH1: 9
+      UART3_RX: 10
       SPI0_MISO: 11
       CAN0_RX: 13
       EVENTOUT: 15
@@ -262,60 +262,60 @@ pins:
       POC_IN0: 6
       TIMER0_BRKIN: 7
       SPI0_NSS: 9
-      GTOC0_IN: 11
-      GTOC1_IN: 12
-      GTOC2_IN: 13
-      GTOC3_IN: 14
+      GTOC0_IN: 10
+      GTOC1_IN: 11
+      GTOC2_IN: 12
+      GTOC3_IN: 13
       GPTIMER0_CPPO: 14
       EVENTOUT: 15
 
   PD9:
     pincodes: [R, C]
     afs:
-      TIMER0_CH0: 3
-      TIMER0_CH0_INV: 4
+      TIMER0_CH0: 1
+      TIMER0_CH0_INV: 3
 
   PD10:
     pincodes: [R, C]
     afs:
-      TIMER0_CH1: 3
-      TIMER0_CH1_INV: 4
+      TIMER0_CH1: 1
+      TIMER0_CH1_INV: 3
 
   PD11:
     pincodes: [R, C]
     afs:
-      TIMER0_CH2: 3
-      TIMER0_CH2_INV: 4
+      TIMER0_CH2: 1
+      TIMER0_CH2_INV: 3
 
   PD12:
     pincodes: [R, C]
     afs:
-      TIMER0_MCH0: 3
-      TIMER0_MCH0_INV: 4
+      TIMER0_MCH0: 1
+      TIMER0_MCH0_INV: 3
 
   PD13:
     pincodes: [R, C]
     afs:
-      TIMER0_MCH1: 3
-      TIMER0_MCH1_INV: 4
+      TIMER0_MCH1: 1
+      TIMER0_MCH1_INV: 3
 
   PD14:
     pincodes: [R, C]
     afs:
-      TIMER0_MCH2: 3
-      TIMER0_MCH2_INV: 4
+      TIMER0_MCH2: 1
+      TIMER0_MCH2_INV: 3
 
   PE8:
     pincodes: [R]
     afs:
-      TIMER7_MCH2: 3
-      TIMER7_MCH2_INV: 4
+      TIMER7_MCH2: 1
+      TIMER7_MCH2_INV: 3
 
   PE9:
     pincodes: [R, C]
     afs:
-      TIMER7_MCH1: 3
-      TIMER7_MCH1_INV: 4
+      TIMER7_MCH1: 1
+      TIMER7_MCH1_INV: 3
 
   PE10:
     pincodes: [R, C]
@@ -336,24 +336,24 @@ pins:
   PE12:
     pincodes: [R, C]
     afs:
-      TIMER7_CH1: 3
-      TIMER7_CH1_INV: 4
+      TIMER7_CH1: 1
+      TIMER7_CH1_INV: 3
 
   PE13:
     pincodes: [R, C]
     afs:
-      TIMER7_CH0: 3
-      TIMER7_CH0_INV: 4
+      TIMER7_CH0: 1
+      TIMER7_CH0_INV: 3
 
   PE14:
     pincodes: [R]
     afs:
       POC_IN1: 6
       TIMER7_BRKIN: 7
-      GTOC0_IN: 11
-      GTOC1_IN: 12
-      GTOC2_IN: 13
-      GTOC3_IN: 14
+      GTOC0_IN: 10
+      GTOC1_IN: 11
+      GTOC2_IN: 12
+      GTOC3_IN: 13
       GPTIMER1_CPPO: 14
       EVENTOUT: 15
 
@@ -366,8 +366,8 @@ pins:
       I2C0_SDA: 7
       I2C0_SMBA: 8
       SPI0_MOSI: 9
-      GPTIMER0_CH0: 12
-      GPTIMER0_CH0_INV: 14
+      GPTIMER0_CH0: 11
+      GPTIMER0_CH0_INV: 13
       EVENTOUT: 15
 
   PF9:
@@ -378,9 +378,9 @@ pins:
       UART2_RX: 6
       I2C0_SCL: 8
       SPI0_IO2: 9
-      ADCSM4: 11
-      GPTIMER0_CH1: 12
-      GPTIMER0_CH1_INV: 14
+      ADCSM4: 10
+      GPTIMER0_CH1: 11
+      GPTIMER0_CH1_INV: 13
       EVENTOUT: 15
 
   PF10:
@@ -393,9 +393,9 @@ pins:
       I2C0_SMBA: 7
       I2C0_SDA: 8
       SPI0_IO3: 9
-      ADCSM3: 11
-      GPTIMER0_CH0: 12
-      GPTIMER0_CH0_INV: 14
+      ADCSM3: 10
+      GPTIMER0_CH0: 11
+      GPTIMER0_CH0_INV: 13
       EVENTOUT: 15
 
   PF11:
@@ -413,14 +413,14 @@ pins:
     pincodes: [R, C]
     afs:
       CK_OUT: 0
-      POC_IN2: 5
+      POC_IN2: 4
       UART3_RX: 7
       CAN0_RX: 8
       SPI0_MISO: 9
-      GTOC0_IN: 11
-      GTOC1_IN: 12
-      GTOC2_IN: 13
-      GTOC3_IN: 14
+      GTOC0_IN: 10
+      GTOC1_IN: 11
+      GTOC2_IN: 12
+      GTOC3_IN: 13
       GPTIMER0_CPPO: 14
       EVENTOUT: 15
 
@@ -432,8 +432,8 @@ pins:
       UART1_TX: 6
       UART3_TX: 7
       CAN0_TX: 8
-      GPTIMER1_CH1: 12
-      GPTIMER1_CH1_INV: 14
+      GPTIMER1_CH1: 11
+      GPTIMER1_CH1_INV: 13
       EVENTOUT: 15
 
   PF14:
@@ -444,8 +444,8 @@ pins:
       UART1_RX: 6
       UART3_RX: 7
       CAN0_RX: 8
-      GPTIMER1_CH0: 12
-      GPTIMER1_CH0_INV: 14
+      GPTIMER1_CH0: 11
+      GPTIMER1_CH0_INV: 13
       EVENTOUT: 15
 
   PG11:
@@ -457,8 +457,8 @@ pins:
       TIMER2_CH2: 3
       UART0_TX: 6
       GTOC2_IN: 11
-      GPTIMER0_CH1: 12
-      GPTIMER0_CH1_INV: 13
+      GPTIMER0_CH1: 13
+      GPTIMER0_CH1_INV: 14
       EVENTOUT: 15
 
   PG12:
@@ -494,10 +494,10 @@ pins:
       ADC0_PROC: 5
       UART3_RX: 7
       SPI0_NSS: 9
-      GPTIMER0_CH1: 11
-      GPTIMER1_CH1: 12
-      GPTIMER0_CH1_INV: 13
-      GPTIMER1_CH1_INV: 14
+      GPTIMER0_CH1: 10
+      GPTIMER1_CH1: 11
+      GPTIMER0_CH1_INV: 12
+      GPTIMER1_CH1_INV: 13
       EVENTOUT: 15
 
   PG15:
@@ -508,10 +508,10 @@ pins:
       UART1_TX: 6
       CAN0_TX: 8
       SPI0_NSS: 9
-      GPTIMER0_CH0: 11
-      GPTIMER1_CH0: 12
-      GPTIMER0_CH0_INV: 13
-      GPTIMER1_CH0_INV: 14
+      GPTIMER0_CH0: 10
+      GPTIMER1_CH0: 11
+      GPTIMER0_CH0_INV: 12
+      GPTIMER1_CH0_INV: 13
       EVENTOUT: 15
 
   PN2:
