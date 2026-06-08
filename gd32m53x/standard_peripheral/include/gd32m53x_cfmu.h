@@ -1,5 +1,5 @@
 /*!
-    \file    gd32m53x_cfmu.c
+    \file    gd32m53x_cfmu.h
     \brief   CFMU driver
 
     \version 2026-03-04, V1.0.0, firmware for GD32M53x

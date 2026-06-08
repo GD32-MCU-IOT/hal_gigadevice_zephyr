@@ -1967,7 +1967,7 @@ uint16_t adc_self_diagnosis_status_read(uint32_t adc_periph)
 */
 uint16_t adc_bifurcate_data_read(uint32_t adc_periph, adc_group_select_enum group, adc_bifurcate_data_enum channel)
 {
-    uint16_t data_temp;
+    uint16_t data_temp = 0U;
 
     switch(group) {
     case ADC_GROUP_PRI1:

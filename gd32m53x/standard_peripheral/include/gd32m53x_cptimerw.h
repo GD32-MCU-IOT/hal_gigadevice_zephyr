@@ -1,5 +1,5 @@
 /*!
-    \file    gd32m53x_Cctimer.h
+    \file    gd32m53x_cptimerw.h
     \brief   definitions for the TIMER
 
     \version 2026-03-04, V1.0.0, firmware for GD32M53x

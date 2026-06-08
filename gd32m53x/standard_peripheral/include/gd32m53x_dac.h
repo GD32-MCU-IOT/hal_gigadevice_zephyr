@@ -1,5 +1,5 @@
 /*!
-    \file    gd32m53x_dac.c
+    \file    gd32m53x_dac.h
     \brief   DAC driver
 
     \version 2026-03-04, V1.0.0, firmware for GD32M53x

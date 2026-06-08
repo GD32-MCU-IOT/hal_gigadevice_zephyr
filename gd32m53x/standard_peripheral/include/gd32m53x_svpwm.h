@@ -69,7 +69,7 @@ OF SUCH DAMAGE.
 #define SVPWM_CAR_CAR               BITS(0,15)                                /*!< the SVPWM period count */
 
 /* SVPWM_TA */
-#define SVPWM__TA_TA                BITS(0,15)                                /*!< the A-phase duty cycle calculated by SVPWM */
+#define SVPWM_TA_TA                BITS(0,15)                                /*!< the A-phase duty cycle calculated by SVPWM */
 
 /* SVPWM_TB */
 #define SVPWM_TB_TB                 BITS(0,15)                                /*!< the B-phase duty cycle calculated by SVPWM */

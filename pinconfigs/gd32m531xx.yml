@@ -13,9 +13,9 @@
 #
 # Memory codes:
 #
-# - K8: 256KB Flash, 32KB SRAM
-# - K6: 128KB Flash, 24KB SRAM
-# - K4: 64KB Flash, 16KB SRAM
+# - B: 128KB Flash, 32KB SRAM
+# - Z: 192KB Flash, 32KB SRAM
+# - C: 256KB Flash, 32KB SRAM
 #
 # Copyright (c) 2026, GigaDevice Semiconductor Inc.
 # SPDX-License-Identifier: Apache 2.0
@@ -26,9 +26,9 @@ series: gd32m531
 
 variants:
   - pincode: R
-    memories: [K8, K6, K4]
+    memories: [B, Z, C]
   - pincode: C
-    memories: [K8, K6, K4]
+    memories: [B, Z, C]
 
 pins:
   PA0:

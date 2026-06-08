@@ -48,7 +48,7 @@
 
 /* select a system clock by uncommenting the following line */
 /* use IRC32M */
-#define __SYSTEM_CLOCK_IRC32M                    (uint32_t)(__IRC32M)
+//#define __SYSTEM_CLOCK_IRC32M                    (uint32_t)(__IRC32M)
 //#define __SYSTEM_CLOCK_24M_PLL_IRC32M            (uint32_t)(24000000)
 //#define __SYSTEM_CLOCK_72M_PLL_IRC32M            (uint32_t)(72000000)
 //#define __SYSTEM_CLOCK_120M_PLL_IRC32M           (uint32_t)(120000000)
@@ -59,7 +59,7 @@
 //#define __SYSTEM_CLOCK_24M_PLL_HXTAL             (uint32_t)(24000000)
 //#define __SYSTEM_CLOCK_72M_PLL_HXTAL             (uint32_t)(72000000)
 //#define __SYSTEM_CLOCK_120M_PLL_HXTAL            (uint32_t)(120000000)
-//#define __SYSTEM_CLOCK_180M_PLL_HXTAL            (uint32_t)(180000000)
+#define __SYSTEM_CLOCK_180M_PLL_HXTAL            (uint32_t)(180000000)
 
 /* The following is to prevent Vcore fluctuations caused by frequency switching.
    It is strongly recommended to include it to avoid issues caused by self-removal. */
@@ -173,7 +173,7 @@ void SystemInit(void)
 {
     /* FPU settings */
 #if (__FPU_PRESENT == 1) && (__FPU_USED == 1U)
-    SCB->CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2) | (3UL)); /* set CP10 and CP11 Full Access Enable Floating-point Extension, CP0 Full access */
+    SCB->CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2)); /* set CP10 and CP11 Full Access Enable Floating-point Extension */
 #endif
     /* open the protection */
     SYSCFG_PRCFG = 0x00000A503U;
@@ -197,6 +197,9 @@ void SystemInit(void)
     RCU_CFG2 = 0x18000000U;
     /* reset HXTALEN, CKMEN, PLLEN, HXTALSCAL bits */
     RCU_CTL &= ~(RCU_CTL_PLLEN | RCU_CTL_CKMEN | RCU_CTL_HXTALEN | RCU_CTL_HXTALBPS | RCU_CTL_HXTALSCAL);
+
+    /* configure system clock */
+    system_clock_config();
 }
 
 /*!

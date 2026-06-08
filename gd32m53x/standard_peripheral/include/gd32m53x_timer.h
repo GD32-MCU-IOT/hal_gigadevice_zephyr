@@ -1046,7 +1046,7 @@ void timer_deinit(uint32_t timer_periph);
 /* initialize TIMER init parameter struct */
 void timer_struct_para_init(timer_parameter_struct *initpara);
 /* initialize TIMER counter */
-void timer_init(uint32_t timer_periph, timer_parameter_struct *initpara);
+void gd32_timer_init(uint32_t timer_periph, timer_parameter_struct *initpara);
 /* enable a TIMER */
 void timer_enable(uint32_t timer_periph);
 /* disable a TIMER */
@@ -1284,13 +1284,4 @@ FlagStatus timer_interrupt_flag_get(uint32_t timer_periph, uint32_t int_flag);
 void timer_interrupt_flag_clear(uint32_t timer_periph, uint32_t int_flag);
 
 
-/* GD32-prefixed function aliases (recommended for Zephyr) */
-#define gd32_timer_deinit                   timer_deinit
-#define gd32_timer_init                     timer_init
-#define gd32_timer_enable                   timer_enable
-#define gd32_timer_disable                  timer_disable
-#define gd32_timer_interrupt_enable         timer_interrupt_enable
-#define gd32_timer_interrupt_disable        timer_interrupt_disable
-#define gd32_timer_flag_get                 timer_flag_get
-#define gd32_timer_flag_clear               timer_flag_clear
 #endif /* GD32M53X_TIMER_H */

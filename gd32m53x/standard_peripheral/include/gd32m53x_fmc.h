@@ -377,7 +377,7 @@ typedef enum {
 
 #define MFLASH_BASE_ADDRESS        ((uint32_t)0x08000000U)        /*!< FMC main flash base address */
 #define MFLASH_SIZE                ((uint32_t)0x00040000U)        /*!< FMC main flash size */
-#define DFLASH_BASE_ADDRESS        ((uint32_t)(0x08800000U)       /*!< FMC data flash base address */
+#define DFLASH_BASE_ADDRESS        ((uint32_t)0x08800000U)        /*!< FMC data flash base address */
 #define DFLASH_SIZE                ((uint32_t)0x00010000U)        /*!< FMC data flash size */
 #define FMC_TIMEOUT_COUNT          ((uint32_t)0x0FF00000U)        /*!< count to judge of FMC timeout 0x00100000U*/
 #define DOUBLEWORD_CNT_IN_ROW      ((uint8_t)0x20U)               /*!< main flash double-word count in one row data */

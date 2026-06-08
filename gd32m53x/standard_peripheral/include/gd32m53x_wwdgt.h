@@ -58,8 +58,8 @@ OF SUCH DAMAGE.
 
 /* WWDGT_STAT */
 #define WWDGT_STAT_EWIF              BIT(0)                                                 /*!< WWDGT early wakeup interrupt flag */
-#define WWDGT_STAT_REFEF             BIT(1)                                                 /*!< WWDGT underflow error flag */
-#define WWDGT_STAT_UNDFF             BIT(2)                                                 /*!< WWDGT refresh error flag */
+#define WWDGT_STAT_REFEF             BIT(1)                                                 /*!< WWDGT refresh error flag */
+#define WWDGT_STAT_UNDFF             BIT(2)                                                 /*!< WWDGT underflow error flag */
 
 /* constants definitions */
 #define CFG_PSC(regval)              (BITS(5,6) & ((uint32_t)(regval) << 5U))               /*!< write value to WWDGT_CFG_PSC bit field */

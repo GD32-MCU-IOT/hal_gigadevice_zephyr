@@ -238,14 +238,14 @@ typedef enum {
 #define UART_LBLEN_11B                CTL1_LBLEN(1)                    /*!< 11 bits */
 
 /* configure UART DMA request for receive */
-#define CLT2_DENR(regval)             (BIT(6) & ((uint32_t)(regval) << 6))
-#define UART_RECEIVE_DMA_ENABLE       CLT2_DENR(1)                     /*!< DMA request enable for reception */
-#define UART_RECEIVE_DMA_DISABLE      CLT2_DENR(0)                     /*!< DMA request disable for reception */
+#define CTL2_DENR(regval)             (BIT(6) & ((uint32_t)(regval) << 6))
+#define UART_RECEIVE_DMA_ENABLE       CTL2_DENR(1)                     /*!< DMA request enable for reception */
+#define UART_RECEIVE_DMA_DISABLE      CTL2_DENR(0)                     /*!< DMA request disable for reception */
 
 /* configure UART DMA request for transmission */
-#define CLT2_DENT(regval)             (BIT(7) & ((uint32_t)(regval) << 7))
-#define UART_TRANSMIT_DMA_ENABLE      CLT2_DENT(1)                     /*!< DMA request enable for transmission */
-#define UART_TRANSMIT_DMA_DISABLE     CLT2_DENT(0)                     /*!< DMA request disable for transmission */
+#define CTL2_DENT(regval)             (BIT(7) & ((uint32_t)(regval) << 7))
+#define UART_TRANSMIT_DMA_ENABLE      CTL2_DENT(1)                     /*!< DMA request enable for transmission */
+#define UART_TRANSMIT_DMA_DISABLE     CTL2_DENT(0)                     /*!< DMA request disable for transmission */
 
 /* configure UART one sample bit method */
 #define CTL2_OSB(regval)              (BIT(11) & ((uint32_t)(regval) << 11))

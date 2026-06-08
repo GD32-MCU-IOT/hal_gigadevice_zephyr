@@ -654,17 +654,6 @@ typedef enum {
 #define GD32_CAN_MODE_NORMAL               ((uint8_t)0x02U)                  /*!< CAN normal mode */
 #define GD32_CAN_MODE_SLEEP                ((uint8_t)0x04U)                  /*!< CAN sleep mode */
 
-/* Backward compatibility (ifndef protects from Zephyr redefinition) */
-#ifndef CAN_MODE_INITIALIZE
-#define CAN_MODE_INITIALIZE                GD32_CAN_MODE_INITIALIZE
-#endif
-#ifndef CAN_MODE_NORMAL
-#define CAN_MODE_NORMAL                    GD32_CAN_MODE_NORMAL
-#endif
-#ifndef CAN_MODE_SLEEP
-#define CAN_MODE_SLEEP                     GD32_CAN_MODE_SLEEP
-#endif
-
 /* filter bits */
 #define CAN_FILTERBITS_16BIT               ((uint8_t)0x00U)                  /*!< CAN filter 16 bits */
 #define CAN_FILTERBITS_32BIT               ((uint8_t)0x01U)                  /*!< CAN filter 32 bits */

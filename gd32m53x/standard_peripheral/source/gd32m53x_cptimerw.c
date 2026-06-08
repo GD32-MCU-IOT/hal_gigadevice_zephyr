@@ -313,7 +313,7 @@ void cptimerw_channel_input_struct_para_init(cptimerw_ic_parameter_struct *icpar
 #ifdef FW_DEBUG_ERR_REPORT
     /* check parameter */
     if(NOT_VALID_POINTER(icpara)) {
-        fw_debug_report_err(CPTIMERW_MODULE_ID, API_ID(0x0007U), ERR_PARAM_POINTER);
+        fw_debug_report_err(CPTIMERW_MODULE_ID, API_ID(0x000FU), ERR_PARAM_POINTER);
     } else
 #endif /* FW_DEBUG_ERR_REPORT */
     {
@@ -356,7 +356,9 @@ void cptimerw_input_capture_config(uint16_t channel, cptimerw_ic_parameter_struc
             CPTIMERW_CTL1 |= ((uint32_t)icpara->icfilter << 16U) & CPTIMERW_CTL1_ICH0FLT;
 
             /* set the enable bit */
-            CPTIMERW_CTL1 |= (uint32_t)CPTIMERW_CTL1_ICH0EN;
+            if(icpara->icedge \!= CPTIMERW_IC_DISABLE) {
+                CPTIMERW_CTL1 |= (uint32_t)CPTIMERW_CTL1_ICH0EN;
+            }
             break;
         /* configure CPTIMERW ICH1 */
         case CPTIMERW_ICH1:
@@ -372,7 +374,9 @@ void cptimerw_input_capture_config(uint16_t channel, cptimerw_ic_parameter_struc
             CPTIMERW_CTL1 |= ((uint32_t)icpara->icfilter << 22U) & CPTIMERW_CTL1_ICH1FLT;
 
             /* set the enable bit */
-            CPTIMERW_CTL1 |= (uint32_t)CPTIMERW_CTL1_ICH1EN;
+            if(icpara->icedge \!= CPTIMERW_IC_DISABLE) {
+                CPTIMERW_CTL1 |= (uint32_t)CPTIMERW_CTL1_ICH1EN;
+            }
             break;
         default:
             break;

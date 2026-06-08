@@ -398,8 +398,8 @@ typedef struct {
 
 /* TIMER polarity selection enable */
 #define CDCFG_TIMER_PSELEN(regval)            (BIT(7) & ((uint32_t)(regval) << 7U))
-#define TIMER_POLARITY_SELECTION_DISABLE       CDCFG_TIMER_PSELEN(0)                 /*!< TIMER polarity selection is enabled */
-#define TIMER_POLARITY_SELECTION_ENABLE        CDCFG_TIMER_PSELEN(1)                 /*!< TIMER polarity selection is disabled */
+#define TIMER_POLARITY_SELECTION_DISABLE       CDCFG_TIMER_PSELEN(0)                 /*!< TIMER polarity selection is disabled */
+#define TIMER_POLARITY_SELECTION_ENABLE        CDCFG_TIMER_PSELEN(1)                 /*!< TIMER polarity selection is enabled */
 
 /* multi mode channel 2 active polarity */
 #define CDCFG_MCH2_APSEL(regval)              (BIT(5) & ((uint32_t)(regval) << 5U))
