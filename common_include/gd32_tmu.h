@@ -14,4 +14,6 @@
 #include <gd32h75e_tmu.h>
 #elif defined(CONFIG_SOC_SERIES_GD32H7XX)
 #include <gd32h7xx_tmu.h>
+#elif defined(CONFIG_SOC_SERIES_GD32M53X)
+#include <gd32m53x_tmu.h>
 #endif
