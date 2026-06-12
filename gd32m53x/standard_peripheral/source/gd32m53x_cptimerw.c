@@ -356,9 +356,7 @@ void cptimerw_input_capture_config(uint16_t channel, cptimerw_ic_parameter_struc
             CPTIMERW_CTL1 |= ((uint32_t)icpara->icfilter << 16U) & CPTIMERW_CTL1_ICH0FLT;
 
             /* set the enable bit */
-            if(icpara->icedge \!= CPTIMERW_IC_DISABLE) {
-                CPTIMERW_CTL1 |= (uint32_t)CPTIMERW_CTL1_ICH0EN;
-            }
+            CPTIMERW_CTL1 |= (uint32_t)CPTIMERW_CTL1_ICH0EN;
             break;
         /* configure CPTIMERW ICH1 */
         case CPTIMERW_ICH1:
@@ -374,9 +372,7 @@ void cptimerw_input_capture_config(uint16_t channel, cptimerw_ic_parameter_struc
             CPTIMERW_CTL1 |= ((uint32_t)icpara->icfilter << 22U) & CPTIMERW_CTL1_ICH1FLT;
 
             /* set the enable bit */
-            if(icpara->icedge \!= CPTIMERW_IC_DISABLE) {
-                CPTIMERW_CTL1 |= (uint32_t)CPTIMERW_CTL1_ICH1EN;
-            }
+            CPTIMERW_CTL1 |= (uint32_t)CPTIMERW_CTL1_ICH1EN;
             break;
         default:
             break;
