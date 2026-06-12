@@ -38,4 +38,6 @@
 #include <gd32l23x_misc.h>
 #elif defined(CONFIG_SOC_SERIES_GD32M53X)
 #include <gd32m53x_misc.h>
+#elif defined(CONFIG_SOC_SERIES_GD32W51X_F5HC)
+#include <gd32w51x_f5hc_misc.h>
 #endif

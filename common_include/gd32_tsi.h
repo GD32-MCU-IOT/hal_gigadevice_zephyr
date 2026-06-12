@@ -6,4 +6,6 @@
 
 #if defined(CONFIG_SOC_SERIES_GD32F3X0)
 #include <gd32f3x0_tsi.h>
+#elif defined(CONFIG_SOC_SERIES_GD32W51X_F5HC)
+#include <gd32w51x_f5hc_tsi.h>
 #endif

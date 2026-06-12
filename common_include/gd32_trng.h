@@ -18,4 +18,6 @@
 #include <gd32h7xx_trng.h>
 #elif defined(CONFIG_SOC_SERIES_GD32L23X)
 #include <gd32l23x_trng.h>
+#elif defined(CONFIG_SOC_SERIES_GD32W51X_F5HC)
+#include <gd32w51x_f5hc_trng.h>
 #endif
