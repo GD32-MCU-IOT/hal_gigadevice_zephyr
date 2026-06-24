@@ -201,7 +201,7 @@ void timer_struct_para_init(timer_parameter_struct *initpara)
     \param[out] none
     \retval     none
 */
-void timer_init(uint32_t timer_periph, timer_parameter_struct *initpara)
+void gd32_timer_init(uint32_t timer_periph, timer_parameter_struct *initpara)
 {
 #ifdef FW_DEBUG_ERR_REPORT
     if(NOT_TIMER_PERIPH(timer_periph)) {
