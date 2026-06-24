@@ -40,4 +40,6 @@
 #include <gd32m53x_wwdgt.h>
 #elif defined(CONFIG_SOC_SERIES_GD32VF103)
 #include <gd32vf103_wwdgt.h>
+#elif defined(CONFIG_SOC_SERIES_GD32W51X_F5HC)
+#include <gd32w51x_f5hc_wwdgt.h>
 #endif

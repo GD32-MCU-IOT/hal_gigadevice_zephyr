@@ -10,4 +10,6 @@
 #include <gd32h75e_hpdf.h>
 #elif defined(CONFIG_SOC_SERIES_GD32H7XX)
 #include <gd32h7xx_hpdf.h>
+#elif defined(CONFIG_SOC_SERIES_GD32W51X_F5HC)
+#include <gd32w51x_f5hc_hpdf.h>
 #endif

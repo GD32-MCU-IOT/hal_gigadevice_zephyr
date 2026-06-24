@@ -8,4 +8,6 @@
 #include <gd32e50x_sqpi.h>
 #elif defined(CONFIG_SOC_SERIES_GD32E51X)
 #include <gd32e51x_sqpi.h>
+#elif defined(CONFIG_SOC_SERIES_GD32W51X_F5HC)
+#include <gd32w51x_f5hc_sqpi.h>
 #endif

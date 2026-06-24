@@ -14,4 +14,6 @@
 #include <gd32h7xx_cau.h>
 #elif defined(CONFIG_SOC_SERIES_GD32L23X)
 #include <gd32l23x_cau.h>
+#elif defined(CONFIG_SOC_SERIES_GD32W51X_F5HC)
+#include <gd32w51x_f5hc_cau.h>
 #endif
