@@ -627,7 +627,6 @@ void timer_deinit(uint32_t timer_periph);
 void timer_struct_para_init(timer_parameter_struct* initpara);
 /* initialize TIMER counter */
 void gd32_timer_init(uint32_t timer_periph, timer_parameter_struct* initpara);
-#define timer_init gd32_timer_init
 /* enable a TIMER */
 void timer_enable(uint32_t timer_periph);
 /* disable a TIMER */
