@@ -30,6 +30,7 @@
 #include <gd32f527_fmc.h>
 #elif defined(CONFIG_SOC_SERIES_GD32G5X3)
 #include <gd32g5x3_fmc.h>
+#include <gd32g5x3_fmc_ramfunc.h>
 #elif defined(CONFIG_SOC_SERIES_GD32H75E)
 #include <gd32h75e_fmc.h>
 #elif defined(CONFIG_SOC_SERIES_GD32H7XX)

@@ -19,6 +19,39 @@ import shutil
 REPO_ROOT = Path(__file__).absolute().parents[1]
 """Repository root (used for input/output default folders)."""
 
+API_ALIASES = {
+    "uart": "usart",
+}
+
+
+def file_api(filename, series):
+    """Return the API name from a HAL header or source filename."""
+
+    path = Path(filename)
+    prefix = series + "_"
+    if path.suffix not in (".c", ".h") or not path.stem.startswith(prefix):
+        return None
+
+    api = path.stem[len(prefix):]
+    if not api or not re.fullmatch(r"[a-z0-9_]+", api):
+        return None
+
+    return api
+
+
+def canonical_api(api, header_apis):
+    """Return the common header API for a HAL header or source API."""
+
+    base_apis = [
+        candidate
+        for candidate in header_apis
+        if api.startswith(candidate + "_")
+    ]
+    if base_apis:
+        api = max(base_apis, key=len)
+
+    return API_ALIASES.get(api, api)
+
 
 def main(hal_path, output):
     """Entry point.
@@ -36,26 +69,29 @@ def main(hal_path, output):
 
         # obtain series API headers
         series_headers = entry / "standard_peripheral" / "include"
-        for header in series_headers.iterdir():
-            m = re.match(r"^gd32[a-z0-9]+_([a-z0-9]+)\.h$", header.name)
-            if not m:
-                continue
 
-            api = m.group(1)
+        series_apis = dict()
+        for header in sorted(series_headers.iterdir()):
+            api = file_api(header.name, entry.name)
+            if api is None or header.suffix != ".h":
+                continue
 
             # ignore libopt (not an API)
             if api == "libopt":
                 continue
 
-            if api not in apis:
-                apis[api] = list()
-            apis[api].append(entry.name)
+            series_apis.setdefault(api, []).append(header.name)
+
+        for api, headers in series_apis.items():
+            common_api = canonical_api(api, series_apis)
+            series = apis.setdefault(common_api, {}).setdefault(entry.name, [])
+            series.extend(headers)
 
     if output.exists():
         shutil.rmtree(output)
     output.mkdir(parents=True)
 
-    for api, all_series in apis.items():
+    for api, all_series in sorted(apis.items()):
         header_file = output / ("gd32_" + api + ".h")
         with open(header_file, "w") as f:
             f.write("/*\n")
@@ -64,10 +100,11 @@ def main(hal_path, output):
             f.write(" * SPDX-License-Identifier: Apache-2.0\n")
             f.write(" */\n\n")
 
-            for i, series in enumerate(all_series):
+            for i, (series, headers) in enumerate(all_series.items()):
                 f.write("#if" if i == 0 else "#elif")
                 f.write(f" defined(CONFIG_SOC_SERIES_{series.upper()})\n")
-                f.write(f"#include <{series}_{api}.h>\n")
+                for header in headers:
+                    f.write(f"#include <{header}>\n")
             f.write("#endif\n")
 
 
