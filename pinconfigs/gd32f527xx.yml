@@ -1,8 +1,7 @@
-# GD32F527XX pin definitions
+# gd32f527xx pin definitions
 #
 # Sources:
-# - GD32F527XX Datasheet
-# - F527_pin_info XML files
+# - GD32F527xx Datasheet (Revision 1.8)
 #
 # Pin codes:
 #
@@ -13,10 +12,8 @@
 #
 # Memory codes:
 #
-# - ZMT7/ZST7: 4096KB/7680KB Flash, 1088KB/576KB SRAM
-# - VMT7/VST7: 4096KB/7680KB Flash, 1088KB/576KB SRAM  
-# - RMT7/RST7: 4096KB/7680KB Flash, 1088KB/576KB SRAM
-# - IMT7/IST7: 4096KB/7680KB Flash, 1088KB/576KB SRAM
+# - 4096Kb  Flash, 1088Kb SRAM: M
+# - 7680Kb Flash, 512Kb  SRAM: S
 #
 # Copyright (c) 2025, GigaDevice Semiconductor Inc.
 # SPDX-License-Identifier: Apache 2.0
@@ -80,7 +77,7 @@ pins:
       TIMER4_CH3: 2
       TIMER8_CH1: 3
       I2C3_SDA: 4
-      I2S1_MCK: 6
+      I2S1_MCK: 5
       SAI0_FS_0: 6
       USART1_RX: 7
       USBHS_ULPI_D0: 10
@@ -92,6 +89,7 @@ pins:
     afs:
       ADC01_IN4: ANALOG
       DAC0_OUT0: ANALOG
+      TIMER7_CH1_ON: 3
       SPI0_NSS: 5
       SPI2_NSS: 6
       I2S2_WS: 6
@@ -99,7 +97,6 @@ pins:
       USBHS_SOF: 12
       DCI_HSYNC: 13
       TLI_VSYNC: 14
-      TIMER7_CH1_ON: 3
       EVENTOUT: 15
   PA5:
     pincodes: [I, Z, V, R]
@@ -252,7 +249,6 @@ pins:
   PB2:
     pincodes: [I, Z, V, R]
     afs:
-      BOOT1: ANALOG
       TIMER1_CH3: 1
       SAI0_SD_0: 6
       SPI2_MOSI: 7
@@ -433,10 +429,10 @@ pins:
     pincodes: [I, Z, V, R]
     afs:
       ADC012_IN10: ANALOG
+      TIMER7_CH2_ON: 3
       SAI0_MCLK_1: 6
       USBHS_ULPI_STP: 10
       EXMC_SDNWE: 12
-      TIMER7_CH2_ON: 3
       EVENTOUT: 15
   PC1:
     pincodes: [I, Z, V, R]
@@ -569,20 +565,14 @@ pins:
     pincodes: [I, Z, V, R]
     afs:
       SPI0_SCK: 5
-      I2S1_CK: 6
-      RTC_TAMP0: ANALOG
-      RTC_OUT: ANALOG
-      RTC_TS: ANALOG
       EVENTOUT: 15
   PC14:
     pincodes: [I, Z, V, R]
     afs:
-      OSC32IN: ANALOG
       EVENTOUT: 15
   PC15:
     pincodes: [I, Z, V, R]
     afs:
-      OSC32OUT: ANALOG
       EVENTOUT: 15
   PD0:
     pincodes: [I, Z, V]
@@ -933,10 +923,11 @@ pins:
     pincodes: [I, Z]
     afs:
       ADC2_IN8: ANALOG
+      I2C5_SMBA: 4
       EXMC_INTR: 12
       DCI_D11: 13
       TLI_DE: 14
-      I2C5_SMBA: 4
+
       EVENTOUT: 15
   PF11:
     pincodes: [I, Z]
@@ -949,8 +940,8 @@ pins:
   PF12:
     pincodes: [I, Z]
     afs:
-      EXMC_A6: 12
       I2C5_SDA: 4
+      EXMC_A6: 12
       EVENTOUT: 15
   PF13:
     pincodes: [I, Z]
@@ -1011,7 +1002,7 @@ pins:
     pincodes: [I, Z]
     afs:
       I2C4_SMBA: 6
-      EXMC_INT2: 12
+      EXMC_INT1: 12
       DCI_D12: 13
       TLI_R7: 14
       EVENTOUT: 15
@@ -1020,7 +1011,7 @@ pins:
     afs:
       I2C4_SCL: 6
       USART5_CK: 8
-      EXMC_INT3: 12
+      EXMC_INT2: 12
       DCI_D13: 13
       TLI_PIXCLK: 14
       EVENTOUT: 15
@@ -1105,12 +1096,10 @@ pins:
   PH0:
     pincodes: [I, Z, V]
     afs:
-      OSCIN: ANALOG
       EVENTOUT: 15
   PH1:
     pincodes: [I, Z, V]
     afs:
-      OSCOUT: ANALOG
       EVENTOUT: 15
   PH2:
     pincodes: [I]
@@ -1258,7 +1247,7 @@ pins:
   PI3:
     pincodes: [I]
     afs:
-      TIMER0_CH0: 1    
+      TIMER0_CH0: 1
       TIMER7_ETI: 3
       SPI1_MOSI: 5
       I2S1_SD: 5
@@ -1304,9 +1293,6 @@ pins:
   PI8:
     pincodes: [I]
     afs:
-      RTC_TAMP1: ANALOG
-      RTC_TAMP0: ANALOG
-      RTC_TS: ANALOG
       EVENTOUT: 15
   PI9:
     pincodes: [I]
