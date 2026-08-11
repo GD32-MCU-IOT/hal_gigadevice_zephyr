@@ -236,10 +236,6 @@
 #define ANALOG_PH1 \
 	GD32_PINMUX_AF('H', 1, ANALOG)
 
-/* BOOT1 */
-#define BOOT1_PB2 \
-	GD32_PINMUX_AF('B', 2, ANALOG)
-
 /* CAN0_RX */
 #define CAN0_RX_PA11 \
 	GD32_PINMUX_AF('A', 11, AF9)
@@ -879,14 +875,12 @@
 	GD32_PINMUX_AF('B', 13, AF5)
 #define I2S1_CK_PC7 \
 	GD32_PINMUX_AF('C', 7, AF5)
-#define I2S1_CK_PC13 \
-	GD32_PINMUX_AF('C', 13, AF6)
 #define I2S1_CK_PD3 \
 	GD32_PINMUX_AF('D', 3, AF5)
 
 /* I2S1_MCK */
 #define I2S1_MCK_PA3 \
-	GD32_PINMUX_AF('A', 3, AF6)
+	GD32_PINMUX_AF('A', 3, AF5)
 #define I2S1_MCK_PA6 \
 	GD32_PINMUX_AF('A', 6, AF6)
 #define I2S1_MCK_PC6 \
@@ -980,37 +974,9 @@
 #define JTMS_PA13 \
 	GD32_PINMUX_AF('A', 13, AF0)
 
-/* OSC32IN */
-#define OSC32IN_PC14 \
-	GD32_PINMUX_AF('C', 14, ANALOG)
-
-/* OSC32OUT */
-#define OSC32OUT_PC15 \
-	GD32_PINMUX_AF('C', 15, ANALOG)
-
-/* OSCIN */
-#define OSCIN_PH0 \
-	GD32_PINMUX_AF('H', 0, ANALOG)
-
-/* OSCOUT */
-#define OSCOUT_PH1 \
-	GD32_PINMUX_AF('H', 1, ANALOG)
-
-/* RTC_OUT */
-#define RTC_OUT_PC13 \
-	GD32_PINMUX_AF('C', 13, ANALOG)
-
 /* RTC_REFIN */
 #define RTC_REFIN_PB15 \
 	GD32_PINMUX_AF('B', 15, AF0)
-
-/* RTC_TAMP0 */
-#define RTC_TAMP0_PC13 \
-	GD32_PINMUX_AF('C', 13, ANALOG)
-
-/* RTC_TS */
-#define RTC_TS_PC13 \
-	GD32_PINMUX_AF('C', 13, ANALOG)
 
 /* SAI0_FS_0 */
 #define SAI0_FS_0_PA3 \
