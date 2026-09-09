@@ -588,7 +588,7 @@ void timer_deinit(uint32_t timer_periph);
 /* initialize TIMER init parameter struct */
 void timer_struct_para_init(timer_parameter_struct* initpara);
 /* initialize TIMER counter */
-void timer_init(uint32_t timer_periph, timer_parameter_struct* initpara);
+void gd32_timer_init(uint32_t timer_periph, timer_parameter_struct* initpara);
 /* enable a timer */
 void timer_enable(uint32_t timer_periph);
 /* disable a timer */
@@ -740,28 +740,5 @@ void timer_interrupt_flag_clear(uint32_t timer_periph, uint32_t interrupt);
 FlagStatus timer_flag_get(uint32_t timer_periph, uint32_t flag);
 /* clear TIMER flag */
 void timer_flag_clear(uint32_t timer_periph, uint32_t flag);
-
-/* ============== GD32-prefixed function aliases (recommended for Zephyr) ============== */
-/* These aliases avoid potential naming conflicts with other libraries */
-#define gd32_timer_deinit                   timer_deinit
-#define gd32_timer_struct_para_init         timer_struct_para_init
-#define gd32_timer_init                     timer_init
-#define gd32_timer_enable                   timer_enable
-#define gd32_timer_disable                  timer_disable
-#define gd32_timer_auto_reload_shadow_enable    timer_auto_reload_shadow_enable
-#define gd32_timer_auto_reload_shadow_disable   timer_auto_reload_shadow_disable
-#define gd32_timer_update_event_enable      timer_update_event_enable
-#define gd32_timer_update_event_disable     timer_update_event_disable
-#define gd32_timer_counter_alignment        timer_counter_alignment
-#define gd32_timer_prescaler_config         timer_prescaler_config
-#define gd32_timer_autoreload_value_config  timer_autoreload_value_config
-#define gd32_timer_counter_value_config     timer_counter_value_config
-#define gd32_timer_counter_read             timer_counter_read
-#define gd32_timer_interrupt_enable         timer_interrupt_enable
-#define gd32_timer_interrupt_disable        timer_interrupt_disable
-#define gd32_timer_interrupt_flag_get       timer_interrupt_flag_get
-#define gd32_timer_interrupt_flag_clear     timer_interrupt_flag_clear
-#define gd32_timer_flag_get                 timer_flag_get
-#define gd32_timer_flag_clear               timer_flag_clear
 
 #endif /* GD32C11X_TIMER_H */
