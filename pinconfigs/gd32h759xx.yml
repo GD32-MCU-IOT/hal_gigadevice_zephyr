@@ -386,7 +386,7 @@ pins:
       I2C3_SDA: 6
       USART0_RX: 7
       HPDF_CKIN5: 11
-      EXMC_NADV,: 12
+      EXMC_NADV: 12
       EXMC_NL: 12
       DCI_VSYNC: 13
       EVENTOUT: 15
@@ -1127,7 +1127,7 @@ pins:
     pincodes: [I]
     afs:
       ADC2_IN4: ANALOG
-      TIMER0_MCH2,: 1
+      TIMER0_MCH2: 1
       TIMER7_MCH2: 3
       USART0_RX: 4
       HPDF_CKIN2: 6
