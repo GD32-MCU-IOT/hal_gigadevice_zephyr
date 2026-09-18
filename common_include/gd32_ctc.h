@@ -24,6 +24,8 @@
 #include <gd32f50x_ctc.h>
 #elif defined(CONFIG_SOC_SERIES_GD32F527)
 #include <gd32f527_ctc.h>
+#elif defined(CONFIG_SOC_SERIES_GD32H73X_75X)
+#include <gd32h73x_75x_ctc.h>
 #elif defined(CONFIG_SOC_SERIES_GD32H75E)
 #include <gd32h75e_ctc.h>
 #elif defined(CONFIG_SOC_SERIES_GD32H7XX)

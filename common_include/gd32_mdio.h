@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#if defined(CONFIG_SOC_SERIES_GD32H7XX)
+#if defined(CONFIG_SOC_SERIES_GD32H73X_75X)
+#include <gd32h73x_75x_mdio.h>
+#elif defined(CONFIG_SOC_SERIES_GD32H7XX)
 #include <gd32h7xx_mdio.h>
 #endif
