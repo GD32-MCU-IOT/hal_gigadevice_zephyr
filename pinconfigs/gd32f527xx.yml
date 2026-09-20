@@ -1121,6 +1121,7 @@ pins:
     afs:
       I2C1_SCL: 4
       USBHS_ULPI_NXT: 10
+      SPI5_IO3: 13
       EVENTOUT: 15
   PH5:
     pincodes: [I]
