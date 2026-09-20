@@ -1947,6 +1947,8 @@
 /* SPI5_IO3 */
 #define SPI5_IO3_PG11 \
 	GD32_PINMUX_AF('G', 11, AF5)
+#define SPI5_IO3_PH4 \
+	GD32_PINMUX_AF('H', 4, AF13)
 
 /* SPI5_MISO */
 #define SPI5_MISO_PB12 \
