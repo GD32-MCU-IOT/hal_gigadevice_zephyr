@@ -12,6 +12,8 @@
 #include <gd32c2x1_dbg.h>
 #elif defined(CONFIG_SOC_SERIES_GD32E10X)
 #include <gd32e10x_dbg.h>
+#elif defined(CONFIG_SOC_SERIES_GD32E23X)
+#include <gd32e23x_dbg.h>
 #elif defined(CONFIG_SOC_SERIES_GD32E50X)
 #include <gd32e50x_dbg.h>
 #elif defined(CONFIG_SOC_SERIES_GD32E51X)
