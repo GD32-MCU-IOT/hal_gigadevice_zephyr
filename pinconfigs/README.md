@@ -187,3 +187,9 @@ Below table show the invalid signal, pins mapping.
 #### GD32L233
 
 GD32L233Kx-QFN32 and GD32L233Kx-LQFP32 have same pincode 'K'. To avoid pincode conflict, change GD32L233Kx-QFN32 pincode to 'Q'.
+
+#### GD32L235
+
+GD32L235Kx-LQFP32, GD32L235Kx-QFN32 and GD32L235KxxxP-QFN32 VREFP have same
+pincode 'K' but different pin sets. To avoid pincode conflict, keep 'K' for
+LQFP32, change QFN32 pincode to 'Q' (as GD32L233) and QFN32 VREFP pincode to 'P'.

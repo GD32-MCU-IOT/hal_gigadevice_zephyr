@@ -2,11 +2,11 @@
     \file    gd32l23x_trng.c
     \brief   TRNG driver
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -80,8 +80,8 @@ uint32_t trng_get_true_random_data(void)
 }
 
 /*!
-    \brief      get the trng status flags
-    \param[in]  flag: trng status flag, refer to trng_flag_enum
+    \brief      get the TRNG status flags
+    \param[in]  flag: TRNG status flag, refer to trng_flag_enum
                 only one parameter can be selected which is shown as below:
       \arg        TRNG_FLAG_DRDY: Random Data ready status
       \arg        TRNG_FLAG_CECS: Clock error current status
@@ -91,11 +91,13 @@ uint32_t trng_get_true_random_data(void)
 */
 FlagStatus trng_flag_get(trng_flag_enum flag)
 {
+    FlagStatus ret;
     if(RESET != (TRNG_STAT & flag)) {
-        return SET;
+        ret = SET;
     } else {
-        return RESET;
+        ret = RESET;
     }
+    return ret;
 }
 
 /*!
@@ -106,7 +108,7 @@ FlagStatus trng_flag_get(trng_flag_enum flag)
 */
 void trng_interrupt_enable(void)
 {
-    TRNG_CTL |= (uint32_t)TRNG_CTL_IE;
+    TRNG_CTL |= (uint32_t)TRNG_CTL_TRNGIE;
 }
 
 /*!
@@ -117,12 +119,12 @@ void trng_interrupt_enable(void)
 */
 void trng_interrupt_disable(void)
 {
-    TRNG_CTL &= ~(uint32_t)TRNG_CTL_IE;
+    TRNG_CTL &= ~(uint32_t)TRNG_CTL_TRNGIE;
 }
 
 /*!
-    \brief      get the trng interrupt flags
-    \param[in]  int_flag: trng interrupt flag, refer to trng_int_flag_enum
+    \brief      get the TRNG interrupt flags
+    \param[in]  int_flag: TRNG interrupt flag, refer to trng_int_flag_enum
                 only one parameter can be selected which is shown as below:
       \arg        TRNG_INT_FLAG_CEIF: clock error interrupt flag
       \arg        TRNG_INT_FLAG_SEIF: Seed error interrupt flag
@@ -131,16 +133,18 @@ void trng_interrupt_disable(void)
 */
 FlagStatus trng_interrupt_flag_get(trng_int_flag_enum int_flag)
 {
+    FlagStatus ret;
     if(RESET != (TRNG_STAT & int_flag)) {
-        return SET;
+        ret = SET;
     } else {
-        return RESET;
+        ret = RESET;
     }
+    return ret;
 }
 
 /*!
-    \brief      clear the trng interrupt flags
-    \param[in]  int_flag: trng interrupt flag, refer to trng_int_flag_enum
+    \brief      clear the TRNG interrupt flags
+    \param[in]  int_flag: TRNG interrupt flag, refer to trng_int_flag_enum
                 only one parameter can be selected which is shown as below:
       \arg        TRNG_INT_FLAG_CEIF: clock error interrupt flag
       \arg        TRNG_INT_FLAG_SEIF: Seed error interrupt flag

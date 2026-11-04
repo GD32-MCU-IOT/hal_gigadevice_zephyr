@@ -2,12 +2,11 @@
     \file    gd32l23x_cau.h
     \brief   definitions for the CAU
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
-    \version 2021-08-12, V1.0.1, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -62,8 +61,8 @@ OF SUCH DAMAGE.
 #define CAU_IV0L                   REG32(CAU + 0x00000044U)        /*!< initial vector 0 low register */
 #define CAU_IV1H                   REG32(CAU + 0x00000048U)        /*!< initial vector 1 high register */
 #define CAU_IV1L                   REG32(CAU + 0x0000004CU)        /*!< initial vector 1 low register */
-#define CAU_GCMCCMCTXSx(x)         REG32(CAU + 0x00000050U + (uint32_t)(4U * (x)))    /*!< GCM or CCM mode context switch register */
-#define CAU_GCMCTXSx(x)            REG32(CAU + 0x00000070U + (uint32_t)(4U * (x)))    /*!< GCM mode context switch register */
+#define CAU_GCMCCMCTXSx(x)         REG32(CAU + 0x00000050U + (uint32_t)(4U * (x)))    /*!< GCM or CCM mode context switch register, x = 0...7 */
+#define CAU_GCMCTXSx(x)            REG32(CAU + 0x00000070U + (uint32_t)(4U * (x)))    /*!< GCM mode context switch register, x = 0...7 */
 
 /* bits definitions */
 /* CAU_CTL */
@@ -305,13 +304,13 @@ ErrStatus cau_des_ecb(cau_parameter_struct *cau_parameter, uint8_t *output);
 ErrStatus cau_des_cbc(cau_parameter_struct *cau_parameter, uint8_t *output);
 
 /* interrupt & flag functions */
+/* get the CAU flag status */
+FlagStatus cau_flag_get(uint32_t flag);
 /* enable the CAU interrupts */
 void cau_interrupt_enable(uint32_t interrupt);
 /* disable the CAU interrupts */
 void cau_interrupt_disable(uint32_t interrupt);
 /* get the interrupt flag */
 FlagStatus cau_interrupt_flag_get(uint32_t interrupt);
-/* get the CAU flag status */
-FlagStatus cau_flag_get(uint32_t flag);
 
 #endif /* GD32L23X_CAU_H */

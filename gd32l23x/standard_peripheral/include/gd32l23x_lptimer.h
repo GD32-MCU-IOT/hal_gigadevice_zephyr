@@ -2,11 +2,11 @@
     \file    gd32l23x_lptimer.h
     \brief   definitions for the LPTIMER
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -38,19 +38,24 @@ OF SUCH DAMAGE.
 #include "gd32l23x.h"
 
 /* LPTIMER definitions */
+#ifdef GD32L233
 #define LPTIMER                             LPTIMER_BASE
+#else
+#define LPTIMER0                            LPTIMER_BASE
+#define LPTIMER1                            (LPTIMER_BASE - 0x00001800U)
+#endif
 
 /* registers definitions */
-#define LPTIMER_INTF                        REG32(LPTIMER + 0x00U)              /*!< interrupt flag register */
-#define LPTIMER_INTC                        REG32(LPTIMER + 0x04U)              /*!< interrupt flag clear register */
-#define LPTIMER_INTEN                       REG32(LPTIMER + 0x08U)              /*!< interrupt enable register */
-#define LPTIMER_CTL0                        REG32(LPTIMER + 0x0CU)              /*!< control register 0 */
-#define LPTIMER_CTL1                        REG32(LPTIMER + 0x10U)              /*!< control register 1 */
-#define LPTIMER_CMPV                        REG32(LPTIMER + 0x14U)              /*!< compare value register */
-#define LPTIMER_CAR                         REG32(LPTIMER + 0x18U)              /*!< counter auto reload register */
-#define LPTIMER_CNT                         REG32(LPTIMER + 0x1CU)              /*!< counter register */
-#define LPTIMER_EIRMP                       REG32(LPTIMER + 0x20U)              /*!< external input remap register */
-#define LPTIMER_INHLCMV                     REG32(LPTIMER + 0x24U)              /*!< input high level counter max value register */
+#define LPTIMER_INTF(lptimerx)              REG32((lptimerx) + 0x00000000U)     /*!< interrupt flag register */
+#define LPTIMER_INTC(lptimerx)              REG32((lptimerx) + 0x00000004U)     /*!< interrupt flag clear register */
+#define LPTIMER_INTEN(lptimerx)             REG32((lptimerx) + 0x00000008U)     /*!< interrupt enable register */
+#define LPTIMER_CTL0(lptimerx)              REG32((lptimerx) + 0x0000000CU)     /*!< control register 0 */
+#define LPTIMER_CTL1(lptimerx)              REG32((lptimerx) + 0x00000010U)     /*!< control register 1 */
+#define LPTIMER_CMPV(lptimerx)              REG32((lptimerx) + 0x00000014U)     /*!< compare value register */
+#define LPTIMER_CAR(lptimerx)               REG32((lptimerx) + 0x00000018U)     /*!< counter auto reload register */
+#define LPTIMER_CNT(lptimerx)               REG32((lptimerx) + 0x0000001CU)     /*!< counter register */
+#define LPTIMER_EIRMP(lptimerx)             REG32((lptimerx) + 0x00000020U)     /*!< external input remap register */
+#define LPTIMER_INHLCMV(lptimerx)           REG32((lptimerx) + 0x00000024U)     /*!< input high level counter max value register */
 
 /* bits definitions */
 /* LPTIMER_INTF */
@@ -100,12 +105,12 @@ OF SUCH DAMAGE.
 
 /* LPTIMER_CTL0 */
 #define LPTIMER_CTL0_CKSSEL                 BIT(0)                              /*!< clock source select */
-#define LPTIMER_CTL0_CKPSEL                 BITS(1, 2)                          /*!< clock polarity select */
-#define LPTIMER_CTL0_ECKFLT                 BITS(3, 4)                          /*!< external clock filter */
-#define LPTIMER_CTL0_TFLT                   BITS(6, 7)                          /*!< trigger filter */
-#define LPTIMER_CTL0_PSC                    BITS(9, 11)                         /*!< clock prescaler selection */
-#define LPTIMER_CTL0_ETSEL                  BITS(13, 15)                        /*!< external trigger select */
-#define LPTIMER_CTL0_ETMEN                  BITS(17, 18)                        /*!< external trigger mode enable */
+#define LPTIMER_CTL0_CKPSEL                 BITS(1,2)                           /*!< clock polarity select */
+#define LPTIMER_CTL0_ECKFLT                 BITS(3,4)                           /*!< external clock filter */
+#define LPTIMER_CTL0_TFLT                   BITS(6,7)                           /*!< trigger filter */
+#define LPTIMER_CTL0_PSC                    BITS(9,11)                          /*!< clock prescaler selection */
+#define LPTIMER_CTL0_ETSEL                  BITS(13,15)                         /*!< external trigger select */
+#define LPTIMER_CTL0_ETMEN                  BITS(17,18)                         /*!< external trigger mode enable */
 #define LPTIMER_CTL0_TIMEOUT                BIT(19)                             /*!< timeout enable */
 #define LPTIMER_CTL0_OMSEL                  BIT(20)                             /*!< output mode select */
 #define LPTIMER_CTL0_OPSEL                  BIT(21)                             /*!< output polarity select */
@@ -122,20 +127,32 @@ OF SUCH DAMAGE.
 #define LPTIMER_CTL1_INHLCEN                BIT(31)                             /*!< LPTIMER external input high level counter enable */
 
 /* LPTIMER_CMPV */
-#define LPTIMER_CMPV_CMPVAL                 BITS(0, 31)                          /*!< compare value */
+#ifdef GD32L235
+#define LPTIMER_CMPV_CMPVAL                 BITS(0,15)                          /*!< compare value */
+#else
+#define LPTIMER_CMPV_CMPVAL                 BITS(0,31)                          /*!< compare value */
+#endif
 
 /* LPTIMER_CAR */
-#define LPTIMER_CAR_CARL                    BITS(0, 31)                          /*!< counter auto reload value */
+#ifdef GD32L235
+#define LPTIMER_CAR_CARL                    BITS(0,15)                          /*!< counter auto reload value */
+#else
+#define LPTIMER_CAR_CARL                    BITS(0,31)                          /*!< counter auto reload value */
+#endif
 
 /* LPTIMER_CNT */
-#define LPTIMER_CNT_CNT                     BITS(0, 31)                          /*!< counter value */
+#ifdef GD32L235
+#define LPTIMER_CNT_CNT                     BITS(0,15)                          /*!< counter value */
+#else
+#define LPTIMER_CNT_CNT                     BITS(0,31)                          /*!< counter value */
+#endif
 
 /* LPTIMER_EIRMP */
 #define LPTIMER_EIRMP_IN0RMP                BIT(0)                              /*!< external input remap 1 */
 #define LPTIMER_EIRMP_IN1RMP                BIT(1)                              /*!< external input remap 1 */
 
 /* LPTIMER_INHLCMV */
-#define LPTIMER_INHLCMV_INHLCMVAL           BITS(0, 25)                         /*!< input high level counter max value */
+#define LPTIMER_INHLCMV_INHLCMVAL           BITS(0,25)                          /*!< input high level counter max value */
 
 /* constants definitions */
 /* LPTIMER init parameter struct definitions */
@@ -157,27 +174,27 @@ typedef struct {
 #define LPTIMER_EXTERNALCLK                 LPTIMER_CTL0_CKSSEL                 /*!< LPTIMER is clocked by external clock source on the LPTIMER_IN0 */
 
 /* external clock polarity select */
-#define CTL0_CKPSEL(regval)                 (BITS(1, 2) & ((uint32_t)(regval) << 1U))
+#define CTL0_CKPSEL(regval)                 (BITS(1,2) & ((uint32_t)(regval) << 1U))
 #define LPTIMER_EXTERNALCLK_RISING          CTL0_CKPSEL(0)                      /*!< the rising edge is the active edge used for counting */
 #define LPTIMER_EXTERNALCLK_FALLING         CTL0_CKPSEL(1)                      /*!< the falling edge is the active edge used for counting */
 #define LPTIMER_EXTERNALCLK_BOTH            CTL0_CKPSEL(2)                      /*!< both edges are the active edge used for counting */
 
 /* external clock filter select */
-#define CTL0_ECKFLT(regval)                 (BITS(3, 4) & ((uint32_t)(regval) << 3U))
+#define CTL0_ECKFLT(regval)                 (BITS(3,4) & ((uint32_t)(regval) << 3U))
 #define LPTIMER_EXTERNALCLK_FILTEROFF       CTL0_ECKFLT(0)                      /*!< external clock filter disabled */
 #define LPTIMER_EXTERNALCLK_FILTER_2        CTL0_ECKFLT(1)                      /*!< the active level change of the external clock need to be maintained at least 2 clock periods */
 #define LPTIMER_EXTERNALCLK_FILTER_4        CTL0_ECKFLT(2)                      /*!< the active level change of the external clock need to be maintained at least 4 clock periods */
 #define LPTIMER_EXTERNALCLK_FILTER_8        CTL0_ECKFLT(3)                      /*!< the active level change of the external clock need to be maintained at least 8 clock periods */
 
 /* trigger filter select */
-#define CTL0_TFLT(regval)                   (BITS(6, 7) & ((uint32_t)(regval) << 6U))
+#define CTL0_TFLT(regval)                   (BITS(6,7) & ((uint32_t)(regval) << 6U))
 #define LPTIMER_TRIGGER_FILTEROFF           CTL0_TFLT(0)                        /*!< trigger filter disabled */
 #define LPTIMER_TRIGGER_FILTER_2            CTL0_TFLT(1)                        /*!< the active level change of the trigger need to be maintained at least 2 clock periods */
 #define LPTIMER_TRIGGER_FILTER_4            CTL0_TFLT(2)                        /*!< the active level change of the trigger need to be maintained at least 4 clock periods */
 #define LPTIMER_TRIGGER_FILTER_8            CTL0_TFLT(3)                        /*!< the active level change of the trigger need to be maintained at least 8 clock periods */
 
 /* clock prescaler select */
-#define CTL0_CLKPSC(regval)                 (BITS(9, 11) & ((uint32_t)(regval) << 9U))
+#define CTL0_CLKPSC(regval)                 (BITS(9,11) & ((uint32_t)(regval) << 9U))
 #define LPTIMER_PSC_1                       CTL0_CLKPSC(0)                      /*!< no prescaler */
 #define LPTIMER_PSC_2                       CTL0_CLKPSC(1)                      /*!< divided by 2 */
 #define LPTIMER_PSC_4                       CTL0_CLKPSC(2)                      /*!< divided by 4 */
@@ -188,7 +205,7 @@ typedef struct {
 #define LPTIMER_PSC_128                     CTL0_CLKPSC(7)                      /*!< divided by 128 */
 
 /* external trigger select */
-#define CTL0_ETSEL(regval)                  (BITS(13, 15) & ((uint32_t)(regval) << 13U))
+#define CTL0_ETSEL(regval)                  (BITS(13,15) & ((uint32_t)(regval) << 13U))
 #define LPTIMER_EXTRIGGER_GPIO              CTL0_ETSEL(0)                       /*!< external trigger for GPIO */
 #define LPTIMER_EXTRIGGER_RTCALARM0         CTL0_ETSEL(1)                       /*!< external trigger for RTC Alarm 0 */
 #define LPTIMER_EXTRIGGER_RTCALARM1         CTL0_ETSEL(2)                       /*!< external trigger for RTC Alarm 1 */
@@ -199,7 +216,7 @@ typedef struct {
 #define LPTIMER_EXTRIGGER_CMP1_OUT          CTL0_ETSEL(7)                       /*!< external trigger for CMP1_OUT */
 
 /* trigger mode select */
-#define CTL0_ETMEN(regval)                  (BITS(17, 18) & ((uint32_t)(regval) << 17U))
+#define CTL0_ETMEN(regval)                  (BITS(17,18) & ((uint32_t)(regval) << 17U))
 #define LPTIMER_TRIGGER_SOFTWARE            CTL0_ETMEN(0)                       /*!< external trigger disable (software trigger) */
 #define LPTIMER_TRIGGER_EXTERNALRISING      CTL0_ETMEN(1)                       /*!< rising edge of external trigger enable */
 #define LPTIMER_TRIGGER_EXTERNALFALLING     CTL0_ETMEN(2)                       /*!< falling edge of external trigger enable */
@@ -278,68 +295,68 @@ typedef struct {
 
 /* function declarations */
 /* deinit the LPTIMER */
-void lptimer_deinit(void);
+void lptimer_deinit(uint32_t lptimer_periph);
 /* initialize LPTIMER init parameter struct with a default value */
 void lptimer_struct_para_init(lptimer_parameter_struct *initpara);
 /* initialize LPTIMER counter */
-void lptimer_init(lptimer_parameter_struct *initpara);
+void lptimer_init(uint32_t lptimer_periph, lptimer_parameter_struct *initpara);
 /* configure external input remap */
-void lptimer_inputremap(uint32_t input0remap, uint32_t input1remap);
+void lptimer_inputremap(uint32_t lptimer_periph, uint32_t input0remap, uint32_t input1remap);
 /* enable the LPTIMER_CAR and LPTIMER_CMPV registers shadow function */
-void lptimer_register_shadow_enable(void);
+void lptimer_register_shadow_enable(uint32_t lptimer_periph);
 /* disable the LPTIMER_CAR and LPTIMER_CMPV registers shadow function */
-void lptimer_register_shadow_disable(void);
+void lptimer_register_shadow_disable(uint32_t lptimer_periph);
 /* enable the LPTIMER TIMEOUT function */
-void lptimer_timeout_enable(void);
+void lptimer_timeout_enable(uint32_t lptimer_periph);
 /* disable the LPTIMER TIMEOUT function */
-void lptimer_timeout_disable(void);
+void lptimer_timeout_disable(uint32_t lptimer_periph);
 
 /* LPTIMER start and stop */
-/* LPTIMER start with countinue mode */
-void lptimer_countinue_start(uint32_t autoreload, uint32_t compare);
+/* LPTIMER start with continuous mode */
+void lptimer_countinue_start(uint32_t lptimer_periph, uint32_t autoreload, uint32_t compare);
 /* LPTIMER start with single mode */
-void lptimer_single_start(uint32_t autoreload, uint32_t compare);
+void lptimer_single_start(uint32_t lptimer_periph, uint32_t autoreload, uint32_t compare);
 /* stop LPTIMER */
-void lptimer_stop(void);
+void lptimer_stop(uint32_t lptimer_periph);
 
 /* read and configure LPTIMER register value */
 /* read LPTIMER current counter value */
-uint32_t lptimer_counter_read(void);
+uint32_t lptimer_counter_read(uint32_t lptimer_periph);
 /* read LPTIMER auto reload value */
-uint32_t lptimer_autoreload_read(void);
+uint32_t lptimer_autoreload_read(uint32_t lptimer_periph);
 /* read the compare value */
-uint32_t lptimer_compare_read(void);
+uint32_t lptimer_compare_read(uint32_t lptimer_periph);
 /* configure LPTIMER autoreload register value */
-void lptimer_autoreload_value_config(uint32_t autoreload);
+void lptimer_autoreload_value_config(uint32_t lptimer_periph, uint32_t autoreload);
 /* configure LPTIMER compare value */
-void lptimer_compare_value_config(uint32_t compare);
+void lptimer_compare_value_config(uint32_t lptimer_periph, uint32_t compare);
 
 /* LPTIMER decode mode */
 /* enable decode mode 0 */
-void lptimer_decodemode0_enable(void);
+void lptimer_decodemode0_enable(uint32_t lptimer_periph);
 /* enable decode mode 1 */
-void lptimer_decodemode1_enable(void);
+void lptimer_decodemode1_enable(uint32_t lptimer_periph);
 /* disable decode mode 0/1 */
-void lptimer_decodemode_disable(void);
+void lptimer_decodemode_disable(uint32_t lptimer_periph);
 
 /* LPTIMER input high level counter */
 /* enable external input high level counter */
-void lptimer_highlevelcounter_enable(uint32_t maxvalue);
+void lptimer_highlevelcounter_enable(uint32_t lptimer_periph, uint32_t maxvalue);
 /* disable external input high level counter */
-void lptimer_highlevelcounter_disable(void);
+void lptimer_highlevelcounter_disable(uint32_t lptimer_periph);
 
 /* LPTIMER interrupt and flag */
 /* get LPTIMER flags */
-FlagStatus lptimer_flag_get(uint32_t flag);
+FlagStatus lptimer_flag_get(uint32_t lptimer_periph, uint32_t flag);
 /* clear LPTIMER flags */
-void lptimer_flag_clear(uint32_t flag);
+void lptimer_flag_clear(uint32_t lptimer_periph, uint32_t flag);
 /* enable the LPTIMER interrupt */
-void lptimer_interrupt_enable(uint32_t interrupt);
+void lptimer_interrupt_enable(uint32_t lptimer_periph, uint32_t interrupt);
 /* disable the LPTIMER interrupt */
-void lptimer_interrupt_disable(uint32_t interrupt);
+void lptimer_interrupt_disable(uint32_t lptimer_periph, uint32_t interrupt);
 /* get LPTIMER interrupt flag */
-FlagStatus lptimer_interrupt_flag_get(uint32_t int_flag);
+FlagStatus lptimer_interrupt_flag_get(uint32_t lptimer_periph, uint32_t int_flag);
 /* clear LPTIMER interrupt flag */
-void lptimer_interrupt_flag_clear(uint32_t int_flag);
+void lptimer_interrupt_flag_clear(uint32_t lptimer_periph, uint32_t int_flag);
 
 #endif /* GD32L23X_LPTIMER_H */

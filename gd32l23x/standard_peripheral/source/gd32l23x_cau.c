@@ -2,11 +2,11 @@
     \file    gd32l23x_cau.c
     \brief   CAU driver
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -51,6 +51,7 @@ void cau_deinit(void)
     rcu_periph_reset_enable(RCU_CAURST);
     /* release CAU from reset state */
     rcu_periph_reset_disable(RCU_CAURST);
+#ifdef GD32L233
     /* enable PMU clock */
     rcu_periph_clock_enable(RCU_PMU);
     /* wakeup CAU power domain */
@@ -58,6 +59,7 @@ void cau_deinit(void)
     /* check CAU power domain is active */
     while(0U == (PMU_STAT & PMU_STAT_CORE1PS_ACTIVE)) {
     }
+#endif
 }
 
 /*!
@@ -361,7 +363,7 @@ void cau_iv_init(cau_iv_parameter_struct *iv_initpara)
                 only one parameter can be selected which is shown as below:
       \arg        CAU_PREPARE_PHASE: prepare phase
       \arg        CAU_AAD_PHASE: AAD phase
-      \arg        CAU_ENCRYPT_DECRYPT_PHASE: encryption/decryption phase
+      \arg        CAU_ENCRYPT_DECRYPT_PHASE: encryption / decryption phase
       \arg        CAU_TAG_PHASE: tag phase
     \param[out] none
     \retval     none
@@ -408,7 +410,7 @@ ControlStatus cau_enable_state_get(void)
 
 /*!
     \brief      write data to the IN FIFO
-    \param[in]  data: data to write (0 - 0xFFFFFFFF)
+    \param[in]  data: data to write (0U - 0xFFFFFFFFU)
     \param[out] none
     \retval     none
 */
@@ -639,6 +641,41 @@ void cau_context_restore(cau_context_parameter_struct *cau_context)
 }
 
 /*!
+    \brief      get the CAU flag status
+    \param[in]  flag: CAU flag status
+                only one parameter can be selected which is shown as below:
+      \arg        CAU_FLAG_INFIFO_EMPTY: input FIFO empty
+      \arg        CAU_FLAG_INFIFO_NO_FULL: input FIFO is not full
+      \arg        CAU_FLAG_OUTFIFO_NO_EMPTY: output FIFO not empty
+      \arg        CAU_FLAG_OUTFIFO_FULL: output FIFO is full
+      \arg        CAU_FLAG_BUSY: the CAU core is busy
+      \arg        CAU_FLAG_INFIFO: input FIFO flag status
+      \arg        CAU_FLAG_OUTFIFO: output FIFO flag status
+    \param[out] none
+    \retval     FlagStatus: SET or RESET
+*/
+FlagStatus cau_flag_get(uint32_t flag)
+{
+    uint32_t reg = 0U;
+    FlagStatus ret_flag = RESET;
+
+    /* check if the flag is in CAU_STAT1 register */
+    if(RESET != (flag & FLAG_MASK)) {
+        reg = CAU_STAT1;
+    } else {
+        /* the flag is in CAU_STAT0 register */
+        reg = CAU_STAT0;
+    }
+
+    /* check the status of the specified CAU flag */
+    if(RESET != (reg & flag)) {
+        ret_flag = SET;
+    }
+
+    return ret_flag;
+}
+
+/*!
     \brief      enable the CAU interrupts
     \param[in]  interrupt: specify the CAU interrupt source to be enabled
                 one or more parameters can be selected which are shown as below:
@@ -687,39 +724,4 @@ FlagStatus cau_interrupt_flag_get(uint32_t interrupt)
     }
 
     return flag;
-}
-
-/*!
-    \brief      get the CAU flag status
-    \param[in]  flag: CAU flag status
-                only one parameter can be selected which is shown as below:
-      \arg        CAU_FLAG_INFIFO_EMPTY: input FIFO empty
-      \arg        CAU_FLAG_INFIFO_NO_FULL: input FIFO is not full
-      \arg        CAU_FLAG_OUTFIFO_NO_EMPTY: output FIFO not empty
-      \arg        CAU_FLAG_OUTFIFO_FULL: output FIFO is full
-      \arg        CAU_FLAG_BUSY: the CAU core is busy
-      \arg        CAU_FLAG_INFIFO: input FIFO flag status
-      \arg        CAU_FLAG_OUTFIFO: output FIFO flag status
-    \param[out] none
-    \retval     FlagStatus: SET or RESET
-*/
-FlagStatus cau_flag_get(uint32_t flag)
-{
-    uint32_t reg = 0U;
-    FlagStatus ret_flag = RESET;
-
-    /* check if the flag is in CAU_STAT1 register */
-    if(RESET != (flag & FLAG_MASK)) {
-        reg = CAU_STAT1;
-    } else {
-        /* the flag is in CAU_STAT0 register */
-        reg = CAU_STAT0;
-    }
-
-    /* check the status of the specified CAU flag */
-    if(RESET != (reg & flag)) {
-        ret_flag = SET;
-    }
-
-    return ret_flag;
 }

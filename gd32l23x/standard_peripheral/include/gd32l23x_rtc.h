@@ -2,11 +2,11 @@
     \file    gd32l23x_rtc.h
     \brief   definitions for the RTC
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -106,6 +106,7 @@ OF SUCH DAMAGE.
 #define RTC_CTL_OS                         BITS(21,22)                                 /*!< output selection */
 #define RTC_CTL_COEN                       BIT(23)                                     /*!< calibration output enable */
 #define RTC_CTL_ITSEN                      BIT(24)                                     /*!< internal timestamp event enable */
+#define RTC_CTL_LXTALSTBRST                BIT(30)                                     /*!< external low-speed oscillator stabilization reset*/
 #define RTC_CTL_OUT2EN                     BIT(31)                                     /*!< RTC_OUT pin select */
 
 /* RTC_STAT */
@@ -119,7 +120,7 @@ OF SUCH DAMAGE.
 #define RTC_STAT_INITM                     BIT(7)                                      /*!< enter initialization mode */
 #define RTC_STAT_ALRM0F                    BIT(8)                                      /*!< alarm0 occurs flag */
 #define RTC_STAT_ALRM1F                    BIT(9)                                      /*!< alarm1 occurs flag */
-#define RTC_STAT_WTF                       BIT(10)                                     /*!< alarm1 occurs flag */
+#define RTC_STAT_WTF                       BIT(10)                                     /*!< wakeup timer flag */
 #define RTC_STAT_TSF                       BIT(11)                                     /*!< time-stamp flag */
 #define RTC_STAT_TSOVRF                    BIT(12)                                     /*!< time-stamp overflow flag */
 #define RTC_STAT_TP0F                      BIT(13)                                     /*!< RTC tamp 0 detected flag */
@@ -162,7 +163,7 @@ OF SUCH DAMAGE.
 
 /* RTC_TTS */
 #define RTC_TTS_SCU                        BITS(0,3)                                   /*!< second units in BCD code */
-#define RTC_TTS_SCT                        BITS(4,6)                                   /*!< second units in BCD code */
+#define RTC_TTS_SCT                        BITS(4,6)                                   /*!< second tens in BCD code */
 #define RTC_TTS_MNU                        BITS(8,11)                                  /*!< minute units in BCD code */
 #define RTC_TTS_MNT                        BITS(12,14)                                 /*!< minute tens in BCD code */
 #define RTC_TTS_HRU                        BITS(16,19)                                 /*!< hour units in BCD code */
@@ -182,7 +183,7 @@ OF SUCH DAMAGE.
 /* RTC_HRFC */
 #define RTC_HRFC_CMSK                      BITS(0,8)                                   /*!< calibration mask number */
 #define RTC_HRFC_CWND16                    BIT(13)                                     /*!< calibration window select 16 seconds */
-#define RTC_HRFC_CWND8                     BIT(14)                                     /*!< calibration window select 16 seconds */
+#define RTC_HRFC_CWND8                     BIT(14)                                     /*!< calibration window select 8 seconds */
 #define RTC_HRFC_FREQI                     BIT(15)                                     /*!< increase RTC frequency by 488.5ppm */
 
 /* RTC_TAMP */
@@ -328,7 +329,7 @@ typedef struct {
 #define GET_DATE_YR(regval)                GET_BITS((regval),16,23)                    /*!< get value of RTC_DATE_YR bit field */
 
 #define RTC_OUT_PC13                       ((uint32_t)0x00000000U)                     /*!< RTC_OUT is connected to PC13 */
-#define RTC_OUT_PB2                        RTC_CTL_OUT2EN                              /*!< RTC_OUT is connected to PB2 */
+#define RTC_OUT_PB2_PB14                   RTC_CTL_OUT2EN                              /*!< RTC_OUT is connected to PB2 or PB14*/
 
 #define CTL_OS(regval)                     (BITS(21,22) & ((uint32_t)(regval) << 21))  /*!< write value to RTC_CTL_OS bit field */
 #define RTC_OS_DISABLE                     CTL_OS(0)                                   /*!< disable output RTC_ALARM */
@@ -439,12 +440,12 @@ typedef struct {
 
 /* tamp register value */
 #define TAMP_TAMPXNOERASE(regval)          (BITS(19,21) & ((uint32_t)(regval) << 19))  /*!< write value to RTC_TAMP_TAMPXNOERASE bits field */
-#define RTC_TAMPXNOERASE_NONE              TAMP_TAMPXNOER(0)                           /*!< both tamper 0~3 event will trigger RTC_BKP registers reset */
-#define RTC_TAMPXNOERASE_TP0               TAMP_TAMPXNOER(1)                           /*!< tamper0 event will not trigger RTC_BKP registers reset */
-#define RTC_TAMPXNOERASE_TP1               TAMP_TAMPXNOER(2)                           /*!< tamper1 event will not trigger RTC_BKP registers reset */
-#define RTC_TAMPXNOERASE_TP2               TAMP_TAMPXNOER(4)                           /*!< tamper2 event will not trigger RTC_BKP registers reset */
-#define RTC_TAMPXNOERASE_TP0_TP1           TAMP_TAMPXNOER(3)                           /*!< Neither tamper0 nor tamper1 event will trigger RTC_BKP registers reset */
-#define RTC_TAMPXNOERASE_TP_ALL            TAMP_TAMPXNOER(7)                           /*!< tamper 0~3 event all will not trigger RTC_BKP registers reset */
+#define RTC_TAMPXNOERASE_NONE              TAMP_TAMPXNOERASE(0)                        /*!< both tamper 0~3 event will trigger RTC_BKP registers reset */
+#define RTC_TAMPXNOERASE_TP0               TAMP_TAMPXNOERASE(1)                        /*!< tamper0 event will not trigger RTC_BKP registers reset */
+#define RTC_TAMPXNOERASE_TP1               TAMP_TAMPXNOERASE(2)                        /*!< tamper1 event will not trigger RTC_BKP registers reset */
+#define RTC_TAMPXNOERASE_TP2               TAMP_TAMPXNOERASE(4)                        /*!< tamper2 event will not trigger RTC_BKP registers reset */
+#define RTC_TAMPXNOERASE_TP0_TP1           TAMP_TAMPXNOERASE(3)                        /*!< Neither tamper0 nor tamper1 event will trigger RTC_BKP registers reset */
+#define RTC_TAMPXNOERASE_TP_ALL            TAMP_TAMPXNOERASE(7)                        /*!< tamper 0~3 event all will not trigger RTC_BKP registers reset */
 
 
 /* tamp register value */
@@ -654,5 +655,9 @@ FlagStatus rtc_flag_get(uint32_t flag);
 /* clear specified flag */
 void rtc_flag_clear(uint32_t flag);
 
+/* LXTAL stabilization reset,this workaround is only for Rev.Code E*/
+void rtc_lxtal_stab_reset_enable(void); 
+/* disable LXTAL stabilization reset */
+void rtc_lxtal_stab_reset_disable(void);
 
 #endif /* GD32L23X_RTC_H */

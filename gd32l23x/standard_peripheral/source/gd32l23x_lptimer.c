@@ -2,11 +2,11 @@
     \file    gd32l23x_lptimer.c
     \brief   LPTIMER driver
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -36,15 +36,28 @@ OF SUCH DAMAGE.
 
 /*!
     \brief      deinit LPTIMER
-    \param[in]  none
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
     \param[out] none
     \retval     none
 */
-void lptimer_deinit(void)
+void lptimer_deinit(uint32_t lptimer_periph)
 {
+#ifdef GD32L233
     /* reset LPTIMER */
     rcu_periph_reset_enable(RCU_LPTIMERRST);
     rcu_periph_reset_disable(RCU_LPTIMERRST);
+#else
+    /* reset LPTIMER0 */
+    if(LPTIMER0 == lptimer_periph) {
+        rcu_periph_reset_enable(RCU_LPTIMER0RST);
+        rcu_periph_reset_disable(RCU_LPTIMER0RST);
+    }
+    /* reset LPTIMER */
+    else {
+        rcu_periph_reset_enable(RCU_LPTIMER1RST);
+        rcu_periph_reset_disable(RCU_LPTIMER1RST);
+    }
+#endif
 }
 
 /*!
@@ -70,6 +83,7 @@ void lptimer_struct_para_init(lptimer_parameter_struct *initpara)
 
 /*!
     \brief      initialize LPTIMER counter
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
     \param[in]  initpara: init parameter struct
                   clocksource: LPTIMER_INTERNALCLK, LPTIMER_EXTERNALCLK
                   prescaler: prescaler value of the counter clock, LPTIMER_PSC_x(x=1,2,4,8..128)
@@ -85,26 +99,27 @@ void lptimer_struct_para_init(lptimer_parameter_struct *initpara)
     \param[out] none
     \retval     none
 */
-void lptimer_init(lptimer_parameter_struct *initpara)
+void lptimer_init(uint32_t lptimer_periph, lptimer_parameter_struct *initpara)
 {
-    LPTIMER_CTL0 = initpara->clocksource | initpara->prescaler | initpara->triggermode | \
-                   initpara->outputpolarity | initpara->outputmode | initpara->countersource;
+    LPTIMER_CTL0(lptimer_periph) = initpara->clocksource | initpara->prescaler | initpara->triggermode | \
+                                   initpara->outputpolarity | initpara->outputmode | initpara->countersource;
 
     if(initpara->triggermode != LPTIMER_TRIGGER_SOFTWARE) {
-        LPTIMER_CTL0 |= initpara->extriggersource | initpara->extriggerfilter;
+        LPTIMER_CTL0(lptimer_periph) |= initpara->extriggersource | initpara->extriggerfilter;
     }
 
     if((initpara->clocksource == LPTIMER_EXTERNALCLK) || (initpara->countersource == LPTIMER_COUNTER_EXTERNAL)) {
-        LPTIMER_CTL0 |= initpara->extclockpolarity | initpara->extclockfilter;
+        LPTIMER_CTL0(lptimer_periph) |= initpara->extclockpolarity | initpara->extclockfilter;
     }
 
     if((initpara->clocksource == LPTIMER_INTERNALCLK) && (initpara->countersource == LPTIMER_COUNTER_EXTERNAL)) {
-        LPTIMER_CTL0 &= ~LPTIMER_CTL0_PSC;
+        LPTIMER_CTL0(lptimer_periph) &= ~LPTIMER_CTL0_PSC;
     }
 }
 
 /*!
     \brief      configure external input remap
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
     \param[in]  input0remap: external input0 remap
                 only one parameter can be selected which is shown as below:
       \arg        LPTIMER_INPUT0_GPIO
@@ -116,234 +131,240 @@ void lptimer_init(lptimer_parameter_struct *initpara)
     \param[out] none
     \retval     none
 */
-void lptimer_inputremap(uint32_t input0remap, uint32_t input1remap)
+void lptimer_inputremap(uint32_t lptimer_periph, uint32_t input0remap, uint32_t input1remap)
 {
-    LPTIMER_EIRMP = (uint32_t)(input0remap | input1remap);
+    LPTIMER_EIRMP(lptimer_periph) = (uint32_t)(input0remap | input1remap);
 }
 
 /*!
     \brief      enable the LPTIMER_CAR and LPTIMER_CMPV registers shadow function
-    \param[in]  none
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
     \param[out] none
     \retval     none
 */
-void lptimer_register_shadow_enable(void)
+void lptimer_register_shadow_enable(uint32_t lptimer_periph)
 {
-    LPTIMER_CTL0 |= (uint32_t)LPTIMER_CTL0_SHWEN;
+    LPTIMER_CTL0(lptimer_periph) |= (uint32_t)LPTIMER_CTL0_SHWEN;
 }
 
 /*!
     \brief      disable the LPTIMER_CAR and LPTIMER_CMPV registers shadow function
-    \param[in]  none
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
     \param[out] none
     \retval     none
 */
-void lptimer_register_shadow_disable(void)
+void lptimer_register_shadow_disable(uint32_t lptimer_periph)
 {
-    LPTIMER_CTL0 &= ~(uint32_t)LPTIMER_CTL0_SHWEN;
+    LPTIMER_CTL0(lptimer_periph) &= ~(uint32_t)LPTIMER_CTL0_SHWEN;
 }
 
 /*!
     \brief      enable the LPTIMER TIMEOUT function
-    \param[in]  none
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
     \param[out] none
     \retval     none
 */
-void lptimer_timeout_enable(void)
+void lptimer_timeout_enable(uint32_t lptimer_periph)
 {
-    LPTIMER_CTL0 |= (uint32_t)LPTIMER_CTL0_TIMEOUT;
+    LPTIMER_CTL0(lptimer_periph) |= (uint32_t)LPTIMER_CTL0_TIMEOUT;
 }
 
 /*!
     \brief      disable the LPTIMER TIMEOUT function
-    \param[in]  none
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
     \param[out] none
     \retval     none
 */
-void lptimer_timeout_disable(void)
+void lptimer_timeout_disable(uint32_t lptimer_periph)
 {
-    LPTIMER_CTL0 &= ~(uint32_t)LPTIMER_CTL0_TIMEOUT;
+    LPTIMER_CTL0(lptimer_periph) &= ~(uint32_t)LPTIMER_CTL0_TIMEOUT;
 }
 
 /*!
-    \brief      LPTIMER countinue start
-    \param[in]  autoreload: auto reload value, 0x0~0xffffffff
-    \param[in]  compare: compare value, 0x0~0xffffffff
+    \brief      LPTIMER start with continuous mode
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
+    \param[in]  autoreload: auto reload value, 0x0~0xFFFF for GD32L235xx, 0x0~0xFFFFFFFF for GD32L233xx
+    \param[in]  compare: compare value, 0x0~0xFFFF for GD32L235xx, 0x0~0xFFFFFFFF for GD32L233xx
     \param[out] none
     \retval     none
 */
-void lptimer_countinue_start(uint32_t autoreload, uint32_t compare)
+void lptimer_countinue_start(uint32_t lptimer_periph, uint32_t autoreload, uint32_t compare)
 {
-    LPTIMER_INTC |= (uint32_t)(LPTIMER_INTC_CMPVUPIC | LPTIMER_INTC_CARUPIC);
-    LPTIMER_CTL1 |= (uint32_t)LPTIMER_CTL1_LPTEN;
+    LPTIMER_INTC(lptimer_periph) |= (uint32_t)(LPTIMER_INTC_CMPVUPIC | LPTIMER_INTC_CARUPIC);
+    LPTIMER_CTL1(lptimer_periph) |= (uint32_t)LPTIMER_CTL1_LPTEN;
 
-    while(0U == (LPTIMER_CTL1 & LPTIMER_CTL1_LPTENF)) {
+    while(0U == (LPTIMER_CTL1(lptimer_periph) & LPTIMER_CTL1_LPTENF)) {
     }
-    LPTIMER_CAR = autoreload;
-    LPTIMER_CMPV = compare;
-    while(0U == (LPTIMER_INTF & LPTIMER_INTF_CARUPIF)) {
+    LPTIMER_CAR(lptimer_periph) = autoreload;
+    LPTIMER_CMPV(lptimer_periph) = compare;
+    while(0U == (LPTIMER_INTF(lptimer_periph) & LPTIMER_INTF_CARUPIF)) {
     }
-    while(0U == (LPTIMER_INTF & LPTIMER_INTF_CMPVUPIF)) {
+    while(0U == (LPTIMER_INTF(lptimer_periph) & LPTIMER_INTF_CMPVUPIF)) {
     }
-    LPTIMER_INTC = LPTIMER_INTC_CMPVUPIC | LPTIMER_INTC_CARUPIC;
-    LPTIMER_CTL1 |= LPTIMER_CTL1_CTNMST;
+    LPTIMER_INTC(lptimer_periph) = LPTIMER_INTC_CMPVUPIC | LPTIMER_INTC_CARUPIC;
+    LPTIMER_CTL1(lptimer_periph) |= LPTIMER_CTL1_CTNMST;
 }
 
 /*!
-    \brief      LPTIMER single start
-    \param[in]  autoreload: auto reload value, 0x0~0xffffffff
-    \param[in]  compare: compare value, 0x0~0xffffffff
+    \brief      LPTIMER start with single mode
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
+    \param[in]  autoreload: auto reload value, 0x0~0xFFFF for GD32L235xx, 0x0~0xFFFFFFFF for GD32L233xx
+    \param[in]  compare: compare value, 0x0~0xFFFF for GD32L235xx, 0x0~0xFFFFFFFF for GD32L233xx
     \param[out] none
     \retval     none
 */
-void lptimer_single_start(uint32_t autoreload, uint32_t compare)
+void lptimer_single_start(uint32_t lptimer_periph, uint32_t autoreload, uint32_t compare)
 {
-    LPTIMER_INTC |= (uint32_t)(LPTIMER_INTC_CMPVUPIC | LPTIMER_INTC_CARUPIC);
-    LPTIMER_CTL1 |= (uint32_t)LPTIMER_CTL1_LPTEN;
+    LPTIMER_INTC(lptimer_periph) |= (uint32_t)(LPTIMER_INTC_CMPVUPIC | LPTIMER_INTC_CARUPIC);
+    LPTIMER_CTL1(lptimer_periph) |= (uint32_t)LPTIMER_CTL1_LPTEN;
 
-    while(0U == (LPTIMER_CTL1 & LPTIMER_CTL1_LPTENF)) {
+    while(0U == (LPTIMER_CTL1(lptimer_periph) & LPTIMER_CTL1_LPTENF)) {
     }
-    LPTIMER_CAR = autoreload;
-    LPTIMER_CMPV = compare;
-    while(0U == (LPTIMER_INTF & LPTIMER_INTF_CARUPIF)) {
+    LPTIMER_CAR(lptimer_periph) = autoreload;
+    LPTIMER_CMPV(lptimer_periph) = compare;
+    while(0U == (LPTIMER_INTF(lptimer_periph) & LPTIMER_INTF_CARUPIF)) {
     }
-    while(0U == (LPTIMER_INTF & LPTIMER_INTF_CMPVUPIF)) {
+    while(0U == (LPTIMER_INTF(lptimer_periph) & LPTIMER_INTF_CMPVUPIF)) {
     }
-    LPTIMER_INTC = LPTIMER_INTC_CMPVUPIC | LPTIMER_INTC_CARUPIC;
-    LPTIMER_CTL1 |= LPTIMER_CTL1_SMST;
+    LPTIMER_INTC(lptimer_periph) = LPTIMER_INTC_CMPVUPIC | LPTIMER_INTC_CARUPIC;
+    LPTIMER_CTL1(lptimer_periph) |= LPTIMER_CTL1_SMST;
 }
 
 /*!
     \brief      stop LPTIMER
-    \param[in]  none
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
     \param[out] none
     \retval     none
 */
-void lptimer_stop(void)
+void lptimer_stop(uint32_t lptimer_periph)
 {
-    LPTIMER_CTL1 &= ~(uint32_t)LPTIMER_CTL1_LPTEN;
+    LPTIMER_CTL1(lptimer_periph) &= ~(uint32_t)LPTIMER_CTL1_LPTEN;
 }
 
 /*!
     \brief      read LPTIMER current counter value
-    \param[in]  none
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
     \param[out] none
-    \retval     counter value
+    \retval     counter value: 0x0~0xFFFF for GD32L235xx, 0x0~0xFFFFFFFF for GD32L233xx
 */
-uint32_t lptimer_counter_read(void)
+uint32_t lptimer_counter_read(uint32_t lptimer_periph)
 {
     uint32_t count_value = 0U;
-    count_value = LPTIMER_CNT;
+    count_value = LPTIMER_CNT(lptimer_periph);
     return (count_value);
 }
 
 /*!
     \brief      read LPTIMER auto reload value
-    \param[in]  none
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
     \param[out] none
-    \retval     auto reload value
+    \retval     counter auto reload value:  0x0~0xFFFF for GD32L235xx, 0x0~0xFFFFFFFF for GD32L233xx
 */
-uint32_t lptimer_autoreload_read(void)
+uint32_t lptimer_autoreload_read(uint32_t lptimer_periph)
 {
     uint32_t car_value = 0U;
-    car_value = LPTIMER_CAR;
+    car_value = LPTIMER_CAR(lptimer_periph);
     return (car_value);
 }
 
 /*!
     \brief      read LPTIMER compare value
-    \param[in]  none
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
     \param[out] none
-    \retval     compare value
+    \retval     compare value: 0x0~0xFFFF for GD32L235xx, 0x0~0xFFFFFFFF for GD32L233xx
 */
-uint32_t lptimer_compare_read(void)
+uint32_t lptimer_compare_read(uint32_t lptimer_periph)
 {
     uint32_t comp_value = 0U;
-    comp_value = LPTIMER_CMPV;
+    comp_value = LPTIMER_CMPV(lptimer_periph);
     return (comp_value);
 }
 
 /*!
     \brief      configure LPTIMER autoreload register value
-    \param[in]  autoreload: autoreload value
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
+    \param[in]  autoreload: counter autoreload value, 0x0~0xFFFF for GD32L235xx, 0x0~0xFFFFFFFF for GD32L233xx
     \param[out] none
     \retval     none
 */
-void lptimer_autoreload_value_config(uint32_t autoreload)
+void lptimer_autoreload_value_config(uint32_t lptimer_periph, uint32_t autoreload)
 {
-    LPTIMER_CAR = (uint32_t)autoreload;
+    LPTIMER_CAR(lptimer_periph) = (uint32_t)autoreload;
 }
 
 /*!
     \brief      configure LPTIMER compare value
-    \param[in]  compare: compare value
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
+    \param[in]  compare: compare value, 0x0~0xFFFF for GD32L235xx, 0x0~0xFFFFFFFF for GD32L233xx
     \param[out] none
     \retval     none
 */
-void lptimer_compare_value_config(uint32_t compare)
+void lptimer_compare_value_config(uint32_t lptimer_periph, uint32_t compare)
 {
-    LPTIMER_CMPV = (uint32_t)compare;
+    LPTIMER_CMPV(lptimer_periph) = (uint32_t)compare;
 }
 
 /*!
     \brief      enable decode mode 0
-    \param[in]  none
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
     \param[out] none
     \retval     none
 */
-void lptimer_decodemode0_enable(void)
+void lptimer_decodemode0_enable(uint32_t lptimer_periph)
 {
-    LPTIMER_CTL0 &= ~(uint32_t)(LPTIMER_CTL0_DECMEN | LPTIMER_CTL0_DECMSEL);
-    LPTIMER_CTL0 |= LPTIMER_CTL0_DECMEN;
+    LPTIMER_CTL0(lptimer_periph) &= ~(uint32_t)(LPTIMER_CTL0_DECMEN | LPTIMER_CTL0_DECMSEL);
+    LPTIMER_CTL0(lptimer_periph) |= LPTIMER_CTL0_DECMEN;
 }
 
 /*!
     \brief      enable decode mode 1
-    \param[in]  none
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
     \param[out] none
     \retval     none
 */
-void lptimer_decodemode1_enable(void)
+void lptimer_decodemode1_enable(uint32_t lptimer_periph)
 {
-    LPTIMER_CTL0 |= (uint32_t)(LPTIMER_CTL0_DECMEN | LPTIMER_CTL0_DECMSEL);
+    LPTIMER_CTL0(lptimer_periph) |= (uint32_t)(LPTIMER_CTL0_DECMEN | LPTIMER_CTL0_DECMSEL);
 }
 
 /*!
     \brief      disable decode mode 0/1
-    \param[in]  none
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
     \param[out] none
     \retval     none
 */
-void lptimer_decodemode_disable(void)
+void lptimer_decodemode_disable(uint32_t lptimer_periph)
 {
-    LPTIMER_CTL0 &= ~(uint32_t)(LPTIMER_CTL0_DECMEN | LPTIMER_CTL0_DECMSEL);
+    LPTIMER_CTL0(lptimer_periph) &= ~(uint32_t)(LPTIMER_CTL0_DECMEN | LPTIMER_CTL0_DECMSEL);
 }
 
 /*!
     \brief      enable external input high level counter
-    \param[in]  maxvalue: input high level counter max value, 0x0~0x03ffffff
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
+    \param[in]  maxvalue: input high level counter max value, 0x0~0x03FFFFFF
     \param[out] none
     \retval     none
 */
-void lptimer_highlevelcounter_enable(uint32_t maxvalue)
+void lptimer_highlevelcounter_enable(uint32_t lptimer_periph, uint32_t maxvalue)
 {
-    LPTIMER_CTL1 |= (uint32_t)LPTIMER_CTL1_INHLCEN;
-    LPTIMER_INHLCMV = (uint32_t)maxvalue;
+    LPTIMER_CTL1(lptimer_periph) |= (uint32_t)LPTIMER_CTL1_INHLCEN;
+    LPTIMER_INHLCMV(lptimer_periph) = (uint32_t)maxvalue;
 }
 
 /*!
     \brief      disable external input high level counter
-    \param[in]  none
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
     \param[out] none
     \retval     none
 */
-void lptimer_highlevelcounter_disable(void)
+void lptimer_highlevelcounter_disable(uint32_t lptimer_periph)
 {
-    LPTIMER_CTL1 &= ~(uint32_t)LPTIMER_CTL1_INHLCEN;
+    LPTIMER_CTL1(lptimer_periph) &= ~(uint32_t)LPTIMER_CTL1_INHLCEN;
 }
 
 /*!
     \brief      get LPTIMER flags
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
     \param[in]  flag: the LPTIMER flag
                 only one parameter can be selected which is shown as below:
       \arg        LPTIMER_FLAG_CMPVM: compare value register match flag
@@ -362,17 +383,20 @@ void lptimer_highlevelcounter_disable(void)
     \param[out] none
     \retval     FlagStatus: SET or RESET
 */
-FlagStatus lptimer_flag_get(uint32_t flag)
+FlagStatus lptimer_flag_get(uint32_t lptimer_periph, uint32_t flag)
 {
-    if(RESET != (LPTIMER_INTF & flag)) {
-        return SET;
+    FlagStatus reval = RESET;
+    if(RESET != (LPTIMER_INTF(lptimer_periph) & flag)) {
+        reval = SET;
     } else {
-        return RESET;
+        reval = RESET;
     }
+    return reval;
 }
 
 /*!
     \brief      clear LPTIMER flags
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
     \param[in]  flag: the LPTIMER flag
                 one or more parameters can be selected which is shown as below:
       \arg        LPTIMER_FLAG_CMPVM: compare value register match flag
@@ -391,13 +415,14 @@ FlagStatus lptimer_flag_get(uint32_t flag)
     \param[out] none
     \retval     none
 */
-void lptimer_flag_clear(uint32_t flag)
+void lptimer_flag_clear(uint32_t lptimer_periph, uint32_t flag)
 {
-    LPTIMER_INTC |= (uint32_t)flag;
+    LPTIMER_INTC(lptimer_periph) |= (uint32_t)flag;
 }
 
 /*!
     \brief      enable the LPTIMER interrupt
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
     \param[in]  interrupt: LPTIMER interrupt source
                 one or more parameters can be selected which is shown as below:
       \arg        LPTIMER_INT_CMPVM: compare value register match interrupt
@@ -416,13 +441,14 @@ void lptimer_flag_clear(uint32_t flag)
     \param[out] none
     \retval     none
 */
-void lptimer_interrupt_enable(uint32_t interrupt)
+void lptimer_interrupt_enable(uint32_t lptimer_periph, uint32_t interrupt)
 {
-    LPTIMER_INTEN |= (uint32_t)interrupt;
+    LPTIMER_INTEN(lptimer_periph) |= (uint32_t)interrupt;
 }
 
 /*!
     \brief      disable the LPTIMER interrupt
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
     \param[in]  interrupt: LPTIMER interrupt source
                 one or more parameters can be selected which is shown as below:
       \arg        LPTIMER_INT_CMPVM: compare value register match interrupt
@@ -441,13 +467,14 @@ void lptimer_interrupt_enable(uint32_t interrupt)
     \param[out] none
     \retval     none
 */
-void lptimer_interrupt_disable(uint32_t interrupt)
+void lptimer_interrupt_disable(uint32_t lptimer_periph, uint32_t interrupt)
 {
-    LPTIMER_INTEN &= (~(uint32_t)interrupt);
+    LPTIMER_INTEN(lptimer_periph) &= (~(uint32_t)interrupt);
 }
 
 /*!
     \brief      get LPTIMER interrupt flag
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
     \param[in]  int_flag: the LPTIMER interrupt flag
                 only one parameter can be selected which is shown as below:
       \arg        LPTIMER_INT_FLAG_CMPVM: compare value register match interrupt flag
@@ -466,19 +493,22 @@ void lptimer_interrupt_disable(uint32_t interrupt)
     \param[out] none
     \retval     FlagStatus: SET or RESET
 */
-FlagStatus lptimer_interrupt_flag_get(uint32_t int_flag)
+FlagStatus lptimer_interrupt_flag_get(uint32_t lptimer_periph, uint32_t int_flag)
 {
+    FlagStatus reval = RESET;
     uint32_t val;
-    val = (LPTIMER_INTEN & int_flag);
-    if((RESET != (LPTIMER_INTF & int_flag)) && (RESET != val)) {
-        return SET;
+    val = (LPTIMER_INTEN(lptimer_periph) & int_flag);
+    if((RESET != (LPTIMER_INTF(lptimer_periph) & int_flag)) && (RESET != val)) {
+        reval = SET;
     } else {
-        return RESET;
+        reval = RESET;
     }
+    return reval;
 }
 
 /*!
     \brief      clear LPTIMER interrupt flag
+    \param[in]  lptimer_periph: LPTIMER for GD32L233xx series, LPTIMER0 or LPTIMER1 for GD32L235xx series
     \param[in]  int_flag: the LPTIMER interrupt flag
                 one or more parameters can be selected which is shown as below:
       \arg        LPTIMER_INT_FLAG_CMPVM: compare value register match interrupt flag
@@ -497,7 +527,7 @@ FlagStatus lptimer_interrupt_flag_get(uint32_t int_flag)
     \param[out] none
     \retval     none
 */
-void lptimer_interrupt_flag_clear(uint32_t int_flag)
+void lptimer_interrupt_flag_clear(uint32_t lptimer_periph, uint32_t int_flag)
 {
-    LPTIMER_INTC |= (uint32_t)int_flag;
+    LPTIMER_INTC(lptimer_periph) |= (uint32_t)int_flag;
 }

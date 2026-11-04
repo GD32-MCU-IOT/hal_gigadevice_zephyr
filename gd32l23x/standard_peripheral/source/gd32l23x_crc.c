@@ -2,11 +2,11 @@
     \file    gd32l23x_crc.c
     \brief   CRC driver
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -34,6 +34,11 @@ OF SUCH DAMAGE.
 
 #include "gd32l23x_crc.h"
 
+#define CRC_IDATA_RESET_VALUE     ((uint32_t)0xFFFFFFFFU)
+#define CRC_DATA_RESET_VALUE      ((uint32_t)0xFFFFFFFFU)
+#define CRC_FDATA_RESET_VALUE     ((uint32_t)0x00000000U)
+#define CRC_POLY_RESET_VALUE      ((uint32_t)0x04C11DB7U)
+
 /*!
     \brief      deinit CRC calculation unit
     \param[in]  none
@@ -42,11 +47,11 @@ OF SUCH DAMAGE.
 */
 void crc_deinit(void)
 {
-    CRC_IDATA = (uint32_t)0xFFFFFFFFU;
-    CRC_DATA  = (uint32_t)0xFFFFFFFFU;
-    CRC_FDATA = (uint32_t)0x00000000U;
-    CRC_POLY  = (uint32_t)0x04C11DB7U;
-    CRC_CTL   = CRC_CTL_RST;
+    CRC_IDATA = CRC_IDATA_RESET_VALUE;
+    CRC_DATA  = CRC_DATA_RESET_VALUE;
+    CRC_FDATA = CRC_FDATA_RESET_VALUE;
+    CRC_POLY  = CRC_POLY_RESET_VALUE;
+    CRC_CTL   = (uint32_t)CRC_CTL_RST;
 }
 
 /*!
@@ -87,7 +92,7 @@ void crc_data_register_reset(void)
     \brief      read the data register
     \param[in]  none
     \param[out] none
-    \retval     32-bit value of the data register
+    \retval     32-bit value of the data register, 0-0xFFFFFFFF
 */
 uint32_t crc_data_register_read(void)
 {
@@ -100,7 +105,7 @@ uint32_t crc_data_register_read(void)
     \brief      read the free data register
     \param[in]  none
     \param[out] none
-    \retval     8-bit value of the free data register
+    \retval     8-bit value of the free data register, 0-0xFF
 */
 uint8_t crc_free_data_register_read(void)
 {
@@ -186,7 +191,7 @@ void crc_polynomial_set(uint32_t poly)
       \arg        INPUT_FORMAT_HALFWORD: input data in half-word format
       \arg        INPUT_FORMAT_BYTE: input data in byte format
     \param[out] none
-    \retval     CRC calculate value
+    \retval     CRC calculate value, 0-0xFFFFFFFF
 */
 uint32_t crc_single_data_calculate(uint32_t sdata, uint8_t data_format)
 {
@@ -198,7 +203,7 @@ uint32_t crc_single_data_calculate(uint32_t sdata, uint8_t data_format)
         REG8(CRC) = (uint8_t)sdata;
     }
 
-    return(CRC_DATA);
+    return (CRC_DATA);
 }
 
 /*!
@@ -211,29 +216,27 @@ uint32_t crc_single_data_calculate(uint32_t sdata, uint8_t data_format)
       \arg        INPUT_FORMAT_HALFWORD: input data in half-word format
       \arg        INPUT_FORMAT_BYTE: input data in byte format
     \param[out] none
-    \retval     CRC calculate value
+    \retval     CRC calculate value, 0-0xFFFFFFFF
 */
 uint32_t crc_block_data_calculate(void *array, uint32_t size, uint8_t data_format)
 {
-    uint8_t *data8;
-    uint16_t *data16;
-    uint32_t *data32;
     uint32_t index;
+    uint32_t data = (uint32_t)array;
 
     if(INPUT_FORMAT_WORD == data_format) {
-        data32 = (uint32_t *)array;
         for(index = 0U; index < size; index++) {
-            REG32(CRC) = data32[index];
+            REG32(CRC) = *(uint32_t *)data;
+            data += 4U;
         }
     } else if(INPUT_FORMAT_HALFWORD == data_format) {
-        data16 = (uint16_t *)array;
         for(index = 0U; index < size; index++) {
-            REG16(CRC) = data16[index];
+            REG16(CRC) = *(uint16_t *)data;
+            data += 2U;
         }
     } else {
-        data8 = (uint8_t *)array;
         for(index = 0U; index < size; index++) {
-            REG8(CRC) = data8[index];
+            REG8(CRC) = *(uint8_t *)data;
+            data += 1U;
         }
     }
 

@@ -2,11 +2,11 @@
     \file    gd32l23x_wwdgt.h
     \brief   definitions for the WWDGT
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -77,6 +77,11 @@ OF SUCH DAMAGE.
 #define WWDGT_CFG_PSC_DIV4096       ((uint32_t)CFG_PSC(0,3))                  /*!< the time base of WWDGT = (PCLK1/4096)/4096 */
 #define WWDGT_CFG_PSC_DIV8192       ((uint32_t)CFG_PSC(1,3))                  /*!< the time base of WWDGT = (PCLK1/4096)/8192 */
 
+/* write value to WWDGT_CTL_CNT bit field */
+#define CTL_CNT(regval)             (BITS(0,6) & ((uint32_t)(regval) << 0))
+/* write value to WWDGT_CFG_WIN bit field */
+#define CFG_WIN(regval)             (BITS(0,6) & ((uint32_t)(regval) << 0)) 
+
 /* function declarations */
 /* reset the WWDGT configuration */
 void wwdgt_deinit(void);
@@ -92,11 +97,11 @@ void wwdgt_counter_update(uint16_t counter_value);
 /* configure counter value, window value, and prescaler divider value */
 void wwdgt_config(uint16_t counter, uint16_t window, uint32_t prescaler);
 
-/* enable early wakeup interrupt of WWDGT */
-void wwdgt_interrupt_enable(void);
 /* check early wakeup interrupt state of WWDGT */
 FlagStatus wwdgt_flag_get(void);
 /* clear early wakeup interrupt state of WWDGT */
 void wwdgt_flag_clear(void);
+/* enable early wakeup interrupt of WWDGT */
+void wwdgt_interrupt_enable(void);
 
 #endif /* GD32L23X_WWDGT_H */

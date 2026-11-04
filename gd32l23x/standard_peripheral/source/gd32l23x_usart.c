@@ -2,11 +2,11 @@
     \file    gd32l23x_usart.c
     \brief   USART driver
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -359,7 +359,6 @@ void usart_sample_bit_config(uint32_t usart_periph, uint32_t osb)
 {
     /* disable USART */
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
-
     USART_CTL2(usart_periph) &= ~(USART_CTL2_OSB);
     USART_CTL2(usart_periph) |= osb;
 }
@@ -406,9 +405,9 @@ void usart_receiver_timeout_threshold_config(uint32_t usart_periph, uint32_t rti
     \param[out] none
     \retval     none
 */
-void usart_data_transmit(uint32_t usart_periph, uint32_t data)
+void usart_data_transmit(uint32_t usart_periph, uint16_t data)
 {
-    USART_TDATA(usart_periph) = (USART_TDATA_TDATA & data);
+    USART_TDATA(usart_periph) = (USART_TDATA_TDATA & (uint32_t)data);
 }
 
 /*!
@@ -427,7 +426,6 @@ uint16_t usart_data_receive(uint32_t usart_periph)
     \param[in]  usart_periph: USARTx(x=0,1), UARTx(x=3,4)
     \param[in]  cmdtype: command type
                 only one parameter can be selected which is shown as below:
-      \arg        USART_CMD_ABDCMD: auto baudrate detection command
       \arg        USART_CMD_SBKCMD: send break command
       \arg        USART_CMD_MMCMD: mute mode command
       \arg        USART_CMD_RXFCMD: receive data flush command
@@ -441,45 +439,6 @@ void usart_command_enable(uint32_t usart_periph, uint32_t cmdtype)
 }
 
 /*!
-    \brief      enable auto baud rate detection
-    \param[in]  usart_periph: USARTx(x=0,1)
-    \param[out] none
-    \retval     none
-*/
-void usart_autobaud_detection_enable(uint32_t usart_periph)
-{
-    USART_CTL1(usart_periph) |= USART_CTL1_ABDEN;
-}
-
-/*!
-    \brief      disable auto baud rate detection
-    \param[in]  usart_periph: USARTx(x=0,1)
-    \param[out] none
-    \retval     none
-*/
-void usart_autobaud_detection_disable(uint32_t usart_periph)
-{
-    USART_CTL1(usart_periph) &= ~(USART_CTL1_ABDEN);
-}
-
-/*!
-    \brief      configure auto baud rate detection mode
-    \param[in]  usart_periph: USARTx(x=0,1)
-    \param[in]  abdmod: auto baud rate detection mode
-                only one parameter can be selected which is shown as below:
-      \arg        USART_ABDM_FTOR: falling edge to rising edge measurement
-      \arg        USART_ABDM_FTOF: falling edge to falling edge measurement
-    \param[out] none
-    \retval     none
-*/
-void usart_autobaud_detection_mode_config(uint32_t usart_periph, uint32_t abdmod)
-{
-    /* reset ABDM bits */
-    USART_CTL1(usart_periph) &= ~(USART_CTL1_ABDM);
-    USART_CTL1(usart_periph) |= abdmod;
-}
-
-/*!
     \brief      configure address of the USART
     \param[in]  usart_periph: USARTx(x=0,1), UARTx(x=3,4)
     \param[in]  addr: 0x00-0xFF, address of USART terminal
@@ -490,7 +449,6 @@ void usart_address_config(uint32_t usart_periph, uint8_t addr)
 {
     /* disable USART */
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
-
     USART_CTL1(usart_periph) &= ~(USART_CTL1_ADDR);
     USART_CTL1(usart_periph) |= (USART_CTL1_ADDR & (((uint32_t)addr) << 24U));
 }
@@ -509,7 +467,6 @@ void usart_address_detection_mode_config(uint32_t usart_periph, uint32_t addmod)
 {
     /* disable USART */
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
-
     USART_CTL1(usart_periph) &= ~(USART_CTL1_ADDM);
     USART_CTL1(usart_periph) |= USART_CTL1_ADDM & (addmod);
 }
@@ -550,7 +507,6 @@ void usart_mute_mode_wakeup_config(uint32_t usart_periph, uint32_t wmethod)
 {
     /* disable USART */
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
-
     USART_CTL0(usart_periph) &= ~(USART_CTL0_WM);
     USART_CTL0(usart_periph) |= wmethod;
 }
@@ -565,7 +521,6 @@ void usart_lin_mode_enable(uint32_t usart_periph)
 {
     /* disable USART */
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
-
     USART_CTL1(usart_periph) |= USART_CTL1_LMEN;
 }
 
@@ -579,7 +534,6 @@ void usart_lin_mode_disable(uint32_t usart_periph)
 {
     /* disable USART */
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
-
     USART_CTL1(usart_periph) &= ~(USART_CTL1_LMEN);
 }
 
@@ -611,7 +565,6 @@ void usart_halfduplex_enable(uint32_t usart_periph)
 {
     /* disable USART */
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
-
     USART_CTL2(usart_periph) |= USART_CTL2_HDEN;
 }
 
@@ -625,7 +578,6 @@ void usart_halfduplex_disable(uint32_t usart_periph)
 {
     /* disable USART */
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
-
     USART_CTL2(usart_periph) &= ~(USART_CTL2_HDEN);
 }
 
@@ -639,7 +591,6 @@ void usart_clock_enable(uint32_t usart_periph)
 {
     /* disable USART */
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
-
     USART_CTL1(usart_periph) |= USART_CTL1_CKEN;
 }
 
@@ -653,7 +604,6 @@ void usart_clock_disable(uint32_t usart_periph)
 {
     /* disable USART */
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
-
     USART_CTL1(usart_periph) &= ~(USART_CTL1_CKEN);
 }
 
@@ -698,7 +648,6 @@ void usart_guard_time_config(uint32_t usart_periph, uint32_t guat)
 {
     /* disable USART */
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
-
     USART_GP(usart_periph) &= ~(USART_GP_GUAT);
     USART_GP(usart_periph) |= (USART_GP_GUAT & ((guat) << 8U));
 }
@@ -713,7 +662,6 @@ void usart_smartcard_mode_enable(uint32_t usart_periph)
 {
     /* disable USART */
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
-
     USART_CTL2(usart_periph) |= USART_CTL2_SCEN;
 }
 
@@ -727,7 +675,6 @@ void usart_smartcard_mode_disable(uint32_t usart_periph)
 {
     /* disable USART */
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
-
     USART_CTL2(usart_periph) &= ~(USART_CTL2_SCEN);
 }
 
@@ -741,7 +688,6 @@ void usart_smartcard_mode_nack_enable(uint32_t usart_periph)
 {
     /* disable USART */
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
-
     USART_CTL2(usart_periph) |= USART_CTL2_NKEN;
 }
 
@@ -755,7 +701,6 @@ void usart_smartcard_mode_nack_disable(uint32_t usart_periph)
 {
     /* disable USART */
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
-
     USART_CTL2(usart_periph) &= ~(USART_CTL2_NKEN);
 }
 
@@ -819,7 +764,6 @@ void usart_irda_mode_enable(uint32_t usart_periph)
 {
     /* disable USART */
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
-
     USART_CTL2(usart_periph) |= USART_CTL2_IREN;
 }
 
@@ -833,7 +777,6 @@ void usart_irda_mode_disable(uint32_t usart_periph)
 {
     /* disable USART */
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
-
     USART_CTL2(usart_periph) &= ~(USART_CTL2_IREN);
 }
 
@@ -884,7 +827,6 @@ void usart_hardware_flow_rts_config(uint32_t usart_periph, uint32_t rtsconfig)
 {
     /* disable USART */
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
-
     USART_CTL2(usart_periph) &= ~(USART_CTL2_RTSEN);
     USART_CTL2(usart_periph) |= rtsconfig;
 }
@@ -903,7 +845,6 @@ void usart_hardware_flow_cts_config(uint32_t usart_periph, uint32_t ctsconfig)
 {
     /* disable USART */
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
-
     USART_CTL2(usart_periph) &= ~USART_CTL2_CTSEN;
     USART_CTL2(usart_periph) |= ctsconfig;
 }
@@ -934,7 +875,6 @@ void usart_rs485_driver_enable(uint32_t usart_periph)
 {
     /* disable USART */
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
-
     USART_CTL2(usart_periph) |= USART_CTL2_DEM;
 }
 
@@ -948,7 +888,6 @@ void usart_rs485_driver_disable(uint32_t usart_periph)
 {
     /* disable USART */
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
-
     USART_CTL2(usart_periph) &= ~(USART_CTL2_DEM);
 }
 
@@ -963,7 +902,6 @@ void usart_driver_assertime_config(uint32_t usart_periph, uint32_t deatime)
 {
     /* disable USART */
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
-
     USART_CTL0(usart_periph) &= ~(USART_CTL0_DEA);
     USART_CTL0(usart_periph) |= (USART_CTL0_DEA & ((deatime) << 21U));
 }
@@ -979,7 +917,6 @@ void usart_driver_deassertime_config(uint32_t usart_periph, uint32_t dedtime)
 {
     /* disable USART */
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
-
     USART_CTL0(usart_periph) &= ~(USART_CTL0_DED);
     USART_CTL0(usart_periph) |= (USART_CTL0_DED & ((dedtime) << 16U));
 }
@@ -1008,8 +945,8 @@ void usart_depolarity_config(uint32_t usart_periph, uint32_t dep)
     \param[in]  usart_periph: USARTx(x=0,1), UARTx(x=3,4)
     \param[in]  dmacmd: enable or disable DMA for reception
                 only one parameter can be selected which is shown as below:
-      \arg        USART_DENR_ENABLE: DMA enable for reception
-      \arg        USART_DENR_DISABLE: DMA disable for reception
+      \arg        USART_RECEIVE_DMA_ENABLE: DMA enable for reception
+      \arg        USART_RECEIVE_DMA_DISABLE: DMA disable for reception
     \param[out] none
     \retval     none
 */
@@ -1025,8 +962,8 @@ void usart_dma_receive_config(uint32_t usart_periph, uint32_t dmacmd)
     \param[in]  usart_periph: USARTx(x=0,1), UARTx(x=3,4)
     \param[in]  dmacmd: enable or disable DMA for transmission
                 only one parameter can be selected which is shown as below:
-      \arg        USART_DENT_ENABLE: DMA enable for transmission
-      \arg        USART_DENT_DISABLE: DMA disable for transmission
+      \arg        USART_TRANSMIT_DMA_ENABLE: DMA enable for transmission
+      \arg        USART_TRANSMIT_DMA_DISABLE: DMA disable for transmission
     \param[out] none
     \retval     none
 */
@@ -1047,7 +984,6 @@ void usart_reception_error_dma_disable(uint32_t usart_periph)
 {
     /* disable USART */
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
-
     USART_CTL2(usart_periph) |= USART_CTL2_DDRE;
 }
 
@@ -1061,7 +997,6 @@ void usart_reception_error_dma_enable(uint32_t usart_periph)
 {
     /* disable USART */
     USART_CTL0(usart_periph) &= ~(USART_CTL0_UEN);
-
     USART_CTL2(usart_periph) &= ~(USART_CTL2_DDRE);
 }
 
@@ -1158,8 +1093,6 @@ uint8_t usart_receive_fifo_counter_number(uint32_t usart_periph)
       \arg        USART_FLAG_CTS: CTS level
       \arg        USART_FLAG_RT: receiver timeout flag
       \arg        USART_FLAG_EB: end of block flag
-      \arg        USART_FLAG_ABDE: auto baudrate detection error
-      \arg        USART_FLAG_ABD: auto baudrate detection flag
       \arg        USART_FLAG_BSY: busy flag
       \arg        USART_FLAG_AM: address match flag
       \arg        USART_FLAG_SB: send break flag
@@ -1176,11 +1109,13 @@ uint8_t usart_receive_fifo_counter_number(uint32_t usart_periph)
 */
 FlagStatus usart_flag_get(uint32_t usart_periph, usart_flag_enum flag)
 {
+    FlagStatus flag_status = RESET;
     if(RESET != (USART_REG_VAL(usart_periph, flag) & BIT(USART_BIT_POS(flag)))) {
-        return SET;
+        flag_status = SET;
     } else {
-        return RESET;
+        flag_status = RESET;
     }
+    return flag_status;
 }
 
 /*!
@@ -1290,16 +1225,18 @@ void usart_interrupt_disable(uint32_t usart_periph, usart_interrupt_enum interru
 FlagStatus usart_interrupt_flag_get(uint32_t usart_periph, usart_interrupt_flag_enum int_flag)
 {
     uint32_t intenable = 0U, flagstatus = 0U;
+    FlagStatus flag_status = RESET;
     /* get the interrupt enable bit status */
     intenable = (USART_REG_VAL(usart_periph, int_flag) & BIT(USART_BIT_POS(int_flag)));
     /* get the corresponding flag bit status */
     flagstatus = (USART_REG_VAL2(usart_periph, int_flag) & BIT(USART_BIT_POS2(int_flag)));
 
     if(flagstatus && intenable) {
-        return SET;
+        flag_status = SET;
     } else {
-        return RESET;
+        flag_status = RESET;
     }
+    return flag_status;
 }
 
 /*!

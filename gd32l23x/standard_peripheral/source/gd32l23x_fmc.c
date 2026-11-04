@@ -2,11 +2,11 @@
     \file    gd32l23x_fmc.c
     \brief   FMC driver
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -42,12 +42,21 @@ OF SUCH DAMAGE.
 #define LOW_16BITS_MASK                   ((uint32_t)0x0000FFFFU)
 #define HIGH_16BITS_MASK                  ((uint32_t)0xFFFF0000U)
 
+#ifdef GD32L233
 /* USER of option bytes mask */
 #define OB_USER_MASK                      ((uint8_t)0x18U)
+#endif /* GD32L233 */
+#ifdef GD32L235
+/* USER of option bytes mask */
+#define OB_USER_MASK                      ((uint8_t)0x10U)
+#define ECCCS_REG_OFFSET                  ((uint32_t)0x00000018U)     /*!< ECCCS register offset */
+#define ECCCS_FLAG_MASK                   ((uint32_t)0x0000007FU)     /*!< flag mask in ECCCS register */
+#define ECCEADDR_OFFSET                   ((uint8_t)0x10U)              /*!< offset value of FMC_ECCCS_ECCADDR bits */
+#endif /* GD32L235 */
 
 /* default offset */
-#define FMC_OBSTAT_USER_OFFSET            2U
-#define FMC_OBSTAT_DATA_OFFSET            10U
+#define FMC_OBSTAT_USER_OFFSET            (0x02U)
+#define FMC_OBSTAT_DATA_OFFSET            (0x0AU)
 
 /* return the FMC state */
 static fmc_state_enum fmc_state_get(void);
@@ -84,26 +93,13 @@ void fmc_lock(void)
 }
 
 /*!
-    \brief      unlock operation of RUN_SLP bit in FMC_WS register
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-void fmc_slp_unlock(void)
-{
-    /* write the FMC sleep or power-down mode unlock key */
-    FMC_SLPKEY = SLP_UNLOCK_KEY0;
-    FMC_SLPKEY = SLP_UNLOCK_KEY1;
-}
-
-/*!
     \brief      set the wait state
     \param[in]  wscnt: wait state
                 only one parameter can be selected which is shown as below:
       \arg        FMC_WAIT_STATE_0: 0 wait state added
       \arg        FMC_WAIT_STATE_1: 1 wait state added
       \arg        FMC_WAIT_STATE_2: 2 wait state added
-      \arg        FMC_WAIT_STATE_3: 3 wait state added
+      \arg        FMC_WAIT_STATE_3: 3 wait state added, only for GD32L233
     \param[out] none
     \retval     none
 */
@@ -140,6 +136,7 @@ void fmc_prefetch_disable(void)
     FMC_WS &= ~FMC_WS_PFEN;
 }
 
+#ifdef GD32L233
 /*!
     \brief      enable low power
     \param[in]  none
@@ -161,50 +158,7 @@ void fmc_low_power_disable(void)
 {
     FMC_WS &= ~FMC_WS_LVE;
 }
-
-/*!
-    \brief      flash enter sleep/power-down mode during MCU run/low-power run mode
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-void fmc_enter_slp_enable(void)
-{
-    FMC_WS |= FMC_WS_RUN_SLP;
-}
-
-/*!
-    \brief      flash enter IDLE mode during MCU run/low-power run mode
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-void fmc_enter_slp_disable(void)
-{
-    FMC_WS &= ~FMC_WS_RUN_SLP;
-}
-
-/*!
-    \brief      flash enter sleep mode when MCU enter deep-sleep mode or RUN_SLP bit is set
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-void fmc_enter_sleep_enable(void)
-{
-    FMC_WS |= FMC_WS_SLEEP_SLP;
-}
-
-/*!
-    \brief      flash enter power-down mode when MCU enter deep-sleep mode or RUN_SLP bit is set
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-void fmc_enter_sleep_disable(void)
-{
-    FMC_WS &= ~FMC_WS_SLEEP_SLP;
-}
+#endif /* GD32L233 */
 
 /*!
     \brief      FMC erase page
@@ -259,6 +213,7 @@ fmc_state_enum fmc_mass_erase(void)
     return fmc_state;
 }
 
+#ifdef GD32L233
 /*!
     \brief      FMC program a word at the corresponding address
     \param[in]  address: address to program
@@ -307,7 +262,8 @@ fmc_state_enum fmc_fast_program(uint32_t address, uint64_t data[])
 
         /* program the row data */
         for(index = 0U; index < DOUBLE_WORDS_CNT_IN_ROW; index++) {
-            REG64(address) = data[index];
+            REG32(address) = (uint32_t)(data[index] & 0xFFFFFFFFU);
+            REG32(address + 4U) = (uint32_t)(data[index] >> 32U);
             address += 8U;
         }
 
@@ -321,6 +277,38 @@ fmc_state_enum fmc_fast_program(uint32_t address, uint64_t data[])
     /* return the FMC state */
     return fmc_state;
 }
+#endif /* GD32L233 */
+
+#ifdef GD32L235
+/*!
+    \brief      FMC program a double-word at the corresponding address
+    \param[in]  address: address to program
+    \param[in]  data: double-word to program
+    \param[out] none
+    \retval     state of FMC, refer to fmc_state_enum
+*/
+fmc_state_enum fmc_doubleword_program(uint32_t address, uint64_t data)
+{
+    fmc_state_enum fmc_state;
+
+    /* wait for the FMC ready */
+    fmc_state = fmc_ready_wait(FMC_TIMEOUT_COUNT);
+
+    if(FMC_READY == fmc_state) {
+        /* set the PG bit to start program */
+        FMC_CTL |= FMC_CTL_PG;
+        REG32(address) = (uint32_t)(data & 0xFFFFFFFFU);
+        REG32(address + 4U) = (uint32_t)((data >> 32U) & 0xFFFFFFFFU);
+        /* wait for the FMC ready */
+        fmc_state = fmc_ready_wait(FMC_TIMEOUT_COUNT);
+        /* reset the PG bit */
+        FMC_CTL &= ~FMC_CTL_PG;
+    }
+
+    /* return the FMC state */
+    return fmc_state;
+}
+#endif /* GD32L235 */
 
 /*!
     \brief      unlock the option bytes operation
@@ -361,12 +349,14 @@ void ob_lock(void)
 fmc_state_enum ob_erase(void)
 {
     uint32_t temp_spc;
+    uint32_t temp_data;
     fmc_state_enum fmc_state;
 
     /* wait for the FMC ready */
     fmc_state = fmc_ready_wait(FMC_TIMEOUT_COUNT);
 
     temp_spc = OB_SPC_USER;
+    temp_data = OB_DATA;
 
     /* check the option bytes security protection value */
     if((RESET != ob_security_protection_flag_get()) && (FMC_HSPC == (temp_spc & LOW_8BITS_MASK))) {
@@ -388,6 +378,8 @@ fmc_state_enum ob_erase(void)
             FMC_CTL |= FMC_CTL_OBPG;
             /* restore the last get option bytes security protection code */
             OB_SPC_USER = (temp_spc & LOW_8BITS_MASK) | LOW_8BITS_MASK1;
+            /* restore the last get option bytes data code */
+            OB_DATA = temp_data;
             /* wait for the FMC ready */
             fmc_state = fmc_ready_wait(FMC_TIMEOUT_COUNT);
 
@@ -433,8 +425,8 @@ fmc_state_enum ob_write_protection_enable(uint32_t ob_wp)
     }
 
     ob_wp      = (uint32_t)(~ob_wp);
-    op_byte[2] = (ob_wp & LOW_8BITS_MASK) | ((ob_wp & HIGH_8BITS_MASK) << 8);
-    op_byte[3] = ((ob_wp & LOW_8BITS_MASK1) >> 16) | ((ob_wp & HIGH_8BITS_MASK1) >> 8);
+    op_byte[2] = (ob_wp & LOW_8BITS_MASK) | ((ob_wp & HIGH_8BITS_MASK) << 8U);
+    op_byte[3] = ((ob_wp & LOW_8BITS_MASK1) >> 16U) | ((ob_wp & HIGH_8BITS_MASK1) >> 8U);
 
     if(FMC_READY == fmc_state) {
         /* start erase the option byte */
@@ -556,10 +548,19 @@ fmc_state_enum ob_security_protection_config(uint8_t ob_spc)
       \arg        OB_BOR_TH_VALUE2: BOR threshold value 2
       \arg        OB_BOR_TH_VALUE1: BOR threshold value 1
       \arg        OB_BOR_TH_VALUE0: BOR threshold value 0
+    \param[in]  ob_sram_parity_check: option bytes sram parity check value, only for GD32L235
+                only one parameter can be selected which is shown as below:
+      \arg        OB_SRAM_PARITY_CHECK_ENABLE: enable SRAM parity check
+      \arg        OB_SRAM_PARITY_CHECK_DISABLE: disable SRAM parity check
     \param[out] none
     \retval     state of FMC, refer to fmc_state_enum
 */
+#ifdef GD32L233
 fmc_state_enum ob_user_write(uint8_t ob_fwdgt, uint8_t ob_deepsleep, uint8_t ob_stdby, uint8_t ob_bor_th)
+#endif /* GD32L233 */
+#ifdef GD32L235
+fmc_state_enum ob_user_write(uint8_t ob_fwdgt, uint8_t ob_deepsleep, uint8_t ob_stdby, uint8_t ob_bor_th, uint8_t ob_sram_parity_check)
+#endif /* GD32L235 */
 {
     uint32_t temp_spc;
     uint8_t temp;
@@ -578,7 +579,13 @@ fmc_state_enum ob_user_write(uint8_t ob_fwdgt, uint8_t ob_deepsleep, uint8_t ob_
     for(i = 0U; i < 4U; i++) {
         op_byte[i] = OP_BYTE(i);
     }
+#ifdef GD32L233
     temp = ((uint8_t)((uint8_t)((uint8_t)((uint8_t)(ob_fwdgt) | ob_deepsleep) | ob_stdby) | ob_bor_th) | (OB_USER_MASK));
+#endif /* GD32L233 */
+#ifdef GD32L235
+    temp = ((uint8_t)((uint8_t)((uint8_t)((uint8_t)((uint8_t)(ob_fwdgt) | ob_deepsleep) | ob_stdby) | ob_bor_th) |
+                      ob_sram_parity_check) | (OB_USER_MASK));
+#endif /* GD32L235 */
     op_byte[0] = ((uint32_t)(temp) << 16U) | ((op_byte[0] & LOW_16BITS_MASK));
 
     if(FMC_READY == fmc_state) {
@@ -614,7 +621,7 @@ fmc_state_enum ob_user_write(uint8_t ob_fwdgt, uint8_t ob_deepsleep, uint8_t ob_
 
 /*!
     \brief      program option bytes DATA
-    \param[in]  data: the data to be programmed
+    \param[in]  ob_data: the data to be programmed
     \param[out] none
     \retval     state of FMC, refer to fmc_state_enum
 */
@@ -724,6 +731,177 @@ FlagStatus ob_security_protection_flag_get(void)
     return spc_state;
 }
 
+#ifdef GD32L235
+/*!
+    \brief      get the address where ECC error occur on
+    \param[in]  none
+    \param[out] none
+    \retval     uint16_t: the address where ECC error occur on
+*/
+uint16_t fmc_ecc_address_get(void)
+{
+    return (uint16_t)(FMC_ECCCS >> ECCEADDR_OFFSET);
+}
+#endif /* GD32L235 */
+
+/*!
+    \brief      unlock operation of RUN_SLP bit in FMC_WS register
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void fmc_slp_unlock(void)
+{
+    /* write the FMC sleep or power-down mode unlock key */
+    FMC_SLPKEY = SLP_UNLOCK_KEY0;
+    FMC_SLPKEY = SLP_UNLOCK_KEY1;
+}
+
+/*!
+    \brief      flash enter sleep mode when MCU enter deep-sleep mode or RUN_SLP bit is set
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void fmc_sleep_slp_enable(void)
+{
+    FMC_WS |= FMC_WS_SLEEP_SLP;
+}
+
+/*!
+    \brief      For GD32L233, flash enter power-down mode when MCU enter deep-sleep mode or RUN_SLP bit is set
+                For GD32L235, flash enter idle mode when MCU enter deep-sleep mode or RUN_SLP bit is set
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void fmc_sleep_slp_disable(void)
+{
+    FMC_WS &= ~FMC_WS_SLEEP_SLP;
+}
+
+
+/*!
+    \brief      For GD32L233, flash enter idle mode when MCU run mode or enter low-power run mode (together with the SLEEP_SLP bit)
+                For GD32L235, flash enter idle mode when MCU run mode (together with the SLEEP_SLP bit)
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void fmc_run_slp_enable(void)
+{
+    FMC_WS |= FMC_WS_RUN_SLP;
+}
+
+/*!
+    \brief      For GD32L233, flash enter sleep or power-down mode when MCU run mode or enter low-power run mode (together with the SLEEP_SLP bit)
+                For GD32L235, flash enter sleep mode when MCU run mode (together with the SLEEP_SLP bit)
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void fmc_run_slp_disable(void)
+{
+    FMC_WS &= ~FMC_WS_RUN_SLP;
+}
+
+/*!
+    \brief      flash enter sleep mode when MCU run mode
+                Please note that this function needs to run in SRAM.
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void fmc_sleep_mode_enter(void)
+{
+    uint32_t ws;
+
+    if(RESET == (FMC_STAT & FMC_STAT_FSTAT)) {
+        /* write the FMC RUNC_SLP unlock key */
+        FMC_SLPKEY = SLP_UNLOCK_KEY0;
+        FMC_SLPKEY = SLP_UNLOCK_KEY1;
+
+        ws = FMC_WS;
+
+        /* set the SLEEP_SLP bit */
+        ws |= FMC_WS_SLEEP_SLP;
+
+        /* set the RUN_SLP bit */
+        ws |= FMC_WS_RUN_SLP;
+
+        FMC_WS = ws;
+
+#ifdef GD32L233
+        /* wait FMC enter sleep mode */
+        while(FMC_FSTAT_SLP_PD_MODE != (FMC_STAT & FMC_STAT_FSTAT)) {
+        }
+#endif /* GD32L233 */
+#ifdef GD32L235
+        /* wait FMC enter sleep mode */
+        while(FMC_FSTAT_SLEEP_MODE != (FMC_STAT & FMC_STAT_FSTAT)) {
+        }
+#endif /* GD32L235 */
+    }
+}
+
+#ifdef GD32L233
+/*!
+    \brief      flash enter power down mode when MCU run mode/low-power run mode
+                Please note that this function needs to run in SRAM.
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void fmc_pd_mode_enter(void)
+{
+    uint32_t ws;
+
+    if(RESET == (FMC_STAT & FMC_STAT_FSTAT)) {
+        /* write the FMC RUNC_SLP unlock key */
+        FMC_SLPKEY = SLP_UNLOCK_KEY0;
+        FMC_SLPKEY = SLP_UNLOCK_KEY1;
+
+        ws = FMC_WS;
+
+        /* set the SLEEP_SLP bit */
+        ws |= FMC_WS_SLEEP_SLP;
+
+        /* set the RUN_SLP bit */
+        ws |= FMC_WS_RUN_SLP;
+
+        FMC_WS = ws;
+
+        /* wait FMC enter slp_pd mode */
+        while(FMC_FSTAT_SLP_PD_MODE != (FMC_STAT & FMC_STAT_FSTAT)) {
+        }
+    }
+}
+#endif /* GD32L233 */
+
+/*!
+    \brief      For GD32L233, flash exit sleep or power-down mode when MCU run mode/low-power run mode
+                For GD32L235, flash exit sleep mode when MCU run mode mode
+                Please note that this function needs to run in SRAM.
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void fmc_slp_mode_exit(void)
+{
+    if(RESET != (FMC_STAT & FMC_STAT_FSTAT)) {
+        /* write the FMC RUNC_SLP unlock key */
+        FMC_SLPKEY = SLP_UNLOCK_KEY0;
+        FMC_SLPKEY = SLP_UNLOCK_KEY1;
+
+        /* clear the RUN_SLP bit */
+        FMC_WS &= ~FMC_WS_RUN_SLP;
+
+        /* wait FMC enter idle mode */
+        while(FMC_FSTAT_IDLE_MODE != (FMC_STAT & FMC_STAT_FSTAT)) {
+        }
+    }
+}
+
 /*!
     \brief      get FMC flag status
     \param[in]  flag: FMC flag
@@ -733,19 +911,30 @@ FlagStatus ob_security_protection_flag_get(void)
       \arg        FMC_FLAG_PGAERR: FMC program alignment error flag
       \arg        FMC_FLAG_WPERR: FMC erase/program protection error flag
       \arg        FMC_FLAG_END: FMC end of operation flag
-      \arg        FMC_FLAG_SLP: FMC sleep or power down flag
+                  only for GD32L235
+      \arg        FMC_FLAG_ECCCOR: one bit error detected and correct flag
+      \arg        FMC_FLAG_ECCDET: two bit error detect flag
+      \arg        FMC_FLAG_SYSECC: an ECC error is detected in system memory flag
+      \arg        FMC_FLAG_MFECC: an ECC error is detected in main Flash flag
+      \arg        FMC_FLAG_OTPECC: an ECC error is detected in OTP flag
+      \arg        FMC_FLAG_OBECC: an ECC error is detected in reading option bytes flag
+      \arg        FMC_FLAG_OBECCDET: option bytes two bit error detect in loading option bytes to register flag
+      \arg        FMC_FLAG_OBERR: option bytes error flag
     \param[out] none
     \retval     FlagStatus: SET or RESET
 */
-FlagStatus fmc_flag_get(uint32_t flag)
+FlagStatus fmc_flag_get(fmc_flag_enum flag)
 {
-    FlagStatus status = RESET;
-
-    if(FMC_STAT & flag) {
-        status = SET;
+    FlagStatus flag_status;
+    
+    /* get other flag */
+    if(0U != (FMC_REG_VAL(flag) & BIT(FMC_BIT_POS(flag)))) {
+        flag_status = SET;
+    } else {
+        flag_status = RESET;
     }
-    /* return the state of corresponding FMC flag */
-    return status;
+    
+    return flag_status;
 }
 
 /*!
@@ -756,14 +945,37 @@ FlagStatus fmc_flag_get(uint32_t flag)
       \arg        FMC_FLAG_PGAERR: FMC program alignment error flag
       \arg        FMC_FLAG_WPERR: FMC erase/program protection error flag
       \arg        FMC_FLAG_END: FMC end of operation flag
-      \arg        FMC_FLAG_SLP: FMC sleep or power down flag
+                  only for GD32L235
+      \arg        FMC_FLAG_ECCCOR: one bit error detected and correct flag
+      \arg        FMC_FLAG_ECCDET: two bit error detect flag
+      \arg        FMC_FLAG_SYSECC: an ECC error is detected in system memory flag
+      \arg        FMC_FLAG_MFECC: an ECC error is detected in main Flash flag
+      \arg        FMC_FLAG_OTPECC: an ECC error is detected in OTP flag
+      \arg        FMC_FLAG_OBECC: an ECC error is detected in reading option bytes flag
+      \arg        FMC_FLAG_OBECCDET: option bytes two bit error detect in loading option bytes to register flag
     \param[out] none
     \retval     none
 */
-void fmc_flag_clear(uint32_t flag)
+void fmc_flag_clear(fmc_flag_enum flag)
 {
-    /* clear the flags */
-    FMC_STAT = flag;
+#ifdef GD32L235
+    uint32_t reg_offset, reg;
+
+    reg_offset = ((uint32_t)(flag) & 0x0000FFFFU) >> 6U;
+    /* clear the flags in ECCCS register */
+    if(ECCCS_REG_OFFSET == reg_offset) {
+        reg = FMC_REG_VAL(flag);
+        reg &= ~ECCCS_FLAG_MASK;
+        reg |= BIT(FMC_BIT_POS(flag));
+        FMC_REG_VAL(flag) = reg;
+    } else {
+        /* clear the flags in STAT register */
+        FMC_REG_VAL(flag) = BIT(FMC_BIT_POS(flag));
+    }
+#else
+    /* clear the flags in STAT register */
+    FMC_REG_VAL(flag) = BIT(FMC_BIT_POS(flag));
+#endif
 }
 
 /*!
@@ -772,12 +984,32 @@ void fmc_flag_clear(uint32_t flag)
                 only one parameter can be selected which is shown as below:
       \arg        FMC_INT_END: FMC end of operation interrupt
       \arg        FMC_INT_ERR: FMC error interrupt
+                  only for GD32L235
+      \arg        FMC_INT_ECCCOR: FMC one bit error correct interrupt
+      \arg        FMC_INT_ECCDET: FMC two bits error interrupt
     \param[out] none
     \retval     none
 */
-void fmc_interrupt_enable(uint32_t interrupt)
+void fmc_interrupt_enable(fmc_interrupt_enum interrupt)
 {
-    FMC_CTL |= interrupt;
+#ifdef GD32L235
+    uint32_t reg_offset, reg;
+
+    reg_offset = ((uint32_t)(interrupt) & 0x0000FFFFU) >> 6U;
+    /* enable interrupt in ECCCS register */
+    if(ECCCS_REG_OFFSET == reg_offset) {
+        reg = FMC_REG_VAL(interrupt);
+        reg &= ~ECCCS_FLAG_MASK;
+        reg |= BIT(FMC_BIT_POS(interrupt));
+        FMC_REG_VAL(interrupt) = reg;
+    } else {
+        /* enable interrupt in CTL register */
+        FMC_REG_VAL(interrupt) |= BIT(FMC_BIT_POS(interrupt));
+    }
+#else
+    /* enable interrupt in CTL register */
+    FMC_REG_VAL(interrupt) |= BIT(FMC_BIT_POS(interrupt));
+#endif
 }
 
 /*!
@@ -786,51 +1018,103 @@ void fmc_interrupt_enable(uint32_t interrupt)
                 only one parameter can be selected which is shown as below:
       \arg        FMC_INT_END: FMC end of operation interrupt
       \arg        FMC_INT_ERR: FMC error interrupt
+                  only for GD32L235
+      \arg        FMC_INT_ECCCOR: FMC one bit error correct interrupt
+      \arg        FMC_INT_ECCDET: FMC two bits error interrupt
     \param[out] none
     \retval     none
 */
-void fmc_interrupt_disable(uint32_t interrupt)
+void fmc_interrupt_disable(fmc_interrupt_enum interrupt)
 {
-    FMC_CTL &= ~(uint32_t)interrupt;
+#ifdef GD32L235
+    uint32_t reg_offset, reg;
+
+    reg_offset = ((uint32_t)(interrupt) & 0x0000FFFFU) >> 6U;
+    /* disable interrupt in ECCCS register */
+    if(ECCCS_REG_OFFSET == reg_offset) {
+        reg = FMC_REG_VAL(interrupt);
+        reg &= ~ECCCS_FLAG_MASK;
+        reg &= ~BIT(FMC_BIT_POS(interrupt));
+        FMC_REG_VAL(interrupt) = reg;
+    } else {
+        /* disable interrupt in CTL register */
+        FMC_REG_VAL(interrupt) &= ~BIT(FMC_BIT_POS(interrupt));
+    }
+#else
+    /* disable interrupt in CTL register */
+    FMC_REG_VAL(interrupt) &= ~BIT(FMC_BIT_POS(interrupt));
+#endif
 }
 
 /*!
     \brief      get FMC interrupt flag
-    \param[in]  flag: FMC interrupt flag
+    \param[in]  int_flag: FMC interrupt flag
                 only one parameter can be selected which is shown as below:
       \arg        FMC_INT_FLAG_PGERR: FMC program operation error interrupt flag
       \arg        FMC_INT_FLAG_PGAERR: FMC program alignment error interrupt flag
       \arg        FMC_INT_FLAG_WPERR: FMC erase/program protection error interrupt flag
       \arg        FMC_INT_FLAG_END: FMC end of operation interrupt flag
+                  only for GD32L235
+      \arg        FMC_INT_FLAG_ECCCOR: one bit error detected and correct interrupt flag
+      \arg        FMC_INT_FLAG_ECCDET: two bits error detect interrupt flag
+      \arg        FMC_INT_FLAG_OBECCDET: option bytes two bit error detect in loading option bytes to register interrupt flag
     \param[out] none
     \retval     FlagStatus: SET or RESET
 */
-FlagStatus fmc_interrupt_flag_get(uint32_t flag)
+FlagStatus fmc_interrupt_flag_get(fmc_interrupt_flag_enum int_flag)
 {
-    FlagStatus status = RESET;
+    uint32_t intenable = 0U, flagstatus = 0U;
+    FlagStatus flag_status;
+    
+    /* get the interrupt enable bit status */
+    intenable = (FMC_REG_VAL(int_flag) & BIT(FMC_BIT_POS(int_flag)));
+    /* get the corresponding flag bit status */
+    flagstatus = (FMC_REG_VAL2(int_flag) & BIT(FMC_BIT_POS2(int_flag)));
 
-    if(FMC_STAT & flag) {
-        status = SET;
+    if(flagstatus && intenable) {
+        flag_status = SET;
+    } else {
+        flag_status = RESET;
     }
-    /* return the state of corresponding FMC flag */
-    return status;
+    
+    return flag_status;
 }
 
 /*!
     \brief      clear FMC interrupt flag
-    \param[in]  flag: FMC interrupt flag
-                one or more parameters can be selected which is shown as below:
+    \param[in]  int_flag: FMC interrupt flag
+                only one parameter can be selected which is shown as below:
       \arg        FMC_INT_FLAG_PGERR: FMC program operation error interrupt flag
       \arg        FMC_INT_FLAG_PGAERR: FMC program alignment error interrupt flag
       \arg        FMC_INT_FLAG_WPERR: FMC erase/program protection error interrupt flag
       \arg        FMC_INT_FLAG_END: FMC end of operation interrupt flag
+                  only for GD32L235
+      \arg        FMC_INT_FLAG_ECCCOR: one bit error detected and correct interrupt flag
+      \arg        FMC_INT_FLAG_ECCDET: two bits error detect interrupt flag
+      \arg        FMC_INT_FLAG_OBECCDET: option bytes two bit error detect in loading option bytes to register interrupt flag
     \param[out] none
     \retval     none
 */
-void fmc_interrupt_flag_clear(uint32_t flag)
+void fmc_interrupt_flag_clear(fmc_interrupt_flag_enum int_flag)
 {
-    /* clear the flag */
-    FMC_STAT = flag;
+#ifdef GD32L235
+    uint32_t reg_offset, reg;
+
+    reg_offset = (uint32_t)(int_flag) >> 22U;
+    /* clear the interrupt flag in ECCCS register */
+    if(ECCCS_REG_OFFSET == reg_offset) {
+        reg = FMC_REG_VAL2(int_flag);
+        reg &= ~ECCCS_FLAG_MASK;
+        reg |= BIT(FMC_BIT_POS2(int_flag));
+        FMC_REG_VAL2(int_flag) = reg;
+    } else {
+        /* clear the interrupt flag in STAT register */
+        FMC_REG_VAL2(int_flag) = BIT(FMC_BIT_POS2(int_flag));
+    }
+#else
+    /* clear the interrupt flag in STAT register */
+    FMC_REG_VAL2(int_flag) = BIT(FMC_BIT_POS2(int_flag));
+#endif
 }
 
 /*!

@@ -2,11 +2,11 @@
     \file    gd32l23x_gpio.h
     \brief   definitions for the GPIO
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -349,6 +349,8 @@ typedef FlagStatus bit_status;
 #define GPIO_AF_7                  AF(7)                           /*!< alternate function 7 selected */
 #define GPIO_AF_8                  AF(8)                           /*!< alternate function 8 selected */
 #define GPIO_AF_9                  AF(9)                           /*!< alternate function 9 selected */
+#define GPIO_AF_10                 AF(10)                          /*!< alternate function 10 selected */
+#define GPIO_AF_11                 AF(11)                          /*!< alternate function 11 selected */
 
 /* function declarations */
 /* reset GPIO port */

@@ -2,11 +2,11 @@
     \file    gd32l23x_crc.h
     \brief   definitions for the CRC
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -38,7 +38,7 @@ OF SUCH DAMAGE.
 #include "gd32l23x.h"
 
 /* CRC definitions */
-#define CRC                            CRC_BASE                        /*!< CRC bsae address */
+#define CRC                            CRC_BASE                        /*!< CRC base address */
 
 /* registers definitions */
 #define CRC_DATA                       REG32((CRC) + 0x00000000U)      /*!< CRC data register */
@@ -60,8 +60,8 @@ OF SUCH DAMAGE.
 #define CRC_CTL_REV_I                  BITS(5, 6)                      /*!< input data reverse function bits */
 #define CRC_CTL_REV_O                  BIT(7)                          /*!< output data reverse function bit */
 
-/* CRC_INIT */
-#define CRC_IDATA_IDATA                BITS(0, 31)                     /*!< CRC initialization data bits */
+/* CRC_IDATA */
+#define CRC_IDATA_IDATA                BITS(0, 31)                     /*!< CRC initialization data */
 
 /* CRC_POLY */
 #define CRC_POLY_POLY                  BITS(0, 31)                     /*!< CRC polynomial value bits */
@@ -104,7 +104,7 @@ uint8_t crc_free_data_register_read(void);
 /* write the free data register */
 void crc_free_data_register_write(uint8_t free_data);
 
-/* write the initial value register */
+/* write the initialization value register */
 void crc_init_data_register_write(uint32_t init_data);
 /* configure the CRC input data function */
 void crc_input_data_reverse_config(uint32_t data_reverse);
