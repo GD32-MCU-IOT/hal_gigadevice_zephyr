@@ -184,6 +184,33 @@ Below table show the invalid signal, pins mapping.
 | SPI0_MISO  | PB14      |
 | SPI0_MOSI  | PB15      |
 
+### GD32E230
+For GD32E230x8/6 devices, there have some invalid signal mapping for USART0, I2C0 and SPI0.
+These alternate functions are only available on GD32E230x4 devices (datasheet note (1)), on
+GD32E230x8/6 the related pins are already mapping to USART1, I2C1 and SPI1.
+
+Below table show the invalid signal, pins mapping.
+
+| SIGNAL     | PINS      |
+| ---------- | --------- |
+| USART0_CTS | PA0       |
+| USART0_RTS | PA1       |
+| USART0_DE  | PA1       |
+| USART0_TX  | PA2, PA14 |
+| USART0_RX  | PA3, PA15 |
+| USART0_CK  | PA4       |
+| I2C0_SCL   | PB10, PF6 |
+| I2C0_SDA   | PB11, PF7 |
+| SPI0_NSS   | PB12      |
+| SPI0_SCK   | PB13      |
+| SPI0_MISO  | PB14      |
+| SPI0_MOSI  | PB15      |
+
+GD32E230Kx-QFN32 and GD32E230Kx-LQFP32 have same pincode 'K'. To avoid pincode conflict, change GD32E230Kx-QFN32 pincode to 'Q'.
+
+On GD32E230Fx, GD32E230Ex and GD32E230Gx packages, PA11/PA12 can be remapped onto the PA9/PA10 pads
+through SYSCFG_CFG0. This remap is not described in gd32e230xx.yml.
+
 #### GD32L233
 
 GD32L233Kx-QFN32 and GD32L233Kx-LQFP32 have same pincode 'K'. To avoid pincode conflict, change GD32L233Kx-QFN32 pincode to 'Q'.
