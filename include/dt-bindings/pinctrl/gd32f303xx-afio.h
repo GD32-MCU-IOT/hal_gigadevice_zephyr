@@ -75,6 +75,11 @@
 /** SPI2 (remap) */
 #define GD32_SPI2_RMP		GD32_REMAP(0U, 28U, 0x1U, 1U)
 
+/** I2S2 (no remap) */
+#define GD32_I2S2_NORMP		GD32_REMAP(0U, 28U, 0x1U, 0U)
+/** I2S2 (remap) */
+#define GD32_I2S2_RMP		GD32_REMAP(0U, 28U, 0x1U, 1U)
+
 /** TIMER8 (no remap) */
 #define GD32_TIMER8_NORMP	GD32_REMAP(1U, 5U, 0x1U, 0U)
 /** TIMER8 (remap) */
@@ -102,9 +107,11 @@
 
 /** CTC (no remap) */
 #define GD32_CTC_NORMP		GD32_REMAP(1U, 11U, 0x3U, 0U)
-/** CTC (partial remap) */
-#define GD32_CTC_PRMP		GD32_REMAP(1U, 11U, 0x3U, 1U)
+/** CTC (partial remap 1) */
+#define GD32_CTC_PRMP1		GD32_REMAP(1U, 11U, 0x3U, 1U)
+/** CTC (partial remap 2) */
+#define GD32_CTC_PRMP2		GD32_REMAP(1U, 11U, 0x3U, 2U)
 /** CTC (full remap) */
-#define GD32_CTC_FRMP		GD32_REMAP(1U, 11U, 0x3U, 2U)
+#define GD32_CTC_FRMP		GD32_REMAP(1U, 11U, 0x3U, 3U)
 
 #endif /* GD32F303XX_AFIO_H_ */
