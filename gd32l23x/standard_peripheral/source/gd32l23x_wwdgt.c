@@ -2,11 +2,11 @@
     \file    gd32l23x_wwdgt.c
     \brief   WWDGT driver
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -33,11 +33,6 @@ OF SUCH DAMAGE.
 */
 
 #include "gd32l23x_wwdgt.h"
-
-/* WWDGT_CTL register value */
-#define CTL_CNT(regval)             (BITS(0,6) & ((uint32_t)(regval) << 0U))    /*!< write value to WWDGT_CTL_CNT bit field */
-/* WWDGT_CFG register value */
-#define CFG_WIN(regval)             (BITS(0,6) & ((uint32_t)(regval) << 0U))    /*!< write value to WWDGT_CFG_WIN bit field */
 
 /*!
     \brief      reset the WWDGT configuration
@@ -132,6 +127,16 @@ void wwdgt_counter_update(uint16_t counter_value)
       \arg        WWDGT_CFG_PSC_DIV2: the time base of window watchdog counter = (PCLK1/4096)/2
       \arg        WWDGT_CFG_PSC_DIV4: the time base of window watchdog counter = (PCLK1/4096)/4
       \arg        WWDGT_CFG_PSC_DIV8: the time base of window watchdog counter = (PCLK1/4096)/8
+      \arg        WWDGT_CFG_PSC_DIV16: the time base of window watchdog counter = (PCLK1/4096)/16
+      \arg        WWDGT_CFG_PSC_DIV32: the time base of window watchdog counter = (PCLK1/4096)/32
+      \arg        WWDGT_CFG_PSC_DIV64: the time base of window watchdog counter = (PCLK1/4096)/64
+      \arg        WWDGT_CFG_PSC_DIV128: the time base of window watchdog counter = (PCLK1/4096)/128
+      \arg        WWDGT_CFG_PSC_DIV256: the time base of window watchdog counter = (PCLK1/4096)/256
+      \arg        WWDGT_CFG_PSC_DIV512: the time base of window watchdog counter = (PCLK1/4096)/512
+      \arg        WWDGT_CFG_PSC_DIV1024: the time base of window watchdog counter = (PCLK1/4096)/1024
+      \arg        WWDGT_CFG_PSC_DIV2048: the time base of window watchdog counter = (PCLK1/4096)/2048
+      \arg        WWDGT_CFG_PSC_DIV4096: the time base of window watchdog counter = (PCLK1/4096)/4096
+      \arg        WWDGT_CFG_PSC_DIV8192: the time base of window watchdog counter = (PCLK1/4096)/8192
     \param[out] none
     \retval     none
 */
@@ -142,17 +147,6 @@ void wwdgt_config(uint16_t counter, uint16_t window, uint32_t prescaler)
 }
 
 /*!
-    \brief      enable early wakeup interrupt of WWDGT
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-void wwdgt_interrupt_enable(void)
-{
-    WWDGT_CFG |= WWDGT_CFG_EWIE;
-}
-
-/*!
     \brief      check early wakeup interrupt state of WWDGT
     \param[in]  none
     \param[out] none
@@ -160,11 +154,12 @@ void wwdgt_interrupt_enable(void)
 */
 FlagStatus wwdgt_flag_get(void)
 {
+    FlagStatus flag_status = RESET;
     if(RESET != (WWDGT_STAT & WWDGT_STAT_EWIF)) {
-        return SET;
+        flag_status = SET;
     }
 
-    return RESET;
+    return flag_status;
 }
 
 /*!
@@ -176,4 +171,15 @@ FlagStatus wwdgt_flag_get(void)
 void wwdgt_flag_clear(void)
 {
     WWDGT_STAT &= ~(uint32_t)(WWDGT_STAT_EWIF);
+}
+
+/*!
+    \brief      enable early wakeup interrupt of WWDGT
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void wwdgt_interrupt_enable(void)
+{
+    WWDGT_CFG |= WWDGT_CFG_EWIE;
 }

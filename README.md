@@ -128,6 +128,15 @@ conflict resolution. See below list with the proposed solution:
   - i2c have different implement than current gd32 i2c driver. no need to patch
     upper i2c speed requirement.
 
+  - V2.4.0: `RCU_CFG2_LPUART1SEL` is defined as `BITS(25,24)`, fix it to
+    `BITS(24,25)`. `rcu_clock_freq_get()` compares the LPUART1, LPTIMER1, I2C1
+    and I2C2 selector fields with values encoded at the LPUART0, LPTIMER0 and
+    I2C0 positions; extract the field with `GET_BITS()` and re-encode it with
+    the matching `CFG2_*SEL()` macro.
+
+  - V2.4.0: CMSIS core headers (`core_cm23.h`, `cmsis_*.h`) shipped in the
+    package are not imported, the cmsis_6 module is used instead.
+
 - gd32a50x
 
   - `SystemCoreClockUpdate` function contain an `pllmf` calculate error.  

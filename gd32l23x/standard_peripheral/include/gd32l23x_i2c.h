@@ -2,11 +2,11 @@
     \file    gd32l23x_i2c.h
     \brief   definitions for the I2C
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -80,7 +80,7 @@ OF SUCH DAMAGE.
 #define I2C_CTL0_PECEN                  BIT(23)                         /*!< PEC calculation switch */
 
 /* I2Cx_CTL1 */
-#define I2C_CTL1_SADDRESS               BITS(0,9)                       /*!< received slave address */
+#define I2C_CTL1_SADDRESS               BITS(0,9)                       /*!< slave address to be sent */
 #define I2C_CTL1_TRDIR                  BIT(10)                         /*!< transfer direction in master mode */
 #define I2C_CTL1_ADD10EN                BIT(11)                         /*!< 10-bit addressing mode enable in master mode */
 #define I2C_CTL1_HEAD10R                BIT(12)                         /*!< 10-bit address header executes read direction only in master receive mode */
@@ -132,7 +132,7 @@ OF SUCH DAMAGE.
 #define I2C_STAT_OUERR                  BIT(10)                         /*!< overrun/underrun error in slave mode */
 #define I2C_STAT_PECERR                 BIT(11)                         /*!< PEC error */
 #define I2C_STAT_TIMEOUT                BIT(12)                         /*!< timeout flag */
-#define I2C_STAT_SMBALT                 BIT(13)                         /*!< SMBus Alert */
+#define I2C_STAT_SMBALT                 BIT(13)                         /*!< SMBus alert */
 #define I2C_STAT_I2CBSY                 BIT(15)                         /*!< busy flag */
 #define I2C_STAT_TR                     BIT(16)                         /*!< whether the I2C is a transmitter or a receiver in slave mode */
 #define I2C_STAT_READDR                 BITS(17,23)                     /*!< received match address in slave mode */
@@ -146,7 +146,7 @@ OF SUCH DAMAGE.
 #define I2C_STATC_OUERRC                BIT(10)                         /*!< overrun/underrun flag clear */
 #define I2C_STATC_PECERRC               BIT(11)                         /*!< PEC error flag clear */
 #define I2C_STATC_TIMEOUTC              BIT(12)                         /*!< TIMEOUT flag clear */
-#define I2C_STATC_SMBALTC               BIT(13)                         /*!< SMBus Alert flag clear */
+#define I2C_STATC_SMBALTC               BIT(13)                         /*!< SMBus alert flag clear */
 
 /* I2Cx_PEC */
 #define I2C_PEC_PECV                    BITS(0,7)                       /*!< Packet Error Checking Value that calculated by hardware when PEC is enabled */
@@ -195,22 +195,22 @@ typedef enum {
 #define I2C_DMA_TRANSMIT                ((uint32_t)0x00000000U)         /*!< I2C transmit data use DMA */
 #define I2C_DMA_RECEIVE                 ((uint32_t)0x00000001U)         /*!< I2C receive data use DMA */
 
-/* I2C interrupt enable or disable */
-#define I2C_INT_ERR                     I2C_CTL0_ERRIE                  /*!< error interrupt enable */
-#define I2C_INT_TC                      I2C_CTL0_TCIE                   /*!< transfer complete interrupt enable */
-#define I2C_INT_STPDET                  I2C_CTL0_STPDETIE               /*!< stop detection interrupt enable */
-#define I2C_INT_NACK                    I2C_CTL0_NACKIE                 /*!< not acknowledge received interrupt enable */
-#define I2C_INT_ADDM                    I2C_CTL0_ADDMIE                 /*!< address match interrupt enable */
-#define I2C_INT_RBNE                    I2C_CTL0_RBNEIE                 /*!< receive interrupt enable */
-#define I2C_INT_TI                      I2C_CTL0_TIE                    /*!< transmit interrupt enable */
+/* I2C interrupt */
+#define I2C_INT_ERR                     I2C_CTL0_ERRIE                  /*!< error interrupt */
+#define I2C_INT_TC                      I2C_CTL0_TCIE                   /*!< transfer complete interrupt */
+#define I2C_INT_STPDET                  I2C_CTL0_STPDETIE               /*!< stop detection interrupt */
+#define I2C_INT_NACK                    I2C_CTL0_NACKIE                 /*!< not acknowledge received interrupt */
+#define I2C_INT_ADDM                    I2C_CTL0_ADDMIE                 /*!< address match interrupt */
+#define I2C_INT_RBNE                    I2C_CTL0_RBNEIE                 /*!< receive interrupt */
+#define I2C_INT_TI                      I2C_CTL0_TIE                    /*!< transmit interrupt */
 
 /* I2C transfer direction in master mode */
 #define I2C_MASTER_TRANSMIT             ((uint32_t)0x00000000U)         /*!< I2C master transmit */
 #define I2C_MASTER_RECEIVE              I2C_CTL1_TRDIR                  /*!< I2C master receive */
 
 /* address mode for the I2C slave */
-#define I2C_ADDFORMAT_7BITS             ((uint32_t)0x00000000U)         /*!< address:7 bits */
-#define I2C_ADDFORMAT_10BITS            I2C_SADDR0_ADDFORMAT            /*!< address:10 bits */
+#define I2C_ADDFORMAT_7BITS             ((uint32_t)0x00000000U)         /*!< address format is 7 bits */
+#define I2C_ADDFORMAT_10BITS            I2C_SADDR0_ADDFORMAT            /*!< address format is 10 bits */
 
 /* the length of filter spikes */
 #define FILTER_DISABLE                  ((uint32_t)0x00000000U)         /*!< digital filter is disabled */
@@ -239,7 +239,7 @@ typedef enum {
 #define ADDRESS_BIT6_COMPARE            ((uint32_t)0x00004000U)         /*!< address bit6 needs compare */
 #define ADDRESS_BIT7_COMPARE            ((uint32_t)0x00008000U)         /*!< address bit7 needs compare */
 
-/* defines which bits of ADDRESS2[7:1] are compared with an incoming address byte, and which bits are masked (don��t care) */
+/* defines which bits of ADDRESS2[7:1] are compared with an incoming address byte, and which bits are masked (do not care) */
 #define ADDRESS2_NO_MASK                ((uint32_t)0x00000000U)         /*!< no mask, all the bits must be compared */
 #define ADDRESS2_MASK_BIT1              ((uint32_t)0x00000001U)         /*!< ADDRESS2[1] is masked, only ADDRESS2[7:2] are compared */
 #define ADDRESS2_MASK_BIT1_2            ((uint32_t)0x00000002U)         /*!< ADDRESS2[2:1] is masked, only ADDRESS2[7:3] are compared */
@@ -285,7 +285,7 @@ void i2c_analog_noise_filter_enable(uint32_t i2c_periph);
 void i2c_analog_noise_filter_disable(uint32_t i2c_periph);
 /* configure the SCL high and low period of clock in master mode */
 void i2c_master_clock_config(uint32_t i2c_periph, uint32_t sclh, uint32_t scll);
-/* configure i2c slave address and transfer direction in master mode */
+/* configure I2C slave address and transfer direction in master mode */
 void i2c_master_addressing(uint32_t i2c_periph, uint32_t address, uint32_t trans_direction);
 
 /* application function declarations */
@@ -309,15 +309,15 @@ void i2c_slave_response_to_gcall_disable(uint32_t i2c_periph);
 void i2c_stretch_scl_low_enable(uint32_t i2c_periph);
 /* disable to stretch SCL low when data is not ready in slave mode */
 void i2c_stretch_scl_low_disable(uint32_t i2c_periph);
-/* configure i2c slave address */
+/* configure I2C slave address */
 void i2c_address_config(uint32_t i2c_periph, uint32_t address, uint32_t addr_format);
 /* define which bits of ADDRESS[7:1] need to compare with the incoming address byte */
 void i2c_address_bit_compare_config(uint32_t i2c_periph, uint32_t compare_bits);
-/* disable i2c address in slave mode */
+/* disable I2C address in slave mode */
 void i2c_address_disable(uint32_t i2c_periph);
-/* configure i2c second slave address */
+/* configure I2C second slave address */
 void i2c_second_address_config(uint32_t i2c_periph, uint32_t address, uint32_t addr_mask);
-/* disable i2c second address in slave mode */
+/* disable I2C second address in slave mode */
 void i2c_second_address_disable(uint32_t i2c_periph);
 /* get received match address in slave mode */
 uint32_t i2c_recevied_address_get(uint32_t i2c_periph);
@@ -327,8 +327,6 @@ void i2c_slave_byte_control_enable(uint32_t i2c_periph);
 void i2c_slave_byte_control_disable(uint32_t i2c_periph);
 /* generate a NACK in slave mode */
 void i2c_nack_enable(uint32_t i2c_periph);
-/* generate an ACK in slave mode */
-void i2c_nack_disable(uint32_t i2c_periph);
 /* enable wakeup from deep-sleep mode */
 void i2c_wakeup_from_deepsleep_enable(uint32_t i2c_periph);
 /* disable wakeup from deep-sleep mode */

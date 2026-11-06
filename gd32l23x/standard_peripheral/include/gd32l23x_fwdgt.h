@@ -2,11 +2,11 @@
     \file    gd32l23x_fwdgt.h
     \brief   definitions for the FWDGT
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -92,6 +92,11 @@ OF SUCH DAMAGE.
 #define FWDGT_FLAG_PUD                  FWDGT_STAT_PUD                                  /*!< a write operation to FWDGT_PSC register is on going */
 #define FWDGT_FLAG_RUD                  FWDGT_STAT_RUD                                  /*!< a write operation to FWDGT_RLD register is on going */
 #define FWDGT_FLAG_WUD                  FWDGT_STAT_WUD                                  /*!< a write operation to FWDGT_WND register is on going */
+
+/* write value to FWDGT_RLD_RLD bit field */
+#define RLD_RLD(regval)             (BITS(0,11) & ((uint32_t)(regval) << 0U))
+/* write value to FWDGT_WND_WND bit field */
+#define WND_WND(regval)             (BITS(0,11) & ((uint32_t)(regval) << 0U))
 
 /* function declarations */
 /* enable write access to FWDGT_PSC, FWDGT_RLD and FWDGT_WND */

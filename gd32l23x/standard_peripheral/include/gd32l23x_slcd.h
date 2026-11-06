@@ -2,11 +2,11 @@
     \file    gd32l23x_slcd.h
     \brief   definitions for the SLCD
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -61,7 +61,9 @@ OF SUCH DAMAGE.
 #define SLCD_CTL_DUTY                       BITS(2,4)                       /*!< duty select */
 #define SLCD_CTL_BIAS                       BITS(5,6)                       /*!< bias select */
 #define SLCD_CTL_COMS                       BIT(7)                          /*!< common segment pad select */
+#ifdef GD32L233
 #define SLCD_CTL_VODEN                      BIT(8)                          /*!< voltage output driver enable */
+#endif
 
 /* SLCD_CFG */
 #define SLCD_CFG_HDEN                       BIT(0)                          /*!< high drive enable */
@@ -69,18 +71,25 @@ OF SUCH DAMAGE.
 #define SLCD_CFG_UPDIE                      BIT(3)                          /*!< update done interrupt enable */
 #define SLCD_CFG_PULSE                      BITS(4,6)                       /*!< pulse on duration */
 #define SLCD_CFG_DTD                        BITS(7,9)                       /*!< dead time duration */
+#ifdef GD32L233
 #define SLCD_CFG_CONR                       BITS(10,12)                     /*!< contrast ratio */
+#endif
 #define SLCD_CFG_BLKDIV                     BITS(13,15)                     /*!< blink frequency divider */
 #define SLCD_CFG_BLKMOD                     BITS(16,17)                     /*!< blink mode */
 #define SLCD_CFG_DIV                        BITS(18,21)                     /*!< clock divider */
 #define SLCD_CFG_PSC                        BITS(22,25)                     /*!< clock prescaler */
+#ifdef GD32L235
+#define SLCD_CFG_RSEL                       BITS(26,27)                     /*!< Weak driving resistance select */
+#endif
 
 /* SLCD_STAT */
 #define SLCD_STAT_ONF                       BIT(0)                          /*!< controller on flag */
 #define SLCD_STAT_SOF                       BIT(1)                          /*!< start of frame flag */
 #define SLCD_STAT_UPRF                      BIT(2)                          /*!< update data request flag */
 #define SLCD_STAT_UPDF                      BIT(3)                          /*!< update data done flag */
+#ifdef GD32L233
 #define SLCD_STAT_VRDYF                     BIT(4)                          /*!< voltage ready flag */
+#endif
 #define SLCD_STAT_SYNF                      BIT(5)                          /*!< SLCD_CFG register synchronization flag */
 
 /* SLCD_STATC */
@@ -108,6 +117,15 @@ OF SUCH DAMAGE.
 #define SLCD_BIAS_1_2                       CTL_BIAS(1)                     /*!< 1/2 bias */
 #define SLCD_BIAS_1_3                       CTL_BIAS(2)                     /*!< 1/3 bias */
 
+#ifdef GD32L235
+/* SLCD weak driving resistance select */
+#define CFG_RSEL(regval)                    (BITS(26,27)&((uint32_t)(regval)<<26))
+#define SLCD_RSEL_6M                        CFG_RSEL(0)                     /*!< weak driving resistance 6M */
+#define SLCD_RSEL_4M                        CFG_RSEL(1)                     /*!< weak driving resistance 4M */
+#define SLCD_RSEL_2M                        CFG_RSEL(2)                     /*!< weak driving resistance 2M */
+#define SLCD_RSEL_1M                        CFG_RSEL(3)                     /*!< weak driving resistance 1M */
+#endif
+
 /* SLCD pulse on duration definitions */
 #define CFG_PULSE(regval)                   (BITS(4,6)&((uint32_t)(regval)<<4))
 #define SLCD_PULSEON_DURATION_0             CFG_PULSE(0)                    /*!< pulse on duration = 0 */
@@ -130,6 +148,7 @@ OF SUCH DAMAGE.
 #define SLCD_DEADTIME_PERIOD_6              CFG_DTD(6)                      /*!< 6 phase inserted between couple of frame */
 #define SLCD_DEADTIME_PERIOD_7              CFG_DTD(7)                      /*!< 7 phase inserted between couple of frame */
 
+#ifdef GD32L233
 /* SLCD contrast definitions */
 #define CFG_CONR(regval)                    (BITS(10,12)&((uint32_t)(regval)<<10))
 #define SLCD_CONTRAST_LEVEL_0               CFG_CONR(0)                     /* contrast ratio level0:Maximum Voltage = 2.65V */
@@ -140,6 +159,7 @@ OF SUCH DAMAGE.
 #define SLCD_CONTRAST_LEVEL_5               CFG_CONR(5)                     /* contrast ratio level5:Maximum Voltage = 3.37V */
 #define SLCD_CONTRAST_LEVEL_6               CFG_CONR(6)                     /* contrast ratio level6:Maximum Voltage = 3.52V */
 #define SLCD_CONTRAST_LEVEL_7               CFG_CONR(7)                     /* contrast ratio level7:Maximum Voltage = 3.67V */
+#endif
 
 /* SLCD blink frequency definitions */
 #define CFG_BLKDIV(regval)                  (BITS(13,15)&((uint32_t)(regval)<<13))
@@ -151,7 +171,6 @@ OF SUCH DAMAGE.
 #define SLCD_BLINK_FREQUENCY_DIV256         CFG_BLKDIV(5)                   /*!< blink frequency = fSLCD/256 */
 #define SLCD_BLINK_FREQUENCY_DIV512         CFG_BLKDIV(6)                   /*!< blink frequency = fSLCD/512 */
 #define SLCD_BLINK_FREQUENCY_DIV1024        CFG_BLKDIV(7)                   /*!< blink frequency = fSLCD/1024 */
-
 
 /* SLCD blink mode definitions */
 #define CFG_BLKMOD(regval)                  (BITS(16,17)&((uint32_t)(regval)<<16))
@@ -178,7 +197,6 @@ OF SUCH DAMAGE.
 #define SLCD_DIVIDER_29                     CFG_DIV(13)                     /*!< DIV = 29 */
 #define SLCD_DIVIDER_30                     CFG_DIV(14)                     /*!< DIV = 30 */
 #define SLCD_DIVIDER_31                     CFG_DIV(15)                     /*!< DIV = 31 */
-
 
 /* SLCD prescaler definitions */
 #define CFG_PRE(regval)                     (BITS(22,25)&((uint32_t)(regval)<<22))
@@ -211,7 +229,9 @@ OF SUCH DAMAGE.
 #define SLCD_FLAG_SO                        SLCD_STAT_SOF                   /*!< start of frame flag */
 #define SLCD_FLAG_UPR                       SLCD_STAT_UPRF                  /*!< update data request flag */
 #define SLCD_FLAG_UPD                       SLCD_STAT_UPDF                  /*!< update data done flag */
+#ifdef GD32L233
 #define SLCD_FLAG_VRDY                      SLCD_STAT_VRDYF                 /*!< voltage ready flag */
+#endif
 #define SLCD_FLAG_SYN                       SLCD_STAT_SYNF                  /*!< SLCD_CFG register synchronization flag */
 
 /* SLCD interrupt flag */
@@ -242,10 +262,16 @@ void slcd_disable(void);
 /* configure SLCD functions */
 /* initialize SLCD interface */
 void slcd_init(uint32_t prescaler, uint32_t divider, uint32_t duty, uint32_t bias);
+#ifdef GD32L233
 /* enable SLCD enhance mode */
 void slcd_enhance_mode_enable(void);
 /* disable SLCD enhance mode */
 void slcd_enhance_mode_disable(void);
+#endif
+#ifdef GD32L235
+/* select SLCD weak driving resistance */
+void slcd_weak_driving_resistance_select(uint32_t resistance);
+#endif
 /* select SLCD bias voltage */
 void slcd_bias_voltage_select(uint32_t bias_voltage);
 /* select SLCD duty */
@@ -254,8 +280,10 @@ void slcd_duty_select(uint32_t duty);
 void slcd_clock_config(uint32_t prescaler, uint32_t divider);
 /* configure SLCD blink mode */
 void slcd_blink_mode_config(uint32_t mode, uint32_t blink_divider);
+#ifndef GD32L235
 /* configure SLCD contrast ratio */
 void slcd_contrast_ratio_config(uint32_t contrast_ratio);
+#endif
 /* configure SLCD dead time duration */
 void slcd_dead_time_config(uint32_t dead_time);
 /* configure SLCD pulse on duration */

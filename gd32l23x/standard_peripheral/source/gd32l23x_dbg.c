@@ -2,11 +2,11 @@
     \file    gd32l23x_dbg.c
     \brief   DBG driver
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -95,16 +95,22 @@ void dbg_low_power_disable(uint32_t dbg_low_power)
                 only one parameter can be selected which is shown as below:
       \arg        DBG_FWDGT_HOLD: hold FWDGT counter when core is halted
       \arg        DBG_WWDGT_HOLD: hold WWDGT counter when core is halted
+      \arg        DBG_TIMER0_HOLD: hold TIMER0 counter when core is halted
       \arg        DBG_TIMER1_HOLD: hold TIMER1 counter when core is halted
       \arg        DBG_TIMER2_HOLD: hold TIMER2 counter when core is halted
       \arg        DBG_TIMER5_HOLD: hold TIMER5 counter when core is halted
       \arg        DBG_TIMER6_HOLD: hold TIMER6 counter when core is halted
       \arg        DBG_TIMER8_HOLD: hold TIMER8 counter when core is halted
       \arg        DBG_TIMER11_HOLD: hold TIMER11 counter when core is halted
-      \arg        DBG_LPTIMER_HOLD: hold LPTIMER counter when core is halted
+      \arg        DBG_TIMER14_HOLD: hold TIMER14(GD32L235) counter when core is halted
+      \arg        DBG_TIMER40_HOLD: hold TIMER40(GD32L235) counter when core is halted
+      \arg        DBG_LPTIMER_HOLD: hold LPTIMER(GD32L233) counter when core is halted
+      \arg        DBG_LPTIMER0_HOLD: hold LPTIMER0(GD32L235) counter when core is halted
+      \arg        DBG_LPTIMER1_HOLD: hold LPTIMER1(GD32L235) counter when core is halted
       \arg        DBG_I2C0_HOLD: hold I2C0 SMBUS when core is halted
       \arg        DBG_I2C1_HOLD: hold I2C1 SMBUS when core is halted
       \arg        DBG_I2C2_HOLD: hold I2C2 SMBUS when core is halted
+      \arg        DBG_CAN_HOLD: hold CAN(GD32L235) when core is halted
       \arg        DBG_RTC_HOLD: hold RTC calendar and wakeup counter when core is halted
     \param[out] none
     \retval     none
@@ -120,16 +126,22 @@ void dbg_periph_enable(dbg_periph_enum dbg_periph)
                 only one parameter can be selected which is shown as below:
       \arg        DBG_FWDGT_HOLD: hold FWDGT counter when core is halted
       \arg        DBG_WWDGT_HOLD: hold WWDGT counter when core is halted
+      \arg        DBG_TIMER0_HOLD: hold TIMER0 counter when core is halted
       \arg        DBG_TIMER1_HOLD: hold TIMER1 counter when core is halted
       \arg        DBG_TIMER2_HOLD: hold TIMER2 counter when core is halted
       \arg        DBG_TIMER5_HOLD: hold TIMER5 counter when core is halted
       \arg        DBG_TIMER6_HOLD: hold TIMER6 counter when core is halted
       \arg        DBG_TIMER8_HOLD: hold TIMER8 counter when core is halted
       \arg        DBG_TIMER11_HOLD: hold TIMER11 counter when core is halted
-      \arg        DBG_LPTIMER_HOLD: hold LPTIMER counter when core is halted
+      \arg        DBG_TIMER14_HOLD: hold TIMER14(GD32L235) counter when core is halted
+      \arg        DBG_TIMER40_HOLD: hold TIMER40(GD32L235) counter when core is halted
+      \arg        DBG_LPTIMER_HOLD: hold LPTIMER(GD32L233) counter when core is halted
+      \arg        DBG_LPTIMER0_HOLD hold LPTIMER0(GD32L235) counter when core is halted
+      \arg        DBG_LPTIMER1_HOLD: hold LPTIMER1(GD32L235) counter when core is halted
       \arg        DBG_I2C0_HOLD: hold I2C0 SMBUS when core is halted
       \arg        DBG_I2C1_HOLD: hold I2C1 SMBUS when core is halted
       \arg        DBG_I2C2_HOLD: hold I2C2 SMBUS when core is halted
+      \arg        DBG_CAN_HOLD: hold CAN(GD32L235) when core is halted
       \arg        DBG_RTC_HOLD: hold RTC calendar and wakeup counter when core is halted
     \param[out] none
     \retval     none

@@ -2,11 +2,11 @@
     \file    gd32l23x_slcd.c
     \brief   SLCD driver
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -93,15 +93,16 @@ void slcd_init(uint32_t prescaler, uint32_t divider, uint32_t duty, uint32_t bia
     /* configure SLCD_CFG register */
     reg = SLCD_CFG;
     reg &= ~(SLCD_CFG_PSC | SLCD_CFG_DIV);
-    reg |= prescaler | divider;
+    reg |= (prescaler | divider);
     SLCD_CFG = reg;
     /* configure SLCD_CTL register */
     reg = SLCD_CTL;
     reg &= ~(SLCD_CTL_BIAS | SLCD_CTL_DUTY);
-    reg |= duty | bias;
+    reg |= (duty | bias);
     SLCD_CTL = reg;
 }
 
+#ifdef GD32L233
 /*!
     \brief      enable SLCD enhance mode
     \param[in]  none
@@ -123,6 +124,28 @@ void slcd_enhance_mode_disable(void)
 {
     SLCD_CTL &= ~SLCD_CTL_VODEN;
 }
+#endif
+#ifdef GD32L235
+/*!
+    \brief      select SLCD weak driving resistance
+    \param[in]  resistance: the SLCD weak driving resistance
+                only one parameter can be selected which is shown as below:
+      \arg        SLCD_RSEL_6M: weak driving resistance 6M
+      \arg        SLCD_RSEL_4M: weak driving resistance 4M
+      \arg        SLCD_RSEL_2M: weak driving resistance 2M
+      \arg        SLCD_RSEL_1M: weak driving resistance 1M
+    \param[out] none
+    \retval     none
+*/
+void slcd_weak_driving_resistance_select(uint32_t resistance)
+{
+    uint32_t temp;
+    temp = SLCD_CFG;
+    temp &= ~SLCD_CFG_RSEL;
+    temp |= resistance;
+    SLCD_CFG = temp;
+}
+#endif
 
 /*!
     \brief      select SLCD bias voltage
@@ -201,10 +224,10 @@ void slcd_clock_config(uint32_t prescaler, uint32_t divider)
     \brief      configure SLCD blink mode
     \param[in]  mode: blink mode
                 only one parameter can be selected which is shown as below:
-      \arg        SLCD_BLINKMODE_OFF: blink disabled
-      \arg        SLCD_BLINKMODE_SEG0_COM0: blink enabled on SEG[0], COM[0]
-      \arg        SLCD_BLINKMODE_SEG0_ALLCOM: blink enabled on SEG[0], all COM
-      \arg        SLCD_BLINKMODE_ALLSEG_ALLCOM: blink enabled on all SEG and all COM
+      \arg        SLCD_BLINK_OFF: blink disabled
+      \arg        SLCD_BLINK_SEG0_COM0: blink enabled on SEG[0], COM[0]
+      \arg        SLCD_BLINK_SEG0_ALLCOM: blink enabled on SEG[0], all COM
+      \arg        SLCD_BLINK_ALLSEG_ALLCOM: blink enabled on all SEG and all COM
     \param[in]  blink_divider: the divider factor
                 only one parameter can be selected which is shown as below:
       \arg        SLCD_BLINK_FREQUENCY_DIV8: blink frequency = fSLCD/8
@@ -223,22 +246,23 @@ void slcd_blink_mode_config(uint32_t mode, uint32_t blink_divider)
     uint32_t reg;
     reg = SLCD_CFG;
     reg &= ~(SLCD_CFG_BLKMOD | SLCD_CFG_BLKDIV);
-    reg |= mode | blink_divider;
+    reg |= (mode | blink_divider);
     SLCD_CFG = reg;
 }
 
+#ifndef GD32L235
 /*!
     \brief      configure slcd_contrast_ratio
-    \param[in]  contrast: the slcd contrast
+    \param[in]  contrast_ratio: the slcd contrast ratio
                 only one parameters can be selected which are shown as below:
-      \arg        SLCD_CONTRAST_LEVEL0:Maximum Voltage = 2.65V
-      \arg        SLCD_CONTRAST_LEVEL1:Maximum Voltage = 2.80V
-      \arg        SLCD_CONTRAST_LEVEL2:Maximum Voltage = 2.92V
-      \arg        SLCD_CONTRAST_LEVEL3:Maximum Voltage = 3.08V
-      \arg        SLCD_CONTRAST_LEVEL4:Maximum Voltage = 3.23V
-      \arg        SLCD_CONTRAST_LEVEL5:Maximum Voltage = 3.37V
-      \arg        SLCD_CONTRAST_LEVEL6:Maximum Voltage = 3.52V
-      \arg        SLCD_CONTRAST_LEVEL7:Maximum Voltage = 3.67V
+      \arg        SLCD_CONTRAST_LEVEL_0:Maximum Voltage = 2.65V
+      \arg        SLCD_CONTRAST_LEVEL_1:Maximum Voltage = 2.80V
+      \arg        SLCD_CONTRAST_LEVEL_2:Maximum Voltage = 2.92V
+      \arg        SLCD_CONTRAST_LEVEL_3:Maximum Voltage = 3.08V
+      \arg        SLCD_CONTRAST_LEVEL_4:Maximum Voltage = 3.23V
+      \arg        SLCD_CONTRAST_LEVEL_5:Maximum Voltage = 3.37V
+      \arg        SLCD_CONTRAST_LEVEL_6:Maximum Voltage = 3.52V
+      \arg        SLCD_CONTRAST_LEVEL_7:Maximum Voltage = 3.67V
     \param[out] none
     \retval     none
 */
@@ -250,6 +274,7 @@ void slcd_contrast_ratio_config(uint32_t contrast_ratio)
     reg |= contrast_ratio;
     SLCD_CFG = reg;
 }
+#endif
 
 /*!
     \brief      configure SLCD dead time duration
@@ -279,7 +304,7 @@ void slcd_dead_time_config(uint32_t dead_time)
 
 /*!
     \brief      configure SLCD pulse on duration
-    \param[in]  pulseonduration: specifies the slcd pulse on duration
+    \param[in]  duration: specifies the slcd pulse on duration
                 only one parameters can be selected which are shown as below:
       \arg        SLCD_PULSEON_DURATION_0: pulse on duration = 0
       \arg        SLCD_PULSEON_DURATION_1: pulse on duration = 1*1/fPRE
@@ -303,7 +328,7 @@ void slcd_pulse_on_duration_config(uint32_t duration)
 
 /*!
     \brief      select SLCD common/segment pad
-    \param[in]  NewValue: ENABLE or DISABLE
+    \param[in]  newvalue: ENABLE or DISABLE
                 only one parameter can be selected which is shown as below:
       \arg        ENABLE: LCD_COM[7:4] pad select LCD_SEG[31:28]
       \arg        DISABLE: LCD_COM[7:4] pad select LCD_COM[7:4]
@@ -321,10 +346,10 @@ void slcd_com_seg_remap(ControlStatus newvalue)
 
 /*!
     \brief      select SLCD voltage source
-    \param[in]  vsrc: specifies the slcd voltage source
+    \param[in]  voltage_source: specifies the slcd voltage source
                 only one parameters can be selected which are shown as below:
-      \arg        SLCD_VOLTAGE_INTERNAL
-      \arg        SLCD_VOLTAGE_EXTERNAL
+      \arg        SLCD_VOLTAGE_INTERNAL: SLCD select internal voltage
+      \arg        SLCD_VOLTAGE_EXTERNAL: SLCD select external voltage
     \param[out] none
     \retval     none
 */
@@ -341,8 +366,8 @@ void slcd_voltage_source_select(uint8_t voltage_source)
     \brief      enable or disable permanent high drive
     \param[in]  newvalue: ENABLE or DISABLE
                 only one parameter can be selected which is shown as below:
-    \arg          ENBALE: enable permanent high drive
-    \arg          DISBALE: disable permanent high drive
+    \arg          ENABLE: enable permanent high drive
+    \arg          DISABLE: disable permanent high drive
     \param[out] none
     \retval     none
 */
@@ -396,26 +421,28 @@ void slcd_data_update_request(void)
       \arg        SLCD_FLAG_SO: start of frame flag
       \arg        SLCD_FLAG_UPR: update data request flag
       \arg        SLCD_FLAG_UPD: update data done flag
-      \arg        SLCD_FLAG_VRDY: voltage ready flag
+      \arg        SLCD_FLAG_VRDY: voltage ready flag (For GD32L233 series)
       \arg        SLCD_FLAG_SYN: SLCD_CFG register synchronization flag
     \param[out] none
     \retval     FlagStatus: SET or RESET
 */
 FlagStatus slcd_flag_get(uint32_t flag)
 {
+    FlagStatus reval;
     if(RESET != (SLCD_STAT & flag)) {
-        return SET;
+        reval = SET;
     } else {
-        return RESET;
+        reval = RESET;
     }
+    return reval;
 }
 
 /*!
     \brief      clear SLCD flags
     \param[in]  flag: the slcd flags
                 one or more parameters can be selected which is shown as below:
-      \arg        SLCD_FLAG_SOF: start of frame flag
-      \arg        SLCD_FLAG_UPDF: update done flag
+      \arg        SLCD_FLAG_SO: start of frame flag
+      \arg        SLCD_FLAG_UPD: update done flag
     \param[out] none
     \retval     none
 */
@@ -456,28 +483,30 @@ void slcd_interrupt_disable(uint32_t interrupt)
     \brief      get SLCD interrupt flags
     \param[in]  int_flag: the slcd interrupt flag
                 only one parameter can be selected which is shown as below:
-      \arg        SLCD_INT_FLAG_SOF: start of frame flag
-      \arg        SLCD_INT_FLAG_UPD: update data done flag
+      \arg        SLCD_INT_FLAG_SO: start of frame flag
+      \arg        SLCD_INT_FLAG_UP: update data done flag
     \param[out] none
     \retval     FlagStatus: SET or RESET
 */
 FlagStatus slcd_interrupt_flag_get(uint32_t int_flag)
 {
+    FlagStatus reval;
     uint32_t val;
     val = (SLCD_CFG & int_flag);
     if((RESET != (SLCD_STAT & int_flag)) && (RESET != val)) {
-        return SET;
+        reval = SET;
     } else {
-        return RESET;
+        reval = RESET;
     }
+    return reval;
 }
 
 /*!
     \brief      clear SLCD interrupt flag
     \param[in]  int_flag: the slcd interrupt flag
                 one or more parameters can be selected which is shown as below:
-      \arg        SLCD_INT_FLAG_SOF: start of frame flag
-      \arg        SLCD_INT_FLAG_UPD: update data done flag
+      \arg        SLCD_INT_FLAG_SO: start of frame flag
+      \arg        SLCD_INT_FLAG_UP: update data done flag
     \param[out] none
     \retval     none
 */

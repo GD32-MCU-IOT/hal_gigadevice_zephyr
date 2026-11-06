@@ -2,35 +2,29 @@
     \file    gd32l23x.h
     \brief   general definitions for GD32L23x
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+ * Copyright (c) 2009-2018 Arm Limited. All rights reserved.
+ * Copyright (c) 2026, GigaDevice Semiconductor Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the License); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-    Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-    1. Redistributions of source code must retain the above copyright notice, this
-       list of conditions and the following disclaimer.
-    2. Redistributions in binary form must reproduce the above copyright notice,
-       this list of conditions and the following disclaimer in the documentation
-       and/or other materials provided with the distribution.
-    3. Neither the name of the copyright holder nor the names of its contributors
-       may be used to endorse or promote products derived from this software without
-       specific prior written permission.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
-NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
-OF SUCH DAMAGE.
-*/
+/* This file refers the CMSIS standard, some adjustments are made according to GigaDevice chips */
 
 #ifndef GD32L23X_H
 #define GD32L23X_H
@@ -104,9 +98,7 @@ typedef enum IRQn {
     /* Cortex-M23 processor exceptions numbers */
     NonMaskableInt_IRQn          = -14,    /*!< non maskable interrupt                                   */
     HardFault_IRQn               = -13,    /*!< hardfault interrupt                                      */
-
     SVCall_IRQn                  = -5,     /*!< sv call interrupt                                        */
-
     PendSV_IRQn                  = -2,     /*!< pend sv interrupt                                        */
     SysTick_IRQn                 = -1,     /*!< system tick interrupt                                    */
     /* interruput numbers */
@@ -129,8 +121,13 @@ typedef enum IRQn {
     DMA_Channel5_IRQn            = 16,     /*!< DMA channel 5 interrupt                                  */
     DMA_Channel6_IRQn            = 17,     /*!< DMA channel 6 interrupt                                  */
     ADC_IRQn                     = 18,     /*!< ADC interrupts                                           */
+#ifdef  GD32L235
+    USBD_HP_CAN_TX_IRQn          = 19,     /*!< USBD High Priority or CAN TX                             */
+    USBD_LP_CAN_RX0_IRQn         = 20,     /*!< USBD Low Priority or CAN RX0                             */
+#else
     USBD_HP_IRQn                 = 19,     /*!< USBD High Priority                                       */
     USBD_LP_IRQn                 = 20,     /*!< USBD Low Priority                                        */
+# endif
     TIMER1_IRQn                  = 21,     /*!< TIMER1 interrupt                                         */
     TIMER2_IRQn                  = 22,     /*!< TIMER2 interrupt                                         */
     TIMER8_IRQn                  = 23,     /*!< TIMER8 interrupt                                         */
@@ -153,21 +150,43 @@ typedef enum IRQn {
     RTC_Alarm_IRQn               = 41,     /*!< RTC Alarm interrupt                                      */
     USBD_WKUP_IRQn               = 42,     /*!< USBD Wakeup interrupt                                    */
     EXTI5_9_IRQn                 = 43,     /*!< EXTI line 5 to 9 interrupts                              */
+#ifdef GD32L235  
+    TIMER0_TRG_CMT_UP_BRK_IRQn   = 44,     /*!< TIMER0 trigger and Channel commutation or update or break interrupt */
+    TIMER0_Channel_IRQn          = 45,     /*!< TIMER0 capture compare interrupt                         */
+    TIMER14_IRQn                 = 46,     /*!< TIMER14 interrupt                                        */
+#endif /* GD32L235 */ 
     EXTI10_15_IRQn               = 47,     /*!< EXTI line 10 to 15 interrupts                            */
+#ifdef GD32L235 
+    TIMER40_IRQn                 = 48,     /*!< TIMER40 interrupt                                        */
+    CAN_RX1_IRQn                 = 49,     /*!< CAN RX1 interrupt                                        */
+    CAN_EWMC_IRQn                = 50,     /*!< CAN EWMC interrupt                                        */
+#endif /* GD32L235 */    
     DMAMUX_IRQn                  = 55,     /*!< DMAMUX interrupt                                         */
     CMP0_IRQn                    = 56,     /*!< Comparator 0 interrupt                                   */
     CMP1_IRQn                    = 57,     /*!< Comparator 1 interrupt                                   */
     I2C0_WKUP_IRQn               = 58,     /*!< I2C0 Wakeup interrupt                                    */
     I2C2_WKUP_IRQn               = 59,     /*!< I2C2 Wakeup interrupt                                    */
     USART0_WKUP_IRQn             = 60,     /*!< USART0 Wakeup interrupt                                  */
+#ifdef GD32L235    
+    LPUART0_IRQn                 = 61,     /*!< LPUART0 global interrupt                                 */
+#else    
     LPUART_IRQn                  = 61,     /*!< LPUART global interrupt                                  */
+#endif    
     CAU_IRQn                     = 62,     /*!< CAU interrupt                                            */
     TRNG_IRQn                    = 63,     /*!< TRNG interrupt                                           */
     SLCD_IRQn                    = 64,     /*!< SLCD interrupt                                           */
     USART1_WKUP_IRQn             = 65,     /*!< USART1 Wakeup interrupt                                  */
     I2C1_WKUP_IRQn               = 66,     /*!< I2C1 Wakeup interrupt                                    */
+#ifdef GD32L235
+    LPUART0_WKUP_IRQn            = 67,     /*!< LPUART0 Wakeup interrupt                                 */
+    LPTIMER0_IRQn                = 68,     /*!< LPTIMER0 interrupt                                       */
+    LPUART1_WKUP_IRQn            = 69,     /*!< LPUART1 Wakeup interrupt                                 */
+    LPTIMER1_IRQn                = 70,     /*!< LPTIMER1 interrupt                                       */   
+    LPUART1_IRQn                 = 71      /*!< LPUART1 global interrupt                                */  
+#else    
     LPUART_WKUP_IRQn             = 67,     /*!< LPUART Wakeup interrupt                                  */
-    LPTIMER_IRQn                 = 68,     /*!< LPTIMER interrupt                                        */
+    LPTIMER_IRQn                 = 68      /*!< LPTIMER interrupt                                        */
+#endif /* GD32L235 */ 
 } IRQn_Type;
 
 /* includes */
@@ -210,6 +229,7 @@ typedef enum {ERROR = 0, SUCCESS = !ERROR} ErrStatus;
 #define I2C_BASE              (APB1_BUS_BASE + 0x00005400U) /*!< I2C base address                 */
 #define USBD_BASE             (APB1_BUS_BASE + 0x00005C00U) /*!< USBD base address                */
 #define USBD_RAM_BASE         (APB1_BUS_BASE + 0x00006000U) /*!< USBD RAM base address            */
+#define CAN_BASE              (APB1_BUS_BASE + 0x00006400U) /*!< CAN base address                 */
 #define PMU_BASE              (APB1_BUS_BASE + 0x00007000U) /*!< PMU base address                 */
 #define DAC_BASE              (APB1_BUS_BASE + 0x00007400U) /*!< DAC base address                 */
 #define LPUART_BASE           (APB1_BUS_BASE + 0x00008000U) /*!< LPUART base address              */

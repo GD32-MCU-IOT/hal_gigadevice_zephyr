@@ -2,11 +2,11 @@
     \file    gd32l23x_vref.c
     \brief   VREF driver
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -43,7 +43,7 @@ OF SUCH DAMAGE.
 void vref_deinit(void)
 {
     /* reset the value of all the VREF registers */
-    VREF_CS = (uint32_t)0x00000002U;
+    VREF_CS = (uint32_t)VREF_RESET;
 }
 
 /*!
@@ -90,6 +90,28 @@ void vref_high_impedance_mode_disable(void)
     VREF_CS &= (uint32_t)~VREF_HIGH_IMPEDANCE_MODE;
 }
 
+#ifdef GD32L235
+/*!
+    \brief      select VREF voltage reference select
+    \param[in]  vref_voltage: voltage reference select, 
+                only one parameter can be selected which is shown as below:
+      \arg        VREF_VOLTAGE_SEL_LEVEL_0: VREF voltage reference select 2.048 V
+      \arg        VREF_VOLTAGE_SEL_LEVEL_1: VREF voltage reference select 2.5 V
+    \param[out] none
+    \retval     none
+*/
+void vref_voltage_select(uint32_t vref_voltage)
+{
+    uint32_t temp = VREF_CS;
+
+    /* clear old value  */
+    temp &= ~(uint32_t)VREF_VOLTAGE_SEL_LEVEL_1;
+    temp |= (uint32_t)vref_voltage;
+  
+    VREF_CS = temp;
+} 
+#endif /* GD32L235 */
+
 /*!
     \brief      get the status of VREF
     \param[in]  none
@@ -100,13 +122,13 @@ void vref_high_impedance_mode_disable(void)
 */
 FlagStatus vref_status_get(void)
 {
-    uint32_t temp_status = VREF_CS;
-    temp_status = temp_status >> 3U;
-    if((temp_status & 0x01U) != 0x00U) {
-        return SET;
+    FlagStatus status = RESET;
+    if((RESET != (VREF_CS & VREF_CS_VREFRDY))) {
+        status = SET;
     } else {
-        return RESET;
+        status = RESET;
     }
+    return status;
 }
 
 /*!

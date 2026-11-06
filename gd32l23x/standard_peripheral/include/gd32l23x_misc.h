@@ -2,10 +2,12 @@
     \file    gd32l23x_misc.h
     \brief   definitions for the MISC
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
+
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
@@ -61,9 +63,9 @@ OF SUCH DAMAGE.
 
 /* function declarations */
 /* enable NVIC request */
-void nvic_irq_enable(uint8_t nvic_irq, uint8_t nvic_irq_priority);
+void nvic_irq_enable(IRQn_Type nvic_irq, uint8_t nvic_irq_priority);
 /* disable NVIC request */
-void nvic_irq_disable(uint8_t nvic_irq);
+void nvic_irq_disable(IRQn_Type nvic_irq);
 /* initiates a system reset request to reset the MCU */
 void nvic_system_reset(void);
 

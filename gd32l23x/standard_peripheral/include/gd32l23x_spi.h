@@ -2,11 +2,11 @@
     \file    gd32l23x_spi.h
     \brief   definitions for the SPI
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -88,13 +88,15 @@ OF SUCH DAMAGE.
 /* SPI_STAT */
 #define SPI_STAT_RBNE                   BIT(0)                                  /*!< receive buffer not empty */
 #define SPI_STAT_TBE                    BIT(1)                                  /*!< transmit buffer empty */
+#define SPI_STAT_I2SCH                  BIT(2)                                  /*!< I2S channel side */
+#define SPI_STAT_TXURERR                BIT(3)                                  /*!< transmission underrun error bit */
 #define SPI_STAT_CRCERR                 BIT(4)                                  /*!< SPI CRC error bit */
 #define SPI_STAT_CONFERR                BIT(5)                                  /*!< SPI configuration error bit */
 #define SPI_STAT_RXORERR                BIT(6)                                  /*!< SPI reception overrun error bit */
 #define SPI_STAT_TRANS                  BIT(7)                                  /*!< transmitting on-going bit */
 #define SPI_STAT_FERR                   BIT(8)                                  /*!< format error bit */
-#define SPI_STAT_RXLVL                  BITS(9,10)                              /*!< RXFIFO level(only for SPI1) */
-#define SPI_STAT_TXLVL                  BITS(11,12)                             /*!< TXFIFO level(only for SPI1) */
+#define SPI_STAT_RXLVL                  BITS(9,10)                              /*!< RXFIFO level(only for SPI0) */
+#define SPI_STAT_TXLVL                  BITS(11,12)                             /*!< TXFIFO level(only for SPI0) */
 
 /* SPI_DATA */
 #define SPI_DATA_DATA                   BITS(0,15)                              /*!< data transfer register */
@@ -126,7 +128,6 @@ OF SUCH DAMAGE.
 /* SPI_QCTL(only for SPI0) */
 #define SPI_QCTL_QMOD                   BIT(0)                                  /*!< quad-SPI mode enable */
 #define SPI_QCTL_QRD                    BIT(1)                                  /*!< quad-SPI mode read select */
-#define SPI_QCTL_IO23_DRV               BIT(2)                                  /*!< drive SPI_IO2 and SPI_IO3 enable */
 
 /* constants definitions */
 /* SPI and I2S parameter struct definitions */
@@ -211,18 +212,18 @@ typedef struct {
 #define SPI_RXDMA_EVEN                  ((uint32_t)0x00000000U)                 /*!< SPI number of byte in RX DMA channel is even */
 #define SPI_RXDMA_ODD                   SPI_CTL1_RXDMA_ODD                      /*!< SPI number of byte in RX DMA channel is odd */
 
-/* SPIx TXFIFO level(x=1) */
+/* SPIx TXFIFO level(x=0) */
 #define CTL1_TXLVL(regval)              (BITS(11,12) & ((uint32_t)(regval) << 11))
 #define SPI_TXLVL_EMPTY                 CTL1_TXLVL(0)                           /*!< SPI TXFIFO is empty */
 #define SPI_TXLVL_QUARTER_FULL          CTL1_TXLVL(1)                           /*!< SPI TXFIFO is a quarter of full */
-#define SPI_TXLVL_HAlF_FULL             CTL1_TXLVL(2)                           /*!< SPI TXFIFO is a half of full */
+#define SPI_TXLVL_HALF_FULL             CTL1_TXLVL(2)                           /*!< SPI TXFIFO is a half of full */
 #define SPI_TXLVL_FULL                  CTL1_TXLVL(3)                           /*!< SPI TXFIFO is full */
 
-/* SPIx RXFIFO level(x=1) */
+/* SPIx RXFIFO level(x=0) */
 #define CTL1_RXLVL(regval)              (BITS(9,10) & ((uint32_t)(regval) << 9))
 #define SPI_RXLVL_EMPTY                 CTL1_RXLVL(0)                           /*!< SPI RXFIFO is empty */
 #define SPI_RXLVL_QUARTER_FULL          CTL1_RXLVL(1)                           /*!< SPI RXFIFO is a quarter of full */
-#define SPI_RXLVL_HAlF_FULL             CTL1_RXLVL(2)                           /*!< SPI RXFIFO is a half of full */
+#define SPI_RXLVL_HALF_FULL             CTL1_RXLVL(2)                           /*!< SPI RXFIFO is a half of full */
 #define SPI_RXLVL_FULL                  CTL1_RXLVL(3)                           /*!< SPI RXFIFO is full */
 
 /* I2S audio sample rate */
@@ -256,7 +257,7 @@ typedef struct {
 
 /* I2S standard */
 #define I2SCTL_I2SSTD(regval)           (BITS(4,5) & ((uint32_t)(regval) << 4))
-#define I2S_STD_PHILLIPS                I2SCTL_I2SSTD(0)                        /*!< I2S phillips standard */
+#define I2S_STD_PHILIPS                 I2SCTL_I2SSTD(0)                        /*!< I2S philips standard */
 #define I2S_STD_MSB                     I2SCTL_I2SSTD(1)                        /*!< I2S MSB standard */
 #define I2S_STD_LSB                     I2SCTL_I2SSTD(2)                        /*!< I2S LSB standard */
 #define I2S_STD_PCMSHORT                I2SCTL_I2SSTD(3)                        /*!< I2S PCM short standard */
@@ -275,9 +276,9 @@ typedef struct {
 #define SPI_CRC_RX                      ((uint8_t)0x01U)                        /*!< SPI receive CRC value */
 
 /* SPI/I2S interrupt enable/disable constants definitions */
-#define SPI_I2S_INT_TBE                 ((uint8_t)0x00U)                        /*!< transmit buffer empty interrupt */
-#define SPI_I2S_INT_RBNE                ((uint8_t)0x01U)                        /*!< receive buffer not empty interrupt */
-#define SPI_I2S_INT_ERR                 ((uint8_t)0x02U)                        /*!< error interrupt */
+#define SPI_I2S_INT_TBE                 SPI_CTL1_TBEIE                          /*!< transmit buffer empty interrupt */
+#define SPI_I2S_INT_RBNE                SPI_CTL1_RBNEIE                         /*!< receive buffer not empty interrupt */
+#define SPI_I2S_INT_ERR                 SPI_CTL1_ERRIE                          /*!< error interrupt */
 
 /* SPI/I2S interrupt flag constants definitions */
 #define SPI_I2S_INT_FLAG_TBE            ((uint8_t)0x00U)                        /*!< transmit buffer empty interrupt flag */
@@ -286,6 +287,7 @@ typedef struct {
 #define SPI_INT_FLAG_CONFERR            ((uint8_t)0x03U)                        /*!< config error interrupt flag */
 #define SPI_INT_FLAG_CRCERR             ((uint8_t)0x04U)                        /*!< CRC error interrupt flag */
 #define SPI_I2S_INT_FLAG_FERR           ((uint8_t)0x05U)                        /*!< format error interrupt flag */
+#define SPI_I2S_INT_FLAG_TXURERR        ((uint8_t)0x06U)                        /*!< underrun error interrupt flag */
 
 /* SPI/I2S flag definitions */
 #define SPI_FLAG_RBNE                   SPI_STAT_RBNE                           /*!< receive buffer not empty flag */
@@ -302,6 +304,14 @@ typedef struct {
 #define I2S_FLAG_RXORERR                SPI_STAT_RXORERR                        /*!< overrun error flag */
 #define I2S_FLAG_TRANS                  SPI_STAT_TRANS                          /*!< transmit on-going flag */
 #define I2S_FLAG_FERR                   SPI_STAT_FERR                           /*!< format error flag */
+#define SPI_FLAG_TXLVL_EMPTY            ((uint32_t)0x10000000U)                 /*!< SPI TXFIFO is empty flag */
+#define SPI_FLAG_TXLVL_QUARTER_FULL     SPI_TXLVL_QUARTER_FULL                  /*!< SPI TXFIFO is a quarter of full flag */
+#define SPI_FLAG_TXLVL_HALF_FULL        SPI_TXLVL_HALF_FULL                     /*!< SPI TXFIFO is a half of full flag */
+#define SPI_FLAG_TXLVL_FULL             SPI_TXLVL_FULL                          /*!< SPI TXFIFO is full flag */
+#define SPI_FLAG_RXLVL_EMPTY            ((uint32_t)0x20000000U)                 /*!< SPI RXFIFO is empty flag */
+#define SPI_FLAG_RXLVL_QUARTER_FULL     SPI_RXLVL_QUARTER_FULL                  /*!< SPI RXFIFO is a quarter of full flag */
+#define SPI_FLAG_RXLVL_HALF_FULL        SPI_RXLVL_HALF_FULL                     /*!< SPI RXFIFO is a half of full flag */
+#define SPI_FLAG_RXLVL_FULL             SPI_RXLVL_FULL                          /*!< SPI RXFIFO is full flag */
 
 /* function declarations */
 /* initialization functions */
@@ -337,25 +347,33 @@ void spi_nss_internal_low(uint32_t spi_periph);
 
 /* SPI DMA functions */
 /* enable SPI DMA */
-void spi_dma_enable(uint32_t spi_periph, uint8_t spi_dma);
+void spi_dma_enable(uint32_t spi_periph, uint8_t dma);
 /* disable SPI DMA */
-void spi_dma_disable(uint32_t spi_periph, uint8_t spi_dma);
+void spi_dma_disable(uint32_t spi_periph, uint8_t dma);
+/* configure SPI total number of data transmitting by DMA is odd or not */
+void spi_transmit_odd_config(uint32_t spi_periph, uint16_t odd);
+/* configure SPI total number of data receiving by DMA is odd or not */
+void spi_receive_odd_config(uint32_t spi_periph, uint16_t odd);
 
 /* SPI/I2S transfer configure functions */
 /* configure SPI/I2S data frame format */
 ErrStatus spi_i2s_data_frame_format_config(uint32_t spi_periph, uint16_t frame_format);
+/* configure SPI access size to FIFO(8-bit or 16-bit) */
+void spi_fifo_access_size_config(uint32_t spi_periph, uint16_t fifo_access_size);
+/* configure SPI bidirectional transfer direction */
+void spi_bidirectional_transfer_config(uint32_t spi_periph, uint32_t transfer_direction);
 /* SPI transmit data */
 void spi_i2s_data_transmit(uint32_t spi_periph, uint16_t data);
 /* SPI receive data */
 uint16_t spi_i2s_data_receive(uint32_t spi_periph);
-/* configure SPI bidirectional transfer direction */
-void spi_bidirectional_transfer_config(uint32_t spi_periph, uint32_t transfer_direction);
 
 /* SPI CRC functions */
 /* set SPI CRC polynomial */
 void spi_crc_polynomial_set(uint32_t spi_periph, uint16_t crc_poly);
 /* get SPI CRC polynomial */
 uint16_t spi_crc_polynomial_get(uint32_t spi_periph);
+/* set CRC length */
+void spi_crc_length_set(uint32_t spi_periph, uint16_t crc_length);
 /* turn on SPI CRC function */
 void spi_crc_on(uint32_t spi_periph);
 /* turn off SPI CRC function */
@@ -364,6 +382,8 @@ void spi_crc_off(uint32_t spi_periph);
 void spi_crc_next(uint32_t spi_periph);
 /* get SPI CRC send value or receive value */
 uint16_t spi_crc_get(uint32_t spi_periph, uint8_t crc);
+/* clear SPI CRC error flag status */
+void spi_crc_error_clear(uint32_t spi_periph);
 
 /* SPI TI mode functions */
 /* enable SPI TI mode */
@@ -379,38 +399,24 @@ void spi_nssp_mode_disable(uint32_t spi_periph);
 
 /* quad wire SPI functions */
 /* enable quad wire SPI */
-void qspi_enable(uint32_t spi_periph);
+void spi_quad_enable(uint32_t spi_periph);
 /* disable quad wire SPI */
-void qspi_disable(uint32_t spi_periph);
+void spi_quad_disable(uint32_t spi_periph);
 /* enable quad wire SPI write */
-void qspi_write_enable(uint32_t spi_periph);
+void spi_quad_write_enable(uint32_t spi_periph);
 /* enable quad wire SPI read */
-void qspi_read_enable(uint32_t spi_periph);
-/* enable quad wire SPI_IO2 and SPI_IO3 pin output */
-void qspi_io23_output_enable(uint32_t spi_periph);
-/* disable quad wire SPI_IO2 and SPI_IO3 pin output */
-void qspi_io23_output_disable(uint32_t spi_periph);
-
-/* only for SPI1 FIFO added */
-/* configure SPI access size to FIFO(8-bit or 16-bit) */
-void spi_fifo_access_size_config(uint32_t spi_periph, uint16_t fifo_access_size);
-/* configure SPI total number of data transmitting by DMA is odd or not */
-void spi_transmit_odd_config(uint32_t spi_periph, uint16_t odd);
-/* configure SPI total number of data receiving by DMA is odd or not */
-void spi_receive_odd_config(uint32_t spi_periph, uint16_t odd);
-/* set CRC length */
-void spi_crc_length_set(uint32_t spi_periph, uint16_t crc_length);
+void spi_quad_read_enable(uint32_t spi_periph);
 
 /* flag and interrupt functions */
+/* clear SPI/I2S format error flag status */
+void spi_i2s_format_error_clear(uint32_t spi_periph, uint32_t flag);
+/* get SPI and I2S flag status */
+FlagStatus spi_i2s_flag_get(uint32_t spi_periph, uint32_t flag);
 /* enable SPI and I2S interrupt */
 void spi_i2s_interrupt_enable(uint32_t spi_periph, uint8_t interrupt);
 /* disable SPI and I2S interrupt */
 void spi_i2s_interrupt_disable(uint32_t spi_periph, uint8_t interrupt);
 /* get SPI and I2S interrupt status */
 FlagStatus spi_i2s_interrupt_flag_get(uint32_t spi_periph, uint8_t interrupt);
-/* get SPI and I2S flag status */
-FlagStatus spi_i2s_flag_get(uint32_t spi_periph, uint32_t flag);
-/* clear SPI CRC error flag status */
-void spi_crc_error_clear(uint32_t spi_periph);
 
 #endif /* GD32L23X_SPI_H */

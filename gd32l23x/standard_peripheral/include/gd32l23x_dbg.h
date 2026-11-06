@@ -2,11 +2,11 @@
     \file    gd32l23x_dbg.h
     \brief   definitions for the DBG
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -55,19 +55,36 @@ OF SUCH DAMAGE.
 #define DBG_CTL0_STB_HOLD        BIT(2)                        /*!< keep debugger connection during standby mode */
 #define DBG_CTL0_FWDGT_HOLD      BIT(8)                        /*!< hold FWDGT counter when core is halted */
 #define DBG_CTL0_WWDGT_HOLD      BIT(9)                        /*!< hold WWDGT counter when core is halted */
+#ifdef GD32L235
+#define DBG_CTL0_TIMER0_HOLD     BIT(11)                       /*!< hold TIMER0 counter when core is halted  */
+#endif /* GD32L235 */
 #define DBG_CTL0_TIMER1_HOLD     BIT(12)                       /*!< hold TIMER1 counter when core is halted */
 #define DBG_CTL0_TIMER2_HOLD     BIT(13)                       /*!< hold TIMER2 counter when core is halted */
+#ifdef GD32L235
+#define DBG_CTL0_CAN_HOLD        BIT(14)                       /*!< hold CAN counter when core is halted  */
+#endif /* GD32L235 */
 #define DBG_CTL0_I2C0_HOLD       BIT(15)                       /*!< hold I2C0 smbus when core is halted */
 #define DBG_CTL0_I2C1_HOLD       BIT(16)                       /*!< hold I2C1 smbus when core is halted */
 #define DBG_CTL0_TIMER5_HOLD     BIT(20)                       /*!< hold TIMER5 counter when core is halted */
 #define DBG_CTL0_TIMER6_HOLD     BIT(21)                       /*!< hold TIMER6 counter when core is halted */
 #define DBG_CTL0_TIMER8_HOLD     BIT(23)                       /*!< hold TIMER8 counter when core is halted */
 #define DBG_CTL0_TIMER11_HOLD    BIT(26)                       /*!< hold TIMER11 counter when core is halted */
+#ifdef GD32L235
+#define DBG_CTL0_TIMER14_HOLD    BIT(27)                       /*!< hold TIMER14 counter when core is halted */
+#define DBG_CTL0_TIMER40_HOLD    BIT(28)                       /*!< hold TIMER40 counter when core is halted */
+#endif /* GD32L235 */
 
 /* DBG_CTL1 */
 #define DBG_CTL1_RTC_HOLD        BIT(10)                       /*!< hold RTC calendar and wakeup counter when core is halted */
+#ifdef GD32L235
+#define DBG_CTL1_LPTIMER0_HOLD   BIT(16)                       /*!< hold LPTIMER0 counter when core is halted */
+#else
 #define DBG_CTL1_LPTIMER_HOLD    BIT(16)                       /*!< hold LPTIMER counter when core is halted */
+#endif /* GD32L235 */
 #define DBG_CTL1_I2C2_HOLD       BIT(17)                       /*!< hold I2C2 smbus when core is halted */
+#ifdef GD32L235
+#define DBG_CTL1_LPTIMER1_HOLD   BIT(18)                       /*!< hold LPTIMER1 counter when core is halted  */
+#endif /* GD32L235 */
 
 /* constants definitions */
 /* keep debugger connection */
@@ -88,19 +105,36 @@ enum dbg_reg_idx {
 
 /* peripherals hold bit */
 typedef enum {
-    DBG_FWDGT_HOLD          = DBG_REGIDX_BIT(DBG_IDX_CTL0, 8U),              /*!< FWDGT hold bit */
-    DBG_WWDGT_HOLD          = DBG_REGIDX_BIT(DBG_IDX_CTL0, 9U),              /*!< WWDGT hold bit */
-    DBG_TIMER1_HOLD         = DBG_REGIDX_BIT(DBG_IDX_CTL0, 12U),             /*!< TIMER1 hold bit */
-    DBG_TIMER2_HOLD         = DBG_REGIDX_BIT(DBG_IDX_CTL0, 13U),             /*!< TIMER2 hold bit */
-    DBG_I2C0_HOLD           = DBG_REGIDX_BIT(DBG_IDX_CTL0, 15U),             /*!< I2C0 hold bit */
-    DBG_I2C1_HOLD           = DBG_REGIDX_BIT(DBG_IDX_CTL0, 16U),             /*!< I2C1 hold bit */
-    DBG_TIMER5_HOLD         = DBG_REGIDX_BIT(DBG_IDX_CTL0, 20U),             /*!< TIMER5 hold bit */
-    DBG_TIMER6_HOLD         = DBG_REGIDX_BIT(DBG_IDX_CTL0, 21U),             /*!< TIMER6 hold bit */
-    DBG_TIMER8_HOLD         = DBG_REGIDX_BIT(DBG_IDX_CTL0, 23U),             /*!< TIMER8 hold bit */
-    DBG_TIMER11_HOLD        = DBG_REGIDX_BIT(DBG_IDX_CTL0, 26U),             /*!< TIMER11 hold bit */
-    DBG_RTC_HOLD            = DBG_REGIDX_BIT(DBG_IDX_CTL1, 10U),             /*!< RTC hold bit */
-    DBG_LPTIMER_HOLD        = DBG_REGIDX_BIT(DBG_IDX_CTL1, 16U),             /*!< LPTIMER hold bit */
-    DBG_I2C2_HOLD           = DBG_REGIDX_BIT(DBG_IDX_CTL1, 17U),             /*!< I2C2 hold bit */
+    DBG_FWDGT_HOLD          = DBG_REGIDX_BIT(DBG_IDX_CTL0, 8U),              /*!< debug FWDGT kept when core is halted */
+    DBG_WWDGT_HOLD          = DBG_REGIDX_BIT(DBG_IDX_CTL0, 9U),              /*!< debug WWDGT kept when core is halted */
+#ifdef GD32L235
+    DBG_TIMER0_HOLD         = DBG_REGIDX_BIT(DBG_IDX_CTL0, 11U),             /*!< debug TIMER0 kept when core is halted */
+#endif /* GD32L235 */
+    DBG_TIMER1_HOLD         = DBG_REGIDX_BIT(DBG_IDX_CTL0, 12U),             /*!< debug TIMER1 kept when core is halted */
+    DBG_TIMER2_HOLD         = DBG_REGIDX_BIT(DBG_IDX_CTL0, 13U),             /*!< debug TIMER2 kept when core is halted */
+#ifdef GD32L235
+    DBG_CAN_HOLD            = DBG_REGIDX_BIT(DBG_IDX_CTL0, 14U),             /*!< debug CAN kept when core is halted */
+#endif /* GD32L235 */
+    DBG_I2C0_HOLD           = DBG_REGIDX_BIT(DBG_IDX_CTL0, 15U),             /*!< debug I2C0 kept when core is halted */
+    DBG_I2C1_HOLD           = DBG_REGIDX_BIT(DBG_IDX_CTL0, 16U),             /*!< debug I2C1 kept when core is halted */
+    DBG_TIMER5_HOLD         = DBG_REGIDX_BIT(DBG_IDX_CTL0, 20U),             /*!< debug TIMER5 kept when core is halted */
+    DBG_TIMER6_HOLD         = DBG_REGIDX_BIT(DBG_IDX_CTL0, 21U),             /*!< debug TIMER6 kept when core is halted */
+    DBG_TIMER8_HOLD         = DBG_REGIDX_BIT(DBG_IDX_CTL0, 23U),             /*!< debug TIMER8 kept when core is halted */
+    DBG_TIMER11_HOLD        = DBG_REGIDX_BIT(DBG_IDX_CTL0, 26U),             /*!< debug TIMER11 kept when core is halted */
+#ifdef GD32L235
+    DBG_TIMER14_HOLD        = DBG_REGIDX_BIT(DBG_IDX_CTL0, 27U),             /*!< debug TIMER14 kept when core is halted */
+    DBG_TIMER40_HOLD        = DBG_REGIDX_BIT(DBG_IDX_CTL0, 28U),             /*!< debug TIMER40 kept when core is halted */
+#endif /* GD32L235 */
+    DBG_RTC_HOLD            = DBG_REGIDX_BIT(DBG_IDX_CTL1, 10U),             /*!< debug RTC kept when core is halted */
+#ifdef GD32L235
+    DBG_LPTIMER0_HOLD       = DBG_REGIDX_BIT(DBG_IDX_CTL1, 16U),             /*!< debug LPTIMER0 kept when core is halted */
+#else
+    DBG_LPTIMER_HOLD        = DBG_REGIDX_BIT(DBG_IDX_CTL1, 16U),             /*!< debug LPTIMER kept when core is halted */
+#endif /* GD32L235 */
+    DBG_I2C2_HOLD           = DBG_REGIDX_BIT(DBG_IDX_CTL1, 17U),             /*!< debug I2C2 kept when core is halted */
+#ifdef GD32L235
+    DBG_LPTIMER1_HOLD       = DBG_REGIDX_BIT(DBG_IDX_CTL1, 18U),             /*!< debug LPTIMER1 kept when core is halted */
+#endif /* GD32L235 */
 } dbg_periph_enum;
 
 /* function declarations */

@@ -2,11 +2,11 @@
     \file    gd32l23x_gpio.c
     \brief   GPIO driver
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -251,11 +251,13 @@ void gpio_port_write(uint32_t gpio_periph, uint16_t data)
 */
 FlagStatus gpio_input_bit_get(uint32_t gpio_periph, uint32_t pin)
 {
+    FlagStatus ret;
     if((uint32_t)RESET != (GPIO_ISTAT(gpio_periph) & (pin))) {
-        return SET;
+        ret = SET;
     } else {
-        return RESET;
+        ret = RESET;
     }
+    return ret;
 }
 
 /*!
@@ -284,11 +286,13 @@ uint16_t gpio_input_port_get(uint32_t gpio_periph)
 */
 FlagStatus gpio_output_bit_get(uint32_t gpio_periph, uint32_t pin)
 {
+    FlagStatus ret;
     if((uint32_t)RESET != (GPIO_OCTL(gpio_periph) & (pin))) {
-        return SET;
+        ret = SET;
     } else {
-        return RESET;
+        ret = RESET;
     }
+    return ret;
 }
 
 /*!
@@ -311,16 +315,18 @@ uint16_t gpio_output_port_get(uint32_t gpio_periph)
       \arg        GPIOx(x = A,B,C,D,F)
     \param[in]  alt_func_num: GPIO pin af function, please refer to specific device datasheet
                 only one parameter can be selected which is shown as below:
-      \arg        GPIO_AF_0: RTC_OUT, CK_OUT, SWDIO, SWCLK
-      \arg        GPIO_AF_1: TIMER1, TIMER2
-      \arg        GPIO_AF_2: TIMER8, TIMER11, LPTIMER, LPUART
+      \arg        GPIO_AF_0: SPI0, SPI1, TIMER0, RTC_OUT, CK_OUT, SWDIO, SWCLK, LPTIMER1, TIMER14
+      \arg        GPIO_AF_1: TIMER1, TIMER40, TIMER2, TIMER0, LPTIMER0, TIMER11, TIMER8, LPTIMER1, TIMER14
+      \arg        GPIO_AF_2: LPTIMER0, TIMER8, LPUART0, TIMER14, TIMER11, TIMER0
       \arg        GPIO_AF_3: SLCD
-      \arg        GPIO_AF_4: I2C0, I2C1, I2C2
-      \arg        GPIO_AF_5: SPI0, SPI1, I2S1
+      \arg        GPIO_AF_4: I2C0, I2C1, I2C2, UART4, CAN
+      \arg        GPIO_AF_5: SPI0, SPI1, I2S1, I2C2
       \arg        GPIO_AF_6: SPI1, CMP0, CMP1, I2S1
-      \arg        GPIO_AF_7: USART0, USART1, LPUART, UART3, UART4
-      \arg        GPIO_AF_8: USART1, LPUART, UART3, UART4, I2C1, CTC, CMP1
+      \arg        GPIO_AF_7: USART1, TIMER11, USART0, LPUART1, CAN, UART3, UART4
+      \arg        GPIO_AF_8: CTC, LPUART0, UART4, I2C1, CMP1, UART3, TIMER11, CAN, USART1
       \arg        GPIO_AF_9: EVENTOUT
+      \arg        GPIO_AF_10: TIMER1, TIMER8, TIMER11, TIMER14, TIMER40, I2C1, LPUART1
+      \arg        GPIO_AF_11: TIMER0, TIMER40, I2C1, I2C2, CAN
     \param[in]  pin: GPIO pin
                 one or more parameters can be selected which are shown as below:
       \arg        GPIO_PIN_x(x=0..15), GPIO_PIN_ALL
