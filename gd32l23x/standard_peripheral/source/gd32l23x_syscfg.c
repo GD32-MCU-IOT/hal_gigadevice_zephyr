@@ -2,11 +2,11 @@
     \file    gd32l23x_syscfg.c
     \brief   SYSCFG driver
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -66,25 +66,25 @@ void syscfg_exti_line_config(uint8_t exti_port, uint8_t exti_pin)
     case EXTISS0:
         /* clear EXTI source line(0..3) */
         SYSCFG_EXTISS0 &= clear_exti_mask;
-        /* configure EXTI soure line(0..3) */
+        /* configure EXTI source line(0..3) */
         SYSCFG_EXTISS0 |= config_exti_mask;
         break;
     case EXTISS1:
-        /* clear EXTI soure line(4..7) */
+        /* clear EXTI source line(4..7) */
         SYSCFG_EXTISS1 &= clear_exti_mask;
-        /* configure EXTI soure line(4..7) */
+        /* configure EXTI source line(4..7) */
         SYSCFG_EXTISS1 |= config_exti_mask;
         break;
     case EXTISS2:
-        /* clear EXTI soure line(8..11) */
+        /* clear EXTI source line(8..11) */
         SYSCFG_EXTISS2 &= clear_exti_mask;
-        /* configure EXTI soure line(8..11) */
+        /* configure EXTI source line(8..11) */
         SYSCFG_EXTISS2 |= config_exti_mask;
         break;
     case EXTISS3:
-        /* clear EXTI soure line(12..15) */
+        /* clear EXTI source line(12..15) */
         SYSCFG_EXTISS3 &= clear_exti_mask;
-        /* configure EXTI soure line(12..15) */
+        /* configure EXTI source line(12..15) */
         SYSCFG_EXTISS3 |= config_exti_mask;
         break;
     default:
@@ -98,6 +98,9 @@ void syscfg_exti_line_config(uint8_t exti_port, uint8_t exti_pin)
                 one or more parameters can be selected which are shown as below:
       \arg        SYSCFG_PA11_PA12_REMAP: PA11 PA12 remap
       \arg        SYSCFG_BOOT0_PD3_REMAP: BOOT0 PD3 remap
+      \arg        SYSCFG_PA8_REMAP: PA8 remap (only for GD32L235)
+      \arg        SYSCFG_PD0_PD1_PD2_REMAP: PD0 PD1 PD2 remap (only for GD32L235)
+      \arg        SYSCFG_PA11_PA12_PB6_PB8_REMAP: PA11 PA12 PB6 PB8 remap (only for GD32L235)
     \param[out] none
     \retval     none
 */
@@ -112,12 +115,15 @@ void syscfg_pin_remap_enable(uint32_t remap_pin)
                 one or more parameters can be selected which are shown as below:
       \arg        SYSCFG_PA11_PA12_REMAP: PA11 PA12 remap
       \arg        SYSCFG_BOOT0_PD3_REMAP: BOOT0 PD3 remap
+      \arg        SYSCFG_PA8_REMAP: PA8 remap (only for GD32L235)
+      \arg        SYSCFG_PD0_PD1_PD2_REMAP: PD0 PD1 PD2 remap (only for GD32L235)
+      \arg        SYSCFG_PA11_PA12_PB6_PB8_REMAP: PA11 PA12 PB6 PB8 remap (only for GD32L235)
     \param[out] none
     \retval     none
 */
 void syscfg_pin_remap_disable(uint32_t remap_pin)
 {
-    SYSCFG_CFG0 &= ~remap_pin;
+    SYSCFG_CFG0 &= (uint32_t)~remap_pin;
 }
 
 /*!
@@ -165,7 +171,7 @@ void irq_latency_set(uint8_t irq_latency)
     reg = SYSCFG_CPU_IRQ_LAT & (~(uint32_t)SYSCFG_CPU_IRQ_LAT_IRQ_LATENCY);
     reg |= (uint32_t)(IRQ_LATENCY(irq_latency));
 
-    SYSCFG_CPU_IRQ_LAT = (uint32_t)reg;
+    SYSCFG_CPU_IRQ_LAT = reg;
 }
 
 /*!
@@ -180,7 +186,86 @@ void irq_latency_set(uint8_t irq_latency)
 uint8_t syscfg_bootmode_get(void)
 {
     /* get the bootmode */
-    uint8_t temp = (uint8_t)(SYSCFG_CFG0 & 0x03U);
+    uint8_t bootmode = (uint8_t)(SYSCFG_CFG0 & SYSCFG_CFG0_BOOT_MODE);
 
-    return temp;
+    return bootmode;
 }
+
+#ifdef GD32L235
+/*!
+    \brief      insert wait state in read accesses of SRAM0/SRAM1 when LDO is 1.1V
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void syscfg_sram_waitstate_insert(void)
+{
+    SYSCFG_CFG1 |= SYSCFG_CFG1_SRAM_LP_WATISTATE;
+}
+
+/*!
+    \brief      cancel insertion of wait state in read accesses of SRAM0/SRAM1 when LDO is 1.1V
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void syscfg_sram_waitstate_cancel(void)
+{
+    SYSCFG_CFG1 &= (uint32_t)~SYSCFG_CFG1_SRAM_LP_WATISTATE;
+}
+
+/*!
+    \brief      connect TIMER0/14/40 break input to the selected parameter
+    \param[in]  syscfg_lock: specify the parameter to be connected
+                one or more parameters can be selected which are shown as below:
+      \arg        SYSCFG_LOCK_LOCKUP: Cortex-M23 lockup output connected to the break input
+      \arg        SYSCFG_LOCK_SRAM_PARITY_ERROR: SRAM_PARITY check error connected to the break input
+      \arg        SYSCFG_LOCK_LVD: LVD interrupt connected to the break input
+    \param[out] none
+    \retval     none
+*/
+void syscfg_lock_config(uint32_t syscfg_lock)
+{
+    uint32_t reg;
+    reg = SYSCFG_CFG1;
+    /* clear LOCKUP_LOCK, SRAM_PARITY_ERROR_LOCK and LVD_LOCK bits */
+    reg &= (uint32_t)~(SYSCFG_CFG1_LOCKUP_LOCK | SYSCFG_CFG1_SRAM_PARITY_ERROR_LOCK | SYSCFG_CFG1_LVD_LOCK);
+    /* configure SYSCFG lock */
+    reg |= syscfg_lock;
+
+    SYSCFG_CFG1 = reg;
+}
+
+/*!
+    \brief      check if the specified flag in SYSCFG_CFG1 is set or not
+    \param[in]  syscfg_flag: specify the flag in SYSCFG_CFG1 to check
+      \arg        SYSCFG_FLAG_SRAM_PCEF: SRAM parity check error flag
+    \param[out] none
+    \retval     the syscfg_flag state returned (SET or RESET)
+  */
+FlagStatus syscfg_flag_get(uint32_t syscfg_flag)
+{
+    FlagStatus flag = RESET;
+
+    if((SYSCFG_CFG1 & syscfg_flag) != (uint32_t)RESET) {
+        flag = SET;
+    } else {
+        flag = RESET;
+    }
+
+    return flag;
+}
+
+/*!
+    \brief      clear the flag in SYSCFG_CFG1 by writing 1
+    \param[in]  syscfg_flag: specify the flag in SYSCFG_CFG1 to clear
+      \arg        SYSCFG_FLAG_SRAM_PCEF: SRAM parity check error flag
+    \param[out] none
+    \retval     none
+*/
+void syscfg_flag_clear(uint32_t syscfg_flag)
+{
+    SYSCFG_CFG1 |= syscfg_flag;
+}
+
+#endif /* GD32L235 */

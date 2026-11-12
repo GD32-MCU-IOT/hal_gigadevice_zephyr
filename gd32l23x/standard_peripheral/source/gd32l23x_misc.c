@@ -2,11 +2,12 @@
     \file    gd32l23x_misc.c
     \brief   MISC driver
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
-    \version 2021-12-09, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
+
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
@@ -40,12 +41,12 @@ OF SUCH DAMAGE.
     \param[out] none
     \retval     none
 */
-void nvic_irq_enable(uint8_t nvic_irq,
+void nvic_irq_enable(IRQn_Type nvic_irq,
                      uint8_t nvic_irq_priority)
 {
     /* set the priority and enable the selected IRQ */
-    NVIC_SetPriority((IRQn_Type)nvic_irq, (uint32_t)nvic_irq_priority);
-    NVIC_EnableIRQ((IRQn_Type)nvic_irq);
+    NVIC_SetPriority(nvic_irq, (uint32_t)nvic_irq_priority);
+    NVIC_EnableIRQ(nvic_irq);
 }
 
 /*!
@@ -54,10 +55,10 @@ void nvic_irq_enable(uint8_t nvic_irq,
     \param[out] none
     \retval     none
 */
-void nvic_irq_disable(uint8_t nvic_irq)
+void nvic_irq_disable(IRQn_Type nvic_irq)
 {
     /* disable the selected IRQ.*/
-    NVIC_DisableIRQ((IRQn_Type)nvic_irq);
+    NVIC_DisableIRQ(nvic_irq);
 }
 
 /*!

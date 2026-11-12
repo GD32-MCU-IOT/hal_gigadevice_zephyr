@@ -2,11 +2,11 @@
     \file    gd32l23x_rtc.c
     \brief   RTC driver
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -465,11 +465,14 @@ void rtc_alarm_get(uint8_t rtc_alarm, rtc_alarm_struct *rtc_alarm_time)
 */
 uint32_t rtc_alarm_subsecond_get(uint8_t rtc_alarm)
 {
+    uint32_t rtc_alarm_temp = 0U;
+    
     if(RTC_ALARM0 == rtc_alarm) {
-        return ((uint32_t)(RTC_ALRM0SS & RTC_ALRM0SS_SSC));
+        rtc_alarm_temp = ((uint32_t)(RTC_ALRM0SS & RTC_ALRM0SS_SSC));
     } else {
-        return ((uint32_t)(RTC_ALRM1SS & RTC_ALRM1SS_SSC));
+        rtc_alarm_temp =  ((uint32_t)(RTC_ALRM1SS & RTC_ALRM1SS_SSC));
     }
+    return rtc_alarm_temp;
 }
 
 /*!
@@ -890,7 +893,7 @@ void rtc_flag_clear(uint32_t flag)
     \brief      select the RTC output pin
     \param[in]  outputpin: specify the rtc output pin is PC13 or not
       \arg        RTC_OUT_PC13: the rtc output pin is PC13
-      \arg        RTC_OUT_PB2: the rtc output pin is PB2
+      \arg        RTC_OUT_PB2_PB14: the rtc output pin is PB2 or PB14
     \param[out] none
     \retval     none
 */
@@ -1288,3 +1291,24 @@ ErrStatus rtc_smooth_calibration_config(uint32_t window, uint32_t plus, uint32_t
     return error_status;
 }
 
+/*!
+    \brief      enable LXTAL stabilization reset
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void rtc_lxtal_stab_reset_enable(void)
+{
+    RTC_CTL |= RTC_CTL_LXTALSTBRST;
+}
+
+/*!
+    \brief      disable LXTAL stabilization reset
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void rtc_lxtal_stab_reset_disable(void)
+{
+    RTC_CTL &= ~RTC_CTL_LXTALSTBRST;
+}

@@ -2,11 +2,11 @@
     \file    gd32l23x_pmu.c
     \brief   PMU driver
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -38,9 +38,10 @@ OF SUCH DAMAGE.
 #define PAR_TWK_CORE1_OFFSET               ((uint32_t)0x00000015U)               /*!< bit offset of TWK_CORE1 in PMU_PAR */
 #define PAR_TSW_IRC16MCNT_OFFSET           ((uint32_t)0x00000010U)               /*!< bit offset of TSW_IRC16MCNT in PMU_PAR */
 #define PAR_TWK_SRAM1_OFFSET               ((uint32_t)0x00000008U)               /*!< bit offset of TWK_SRAM1 in PMU_PAR */
+#define PAR_TWK_EFLASH_OFFSET              ((uint32_t)0x00000015U)               /*!< bit offset of TWK_EFLASH in PMU_PAR */
 
 /*!
-    \brief      reset PMU
+    \brief      reset PMU registers
     \param[in]  none
     \param[out] none
     \retval     none
@@ -95,7 +96,7 @@ void pmu_lvd_disable(void)
                 this bit set by software when the main PLL closed, before closing PLL, change the system clock to IRC16M or HXTAL
     \param[in]  ldo_output:
                 only one parameter can be selected which is shown as below:
-      \arg        PMU_LDOVS_LOW: LDO output voltage low mode
+      \arg        PMU_LDOVS_LOW: LDO output voltage low mode, only for GD32L233xx series
       \arg        PMU_LDOVS_HIGH: LDO output voltage high mode
     \param[out] none
     \retval     none
@@ -144,7 +145,7 @@ void pmu_vcr_select(uint32_t resistor)
 }
 
 /*!
-    \brief      enable low power in Run/Sleep mode
+    \brief      enable low power in Run / Sleep mode
     \param[in]  none
     \param[out] none
     \retval     none
@@ -155,7 +156,7 @@ void pmu_low_power_enable(void)
 }
 
 /*!
-    \brief      disable low power in Run/Sleep mode
+    \brief      disable low power in Run / Sleep mode
     \param[in]  none
     \param[out] none
     \retval     none
@@ -166,8 +167,8 @@ void pmu_low_power_disable(void)
 }
 
 /*!
-    \brief      PMU work at sleep mode
-    \param[in]  lowdrive: low-driver mode when use normal power LDO in Run/Sleep mode.
+    \brief      PMU work in Sleep mode
+    \param[in]  lowdrive: low-driver mode when use normal power LDO in Run / Sleep mode.
                 only one parameter can be selected which is shown as below:
       \arg        PMU_LDNP_NORMALDRIVE: low-driver mode disable
       \arg        PMU_LDNP_LOWDRIVE: low-driver mode enable
@@ -180,7 +181,7 @@ void pmu_low_power_disable(void)
 */
 void pmu_to_sleepmode(uint32_t lowdrive, uint8_t sleepmodecmd)
 {
-    /* clear sleepDeep bit of Cortex-M23 system control register */
+    /* clear sleepdeep bit of Cortex-M23 system control register */
     SCB->SCR &= ~((uint32_t)SCB_SCR_SLEEPDEEP_Msk);
 
     /* clear lowpower mode and low drive bits */
@@ -195,12 +196,14 @@ void pmu_to_sleepmode(uint32_t lowdrive, uint8_t sleepmodecmd)
     if(WFI_CMD == sleepmodecmd) {
         __WFI();
     } else {
+        __SEV();
+        __WFE();
         __WFE();
     }
 }
 
 /*!
-    \brief      PMU work at Deep-sleep mode
+    \brief      PMU work in Deep-sleep mode
     \param[in]  lowdrive: low-driver mode when use normal power LDO in Deep-sleep mode
                 only one parameter can be selected which is shown as below:
       \arg        PMU_LDNPDSP_NORMALDRIVE: low-driver mode disable
@@ -244,39 +247,37 @@ void pmu_to_deepsleepmode(uint32_t lowdrive, uint8_t deepsleepmodecmd, uint8_t d
     }
     /* reset sleepdeep bit of Cortex-M23 system control register */
     SCB->SCR &= ~((uint32_t)SCB_SCR_SLEEPDEEP_Msk);
+    /* clear lowpower mode */
+    PMU_CTL0 &= ~((uint32_t)(PMU_CTL0_LPMOD));
 }
 
 /*!
-    \brief      pmu work at standby mode
-    \param[in]  standbymodecmd:
-                only one parameter can be selected which is shown as below:
-      \arg        WFI_CMD: use WFI command
-      \arg        WFE_CMD: use WFE command
+    \brief      pmu work in standby mode
+    \param[in]  none
     \param[out] none
     \retval     none
 */
-void pmu_to_standbymode(uint8_t standbymodecmd)
+void pmu_to_standbymode(void)
 {
-    /* set sleepdeep bit of Cortex-M23 system control register */
-    SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
-
     /* select the low-power mode to enter */
     PMU_CTL0 |= PMU_STANDBY;
 
-    /* reset wakeup flag and standby flag */
-    PMU_CTL0 |= PMU_CTL0_WURST | PMU_CTL0_STBRST;
+    /* reset wakeup flag */
+    PMU_CTL0 |= PMU_CTL0_WURST;
+    /* set sleepdeep bit of Cortex-M23 system control register */
+    SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
 
-    /* select WFI or WFE command to enter standby mode */
-    if(WFI_CMD == standbymodecmd) {
-        __WFI();
-    } else {
-        __WFE();
-        __WFE();
-    }
+    REG32(0xE000E010U) &= 0x00010004U;
+    REG32(0xE000E180U)  = 0xFFFFFFF3U;
+    REG32(0xE000E184U)  = 0xFFFFFDFFU;
+    REG32(0xE000E188U)  = 0xFFFFFFFFU;
+
+    /* select WFI command to enter standby mode */
+    __WFI();
 }
 
 /*!
-    \brief      enable wakeup pin
+    \brief      enable PMU wakeup pin
     \param[in]  wakeup_pin: wakeup pin
                 one or more parameters can be selected which are shown as below:
       \arg        PMU_WAKEUP_PIN0: WKUP Pin 0 (PA0)
@@ -284,6 +285,7 @@ void pmu_to_standbymode(uint8_t standbymodecmd)
       \arg        PMU_WAKEUP_PIN2: WKUP Pin 2 (PA2)
       \arg        PMU_WAKEUP_PIN3: WKUP Pin 3 (PB2)
       \arg        PMU_WAKEUP_PIN4: WKUP Pin 4 (PC6)
+      \arg        PMU_WAKEUP_PIN5: WKUP Pin 5 (PB5), only for GD32L235xx series
     \param[out] none
     \retval     none
 */
@@ -293,7 +295,7 @@ void pmu_wakeup_pin_enable(uint32_t wakeup_pin)
 }
 
 /*!
-    \brief      disable wakeup pin
+    \brief      disable PMU wakeup pin
     \param[in]  wakeup_pin: wakeup pin
                 one or more parameters can be selected which are shown as below:
       \arg        PMU_WAKEUP_PIN0: WKUP Pin 0 (PA0)
@@ -301,6 +303,7 @@ void pmu_wakeup_pin_enable(uint32_t wakeup_pin)
       \arg        PMU_WAKEUP_PIN2: WKUP Pin 2 (PA2)
       \arg        PMU_WAKEUP_PIN3: WKUP Pin 3 (PB2)
       \arg        PMU_WAKEUP_PIN4: WKUP Pin 4 (PC6)
+      \arg        PMU_WAKEUP_PIN5: WKUP Pin 5 (PB5), only for GD32L235xx series
     \param[out] none
     \retval     none
 */
@@ -310,7 +313,7 @@ void pmu_wakeup_pin_disable(uint32_t wakeup_pin)
 }
 
 /*!
-    \brief      enable backup domain write
+    \brief      enable write access to the registers in backup domain
     \param[in]  none
     \param[out] none
     \retval     none
@@ -321,7 +324,7 @@ void pmu_backup_write_enable(void)
 }
 
 /*!
-    \brief      disable backup domain write
+    \brief      disable write access to the registers in backup domain
     \param[in]  none
     \param[out] none
     \retval     none
@@ -345,6 +348,7 @@ void pmu_sram_power_config(uint32_t state)
     PMU_CTL1 |= state;
 }
 
+#ifndef GD32L235
 /*!
     \brief      configure power state of COREOFF1 domain
     \param[in]  state: power state of COREOFF1 domain
@@ -380,13 +384,50 @@ void pmu_deepsleep2_retention_disable(void)
 {
     PMU_CTL1 |= PMU_CTL1_NRRD2;
 }
+#else
+/*!
+    \brief      configure power state of eflash domain when in Run mode
+    \param[in]  state: power state of eflash domain
+                only one parameter can be selected which is shown as below:
+      \arg        PMU_EFLASH_SLEEP_ON: eflash domain power on in Run mode
+      \arg        PMU_EFLASH_SLEEP_OFF: eflash domain power off in Run mode
+    \param[out] none
+    \retval     none
+*/
+void pmu_eflash_sleep_power_config(uint32_t state)
+{
+    if(PMU_EFLASH_SLEEP_ON == state) {
+        PMU_CTL1 &= state;
+    }else{
+        PMU_CTL1 |= state;
+    }
+}
+
+/*!
+    \brief      configure power state of eflash domain when in Deep-sleep / Deep-sleep 1 / Deep-sleep 2 mode
+    \param[in]  state: power state of eflash domain
+                only one parameter can be selected which is shown as below:
+      \arg        PMU_EFLASH_DSPSLEEP_ON: eflash power on when in Deep-sleep / Deep-sleep 1 / Deep-sleep 2  mode
+      \arg        PMU_EFLASH_DSPSLEEP_OFF: eflash power off when in Deep-sleep / Deep-sleep 1 / Deep-sleep 2  mode
+    \param[out] none
+    \retval     none
+*/
+void pmu_eflash_deepsleep_power_config(uint32_t state)
+{
+    if(PMU_EFLASH_DSPSLEEP_ON == state) {
+        PMU_CTL1 &= state;
+    }else{
+        PMU_CTL1 |= state;
+    }
+}
+#endif /* GD32L235 */
 
 /*!
     \brief      configure SRAM1 power state when enter Deep-sleep 2
     \param[in]  state: power state of SRAM1 when enters Deep-sleep 2 mode
                 only one parameter can be selected which is shown as below:
       \arg        PMU_SRAM1_POWER_OFF: SRAM1 power-off
-      \arg        PMU_SRAM1_POWER_REMAIN: SRAM1 power same as Run/Run1/Run2 mode
+      \arg        PMU_SRAM1_POWER_REMAIN: SRAM1 power same as Run / Run1 / Run2 mode for GD32L233xx series and Run mode for GD32L235xx series
     \param[out] none
     \retval     none
 */
@@ -405,9 +446,10 @@ void pmu_deepsleep2_sram_power_config(uint32_t state)
 void pmu_deepsleep_wait_time_config(uint32_t wait_time)
 {
     PMU_PAR &= ~PMU_PAR_TSW_IRC16MCNT;
-    PMU_PAR |= (uint32_t)(wait_time << PAR_TSW_IRC16MCNT_OFFSET);
+    PMU_PAR |= (uint32_t)((wait_time << PAR_TSW_IRC16MCNT_OFFSET) & PMU_PAR_TSW_IRC16MCNT);
 }
 
+#ifndef GD32L235
 /*!
     \brief      use software value signal when wake up COREOFF1 domain
     \param[in]  wakeup_time: 0x0~0xFF, wakeup time of power switch of COREOFF1 domain. 4 IRC16M clock step and the max value is 64us.
@@ -431,17 +473,41 @@ void pmu_wakeuptime_core1_software_disable(void)
 {
     PMU_PAR &= ~PMU_PAR_TWKCORE1EN;
 }
+#else
+/*!
+    \brief      configure eflash wake up counter
+    \param[in]  wait_time: IRC16M counter, 0x0~0xFF
+    \param[out] none
+    \retval     none
+*/
+void pmu_wakeuptime_eflash_config(uint32_t wait_time)
+{
+    PMU_PAR &= ~PMU_PAR_TWK_EFLASH;
+    PMU_PAR |= (uint32_t)((wait_time << PAR_TWK_EFLASH_OFFSET) & PMU_PAR_TWK_EFLASH);
+}
+#endif /* GD32L235 */
 
 /*!
-    \brief      use software value signal when wake up SRAM1
+    \brief      configure SRAM1 wakeup time
     \param[in]  wakeup_time: 0x0~0xFF, wakeup time of power switch of SRAM1. The step is 4 IRC16M clock and the max value is 64us.
     \param[out] none
     \retval     none
 */
-void pmu_wakeuptime_sram_software_enable(uint32_t wakeup_time)
+void pmu_wakeuptime_sram_config(uint32_t wakeup_time)
 {
     PMU_PAR &= ~PMU_PAR_TWK_SRAM1;
-    PMU_PAR |= (uint32_t)(wakeup_time << PAR_TWK_SRAM1_OFFSET);
+    PMU_PAR |= (uint32_t)((wakeup_time << PAR_TWK_SRAM1_OFFSET) & PMU_PAR_TWK_SRAM1);
+}
+
+#ifndef GD32L235
+/*!
+    \brief      use software value signal when wake up SRAM1
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void pmu_wakeuptime_sram_software_enable(void)
+{
     PMU_PAR |= PMU_PAR_TWKSRAM1EN;
 }
 
@@ -455,6 +521,7 @@ void pmu_wakeuptime_sram_software_disable(void)
 {
     PMU_PAR &= ~PMU_PAR_TWKSRAM1EN;
 }
+#endif /* GD32L235 */
 
 /*!
     \brief      use software value signal when wake up Deep-sleep 2
@@ -481,7 +548,7 @@ void pmu_wakeuptime_deepsleep2_software_disable(void)
 }
 
 /*!
-    \brief      get PMU flag status
+    \brief      get flag state
     \param[in]  flag: PMU flags
                 only one parameter can be selected which is shown as below:
       \arg        PMU_FLAG_WAKEUP: wakeup flag
@@ -489,11 +556,12 @@ void pmu_wakeuptime_deepsleep2_software_disable(void)
       \arg        PMU_FLAG_LVD: lvd flag
       \arg        PMU_FLAG_LDOVSRF: LDO voltage select ready flag
       \arg        PMU_FLAG_NPRDY: normal-power LDO ready flag
-      \arg        PMU_FLAG_LPRDY: low-power LDO ready flag
       \arg        PMU_FLAG_SRAM1_SLEEP: SRAM1 is in sleep state flag
       \arg        PMU_FLAG_SRAM1_ACTIVE: SRAM1 is in active state flag
-      \arg        PMU_FLAG_CORE1_SLEEP: COREOFF1 domain is in sleep state flag
-      \arg        PMU_FLAG_CORE1_ACTIVE: COREOFF1 domain is in active state flag
+      \arg        PMU_FLAG_EFLASHPS_SLEEP: eflash domain is in sleep state flag, only for GD32L235xx series
+      \arg        PMU_FLAG_EFLASHPS_ACTIVE: eflash domain is in active state flag, only for GD32L235xx series
+      \arg        PMU_FLAG_CORE1_SLEEP: COREOFF1 domain is in sleep state flag, only for GD32L233xx series
+      \arg        PMU_FLAG_CORE1_ACTIVE: COREOFF1 domain is in active state flag, only for GD32L233xx series
       \arg        PMU_FLAG_DEEPSLEEP_2: Deep-sleep 2 mode status flag
     \param[out] none
     \retval     FlagStatus: SET or RESET
@@ -516,7 +584,7 @@ FlagStatus pmu_flag_get(uint32_t flag)
 }
 
 /*!
-    \brief      clear PMU flag status
+    \brief      clear flag bit
     \param[in]  flag: PMU flags
                 only one parameter can be selected which is shown as below:
       \arg        PMU_FLAG_WAKEUP: wakeup flag

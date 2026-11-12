@@ -2,11 +2,11 @@
     \file    gd32l23x_ctc.c
     \brief   CTC driver
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -79,8 +79,8 @@ void ctc_counter_disable(void)
 
 /*!
     \brief      configure the IRC48M trim value
-    \param[in]  ctc_trim_value: 8-bit IRC48M trim value
-      \arg        0x00 - 0x3F
+    \param[in]  trim_value: 7-bit IRC48M trim value
+      \arg        0x00 - 0x7F
     \param[out] none
     \retval     none
 */
@@ -105,7 +105,7 @@ void ctc_software_refsource_pulse_generate(void)
 
 /*!
     \brief      configure hardware automatically trim mode
-    \param[in]  hardmode:
+    \param[in]  hardmode: hardware automatically trim mode enable or disable
                 only one parameter can be selected which is shown as below:
       \arg        CTC_HARDWARE_TRIM_MODE_ENABLE: hardware automatically trim mode enable
       \arg        CTC_HARDWARE_TRIM_MODE_DISABLE: hardware automatically trim mode disable
@@ -120,7 +120,7 @@ void ctc_hardware_trim_mode_config(uint32_t hardmode)
 
 /*!
     \brief      configure reference signal source polarity
-    \param[in]  polarity:
+    \param[in]  polarity: reference signal source polarity select
                 only one parameter can be selected which is shown as below:
       \arg        CTC_REFSOURCE_POLARITY_FALLING: reference signal source polarity is falling edge
       \arg        CTC_REFSOURCE_POLARITY_RISING: reference signal source polarity is rising edge
@@ -135,11 +135,10 @@ void ctc_refsource_polarity_config(uint32_t polarity)
 
 /*!
     \brief      select reference signal source
-    \param[in]  refs:
+    \param[in]  refs: reference signal source select
                 only one parameter can be selected which is shown as below:
       \arg        CTC_REFSOURCE_GPIO: GPIO is selected
       \arg        CTC_REFSOURCE_LXTAL: LXTAL is selected
-      \arg        CTC_REFSOURCE_USBSOF: USBD_SOF is selected
     \param[out] none
     \retval     none
 */
@@ -151,7 +150,7 @@ void ctc_refsource_signal_select(uint32_t refs)
 
 /*!
     \brief      configure reference signal source prescaler
-    \param[in]  prescaler:
+    \param[in]  prescaler: reference signal source prescaler
                 only one parameter can be selected which is shown as below:
       \arg        CTC_REFSOURCE_PSC_OFF: reference signal not divided
       \arg        CTC_REFSOURCE_PSC_DIV2: reference signal divided by 2
@@ -219,11 +218,13 @@ uint16_t ctc_counter_capture_value_read(void)
 */
 FlagStatus ctc_counter_direction_read(void)
 {
+    FlagStatus reval = RESET;
     if(RESET != (CTC_STAT & CTC_STAT_REFDIR)) {
-        return SET;
+        reval = SET;
     } else {
-        return RESET;
+        reval = RESET;
     }
+    return reval;
 }
 
 /*!
@@ -243,7 +244,7 @@ uint16_t ctc_counter_reload_value_read(void)
     \brief      read the IRC48M trim value
     \param[in]  none
     \param[out] none
-    \retval     the 8-bit IRC48M trim value
+    \retval     the 7-bit IRC48M trim value
 */
 uint8_t ctc_irc48m_trim_value_read(void)
 {
@@ -256,10 +257,10 @@ uint8_t ctc_irc48m_trim_value_read(void)
     \brief      enable the CTC interrupt
     \param[in]  interrupt: CTC interrupt enable
                 one or more parameters can be selected which are shown as below:
-      \arg        CTC_INT_CKOK: clock trim OK interrupt enable
-      \arg        CTC_INT_CKWARN: clock trim warning interrupt enable
-      \arg        CTC_INT_ERR: error interrupt enable
-      \arg        CTC_INT_EREF: expect reference interrupt enable
+      \arg        CTC_INT_CKOK: clock trim OK interrupt
+      \arg        CTC_INT_CKWARN: clock trim warning interrupt
+      \arg        CTC_INT_ERR: error interrupt
+      \arg        CTC_INT_EREF: expect reference interrupt
     \param[out] none
     \retval     none
 */
@@ -272,10 +273,10 @@ void ctc_interrupt_enable(uint32_t interrupt)
     \brief      disable the CTC interrupt
     \param[in]  interrupt: CTC interrupt enable source
                 one or more parameters can be selected which are shown as below:
-      \arg        CTC_INT_CKOK: clock trim OK interrupt enable
-      \arg        CTC_INT_CKWARN: clock trim warning interrupt enable
-      \arg        CTC_INT_ERR: error interrupt enable
-      \arg        CTC_INT_EREF: expect reference interrupt enable
+      \arg        CTC_INT_CKOK: clock trim OK interrupt
+      \arg        CTC_INT_CKWARN: clock trim warning interrupt
+      \arg        CTC_INT_ERR: error interrupt
+      \arg        CTC_INT_EREF: expect reference interrupt
     \param[out] none
     \retval     none
 */
@@ -301,7 +302,7 @@ void ctc_interrupt_disable(uint32_t interrupt)
 FlagStatus ctc_interrupt_flag_get(uint32_t int_flag)
 {
     uint32_t interrupt_flag = 0U, intenable = 0U;
-
+    FlagStatus reval = RESET;
     /* check whether the interrupt is enabled */
     if(RESET != (int_flag & CTC_FLAG_MASK)) {
         intenable = CTC_CTL0 & CTC_CTL0_ERRIE;
@@ -313,10 +314,11 @@ FlagStatus ctc_interrupt_flag_get(uint32_t int_flag)
     interrupt_flag = CTC_STAT & int_flag;
 
     if(interrupt_flag && intenable) {
-        return SET;
+        reval = SET;
     } else {
-        return RESET;
+        reval = RESET;
     }
+    return reval;
 }
 
 /*!
@@ -358,11 +360,13 @@ void ctc_interrupt_flag_clear(uint32_t int_flag)
 */
 FlagStatus ctc_flag_get(uint32_t flag)
 {
+    FlagStatus reval = RESET;
     if(RESET != (CTC_STAT & flag)) {
-        return SET;
+        reval = SET;
     } else {
-        return RESET;
+        reval = RESET;
     }
+    return reval;
 }
 
 /*!

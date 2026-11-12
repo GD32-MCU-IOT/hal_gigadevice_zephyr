@@ -2,11 +2,11 @@
     \file    gd32l23x_lpuart.c
     \brief   LPUART driver
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -34,36 +34,77 @@ OF SUCH DAMAGE.
 
 #include "gd32l23x_lpuart.h"
 
+#define CTL0_DEA_OFFSET                ((uint32_t)0x00000015U)               /*!< bit offset of DEA[4:0] in LPUART_CTL0 */
+#define CTL0_DED_OFFSET                ((uint32_t)0x00000010U)               /*!< bit offset of DED[4:0] in LPUART_CTL0 */
+#define CTL1_ADDR_OFFSET               ((uint32_t)0x00000018U)               /*!< bit offset of ADDR[7:0] in LPUART_CTL1 */
+
 /*!
     \brief      reset LPUART
-    \param[in]  none
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[out] none
     \retval     none
 */
-void lpuart_deinit(void)
+void lpuart_deinit(uint32_t lpuart_periph)
 {
-    rcu_periph_reset_enable(RCU_LPUARTRST);
-    rcu_periph_reset_disable(RCU_LPUARTRST);
+    switch(lpuart_periph) {
+    case LPUART0:
+#ifdef GD32L235
+        /* reset LPUART0 */
+        rcu_periph_reset_enable(RCU_LPUART0RST);
+        rcu_periph_reset_disable(RCU_LPUART0RST);
+#else
+        /* reset LPUART0 */
+        rcu_periph_reset_enable(RCU_LPUARTRST);
+        rcu_periph_reset_disable(RCU_LPUARTRST);
+#endif
+        break;
+#ifdef GD32L235
+    case LPUART1:
+        /* reset LPUART1 */
+        rcu_periph_reset_enable(RCU_LPUART1RST);
+        rcu_periph_reset_disable(RCU_LPUART1RST);
+        break;
+#endif
+    default:
+        break;
+    }
 }
 
 /*!
     \brief      configure LPUART baud rate value
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  baudval: baud rate value
     \param[out] none
     \retval     none
 */
-void lpuart_baudrate_set(uint32_t baudval)
+void lpuart_baudrate_set(uint32_t lpuart_periph, uint32_t baudval)
 {
     uint32_t lpuclk = 0U, lpudiv = 0U;
-    lpuclk = rcu_clock_freq_get(CK_LPUART);
-
+    switch(lpuart_periph) {
+    case LPUART0:
+#ifdef GD32L235
+        lpuclk = rcu_clock_freq_get(CK_LPUART0);
+#else
+        lpuclk = rcu_clock_freq_get(CK_LPUART);
+#endif
+        break;
+#ifdef GD32L235
+    case LPUART1:
+        lpuclk = rcu_clock_freq_get(CK_LPUART1); 
+        break;
+#endif
+    default:
+        break;
+    }
+    
     lpudiv = (lpuclk / 100U * 256U + baudval / 200U) / (baudval / 100U);
-
-    LPUART_BAUD = (LPUART_BAUD_BRR & lpudiv);
+    
+    LPUART_BAUD(lpuart_periph) = (LPUART_BAUD_BRR & lpudiv);
 }
 
 /*!
     \brief      configure LPUART parity
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  paritycfg: LPUART parity configure
                 only one parameter can be selected which is shown as below:
       \arg        LPUART_PM_NONE: no parity
@@ -72,18 +113,19 @@ void lpuart_baudrate_set(uint32_t baudval)
     \param[out] none
     \retval     none
 */
-void lpuart_parity_config(uint32_t paritycfg)
+void lpuart_parity_config(uint32_t lpuart_periph, uint32_t paritycfg)
 {
     /* disable LPUART */
-    LPUART_CTL0 &= ~(LPUART_CTL0_UEN);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_UEN); 
     /* clear LPUART_CTL0 PM,PCEN bits */
-    LPUART_CTL0 &= ~(LPUART_CTL0_PM | LPUART_CTL0_PCEN);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_PM | LPUART_CTL0_PCEN);
     /* configure LPUART parity mode */
-    LPUART_CTL0 |= paritycfg;
+    LPUART_CTL0(lpuart_periph) |= paritycfg;
 }
 
 /*!
     \brief      configure LPUART word length
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  wlen: LPUART word length configure
                 only one parameter can be selected which is shown as below:
       \arg        LPUART_WL_7BIT: 7 bits
@@ -92,18 +134,19 @@ void lpuart_parity_config(uint32_t paritycfg)
     \param[out] none
     \retval     none
 */
-void lpuart_word_length_set(uint32_t wlen)
+void lpuart_word_length_set(uint32_t lpuart_periph, uint32_t wlen)
 {
     /* disable LPUART */
-    LPUART_CTL0 &= ~(LPUART_CTL0_UEN);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_UEN);
     /* clear LPUART_CTL0 WL bit */
-    LPUART_CTL0 &= ~(LPUART_CTL0_WL0 | LPUART_CTL0_WL1);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_WL0 | LPUART_CTL0_WL1);
     /* configure LPUART word length */
-    LPUART_CTL0 |= wlen;
+    LPUART_CTL0(lpuart_periph) |= wlen;
 }
 
 /*!
     \brief      configure LPUART stop bit length
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  stblen: LPUART stop bit configure
                 only one parameter can be selected which is shown as below:
       \arg        LPUART_STB_1BIT: 1 bit
@@ -111,39 +154,40 @@ void lpuart_word_length_set(uint32_t wlen)
     \param[out] none
     \retval     none
 */
-void lpuart_stop_bit_set(uint32_t stblen)
+void lpuart_stop_bit_set(uint32_t lpuart_periph, uint32_t stblen)
 {
     /* disable LPUART */
-    LPUART_CTL0 &= ~(LPUART_CTL0_UEN);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_UEN);
     /* clear LPUART_CTL1 STB bits */
-    LPUART_CTL1 &= ~LPUART_CTL1_STB;
-    LPUART_CTL1 |= stblen;
+    LPUART_CTL1(lpuart_periph) &= ~LPUART_CTL1_STB;
+    LPUART_CTL1(lpuart_periph) |= stblen;
 }
 
 /*!
     \brief      enable LPUART
-    \param[in]  none
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[out] none
     \retval     none
 */
-void lpuart_enable(void)
+void lpuart_enable(uint32_t lpuart_periph)
 {
-    LPUART_CTL0 |= LPUART_CTL0_UEN;
+    LPUART_CTL0(lpuart_periph) |= LPUART_CTL0_UEN;
 }
 
 /*!
     \brief      disable LPUART
-    \param[in]  none
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[out] none
     \retval     none
 */
-void lpuart_disable(void)
+void lpuart_disable(uint32_t lpuart_periph)
 {
-    LPUART_CTL0 &= ~(LPUART_CTL0_UEN);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_UEN);
 }
 
 /*!
     \brief      configure LPUART transmitter
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  txconfig: enable or disable LPUART transmitter
                 only one parameter can be selected which is shown as below:
       \arg        LPUART_TRANSMIT_ENABLE: enable LPUART transmission
@@ -151,15 +195,16 @@ void lpuart_disable(void)
     \param[out] none
     \retval     none
 */
-void lpuart_transmit_config(uint32_t txconfig)
+void lpuart_transmit_config(uint32_t lpuart_periph, uint32_t txconfig)
 {
-    LPUART_CTL0 &= ~LPUART_CTL0_TEN;
+    LPUART_CTL0(lpuart_periph) &= ~LPUART_CTL0_TEN;
     /* configure transfer mode */
-    LPUART_CTL0 |= txconfig;
+    LPUART_CTL0(lpuart_periph) |= txconfig;
 }
-
+ 
 /*!
     \brief      configure LPUART receiver
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  rxconfig: enable or disable LPUART receiver
                 only one parameter can be selected which is shown as below:
       \arg        LPUART_RECEIVE_ENABLE: enable LPUART reception
@@ -167,15 +212,16 @@ void lpuart_transmit_config(uint32_t txconfig)
     \param[out] none
     \retval     none
 */
-void lpuart_receive_config(uint32_t rxconfig)
+void lpuart_receive_config(uint32_t lpuart_periph, uint32_t rxconfig)
 {
-    LPUART_CTL0 &= ~LPUART_CTL0_REN;
+    LPUART_CTL0(lpuart_periph) &= ~LPUART_CTL0_REN;
     /* configure receiver mode */
-    LPUART_CTL0 |= rxconfig;
+    LPUART_CTL0(lpuart_periph) |= rxconfig;
 }
 
 /*!
     \brief      data is transmitted/received with the LSB/MSB first
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  msbf: LSB/MSB
                 only one parameter can be selected which is shown as below:
       \arg        LPUART_MSBF_LSB: LSB first
@@ -183,16 +229,17 @@ void lpuart_receive_config(uint32_t rxconfig)
     \param[out] none
     \retval     none
 */
-void lpuart_data_first_config(uint32_t msbf)
+void lpuart_data_first_config(uint32_t lpuart_periph, uint32_t msbf)
 {
-    LPUART_CTL0 &= ~(LPUART_CTL0_UEN);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_UEN);
     /* configure LSB or MSB first */
-    LPUART_CTL1 &= ~(LPUART_CTL1_MSBF);
-    LPUART_CTL1 |= (LPUART_CTL1_MSBF & msbf);
+    LPUART_CTL1(lpuart_periph) &= ~(LPUART_CTL1_MSBF);
+    LPUART_CTL1(lpuart_periph) |= (LPUART_CTL1_MSBF & msbf);
 }
 
 /*!
     \brief      configure LPUART inverted
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  invertpara: refer to lpuart_invert_enum
                 only one parameter can be selected which is shown as below:
       \arg        LPUART_DINV_ENABLE: data bit level inversion
@@ -206,34 +253,34 @@ void lpuart_data_first_config(uint32_t msbf)
     \param[out] none
     \retval     none
 */
-void lpuart_invert_config(lpuart_invert_enum invertpara)
+void lpuart_invert_config(uint32_t lpuart_periph, lpuart_invert_enum invertpara)
 {
-    LPUART_CTL0 &= ~(LPUART_CTL0_UEN);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_UEN);
     /* inverted or not the specified signal */
     switch(invertpara) {
     case LPUART_DINV_ENABLE:
-        LPUART_CTL1 |= LPUART_CTL1_DINV;
+        LPUART_CTL1(lpuart_periph) |= LPUART_CTL1_DINV;
         break;
     case LPUART_DINV_DISABLE:
-        LPUART_CTL1 &= ~(LPUART_CTL1_DINV);
+        LPUART_CTL1(lpuart_periph) &= ~(LPUART_CTL1_DINV);
         break;
     case LPUART_TXPIN_ENABLE:
-        LPUART_CTL1 |= LPUART_CTL1_TINV;
+        LPUART_CTL1(lpuart_periph) |= LPUART_CTL1_TINV;
         break;
     case LPUART_TXPIN_DISABLE:
-        LPUART_CTL1 &= ~(LPUART_CTL1_TINV);
+        LPUART_CTL1(lpuart_periph) &= ~(LPUART_CTL1_TINV);
         break;
     case LPUART_RXPIN_ENABLE:
-        LPUART_CTL1 |= LPUART_CTL1_RINV;
+        LPUART_CTL1(lpuart_periph) |= LPUART_CTL1_RINV;
         break;
     case LPUART_RXPIN_DISABLE:
-        LPUART_CTL1 &= ~(LPUART_CTL1_RINV);
+        LPUART_CTL1(lpuart_periph) &= ~(LPUART_CTL1_RINV);
         break;
     case LPUART_SWAP_ENABLE:
-        LPUART_CTL1 |= LPUART_CTL1_STRP;
+        LPUART_CTL1(lpuart_periph) |= LPUART_CTL1_STRP;
         break;
     case LPUART_SWAP_DISABLE:
-        LPUART_CTL1 &= ~(LPUART_CTL1_STRP);
+        LPUART_CTL1(lpuart_periph) &= ~(LPUART_CTL1_STRP);
         break;
     default:
         break;
@@ -242,54 +289,56 @@ void lpuart_invert_config(lpuart_invert_enum invertpara)
 
 /*!
     \brief      enable the LPUART overrun function
-    \param[in]  none
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[out] none
     \retval     none
 */
-void lpuart_overrun_enable(void)
+void lpuart_overrun_enable(uint32_t lpuart_periph)
 {
-    LPUART_CTL0 &= ~(LPUART_CTL0_UEN);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_UEN);
     /* enable overrun function */
-    LPUART_CTL2 &= ~(LPUART_CTL2_OVRD);
+    LPUART_CTL2(lpuart_periph) &= ~(LPUART_CTL2_OVRD);
 }
 
 /*!
     \brief      disable the LPUART overrun function
-    \param[in]  none
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[out] none
     \retval     none
 */
-void lpuart_overrun_disable(void)
+void lpuart_overrun_disable(uint32_t lpuart_periph)
 {
-    LPUART_CTL0 &= ~(LPUART_CTL0_UEN);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_UEN);
     /* disable overrun function */
-    LPUART_CTL2 |= LPUART_CTL2_OVRD;
+    LPUART_CTL2(lpuart_periph) |= LPUART_CTL2_OVRD;
 }
 
 /*!
     \brief      LPUART transmit data function
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  data: data of transmission
     \param[out] none
     \retval     none
 */
-void lpuart_data_transmit(uint32_t data)
+void lpuart_data_transmit(uint32_t lpuart_periph, uint32_t data)
 {
-    LPUART_TDATA = (LPUART_TDATA_TDATA & data);
+    LPUART_TDATA(lpuart_periph) = (LPUART_TDATA_TDATA & data);
 }
 
 /*!
     \brief      LPUART receive data function
-    \param[in]  none
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[out] none
     \retval     data of received
 */
-uint16_t lpuart_data_receive(void)
+uint16_t lpuart_data_receive(uint32_t lpuart_periph)
 {
-    return (uint16_t)(GET_BITS(LPUART_RDATA, 0U, 8U));
+    return (uint16_t)(GET_BITS(LPUART_RDATA(lpuart_periph), 0U, 8U));
 }
 
 /*!
     \brief      enable LPUART command
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  cmdtype: command type
                 only one parameter can be selected which is shown as below:
       \arg        LPUART_CMD_MMCMD: mute mode command
@@ -297,28 +346,30 @@ uint16_t lpuart_data_receive(void)
     \param[out] none
     \retval     none
 */
-void lpuart_command_enable(uint32_t cmdtype)
+void lpuart_command_enable(uint32_t lpuart_periph, uint32_t cmdtype)
 {
-    LPUART_CMD |= (cmdtype);
+    LPUART_CMD(lpuart_periph) |= (cmdtype);
 }
 
 /*!
     \brief      configure address of the LPUART
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  addr: 0x00-0xFF, address of LPUART terminal
     \param[out] none
     \retval     none
 */
-void lpuart_address_config(uint8_t addr)
+void lpuart_address_config(uint32_t lpuart_periph, uint8_t addr)
 {
     /* disable LPUART */
-    LPUART_CTL0 &= ~(LPUART_CTL0_UEN);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_UEN);
 
-    LPUART_CTL1 &= ~(LPUART_CTL1_ADDR);
-    LPUART_CTL1 |= (LPUART_CTL1_ADDR & (((uint32_t)addr) << 24U));
+    LPUART_CTL1(lpuart_periph) &= ~(LPUART_CTL1_ADDR);
+    LPUART_CTL1(lpuart_periph) |= (LPUART_CTL1_ADDR & (((uint32_t)addr) << CTL1_ADDR_OFFSET));
 }
 
 /*!
     \brief      configure address detection mode
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  addmod: address detection mode
                 only one parameter can be selected which is shown as below:
       \arg        LPUART_ADDM_4BIT: 4 bits
@@ -326,39 +377,40 @@ void lpuart_address_config(uint8_t addr)
     \param[out] none
     \retval     none
 */
-void lpuart_address_detection_mode_config(uint32_t addmod)
+void lpuart_address_detection_mode_config(uint32_t lpuart_periph, uint32_t addmod)
 {
     /* disable LPUART */
-    LPUART_CTL0 &= ~(LPUART_CTL0_UEN);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_UEN);
 
-    LPUART_CTL1 &= ~(LPUART_CTL1_ADDM);
-    LPUART_CTL1 |= LPUART_CTL1_ADDM & (addmod);
+    LPUART_CTL1(lpuart_periph) &= ~(LPUART_CTL1_ADDM);
+    LPUART_CTL1(lpuart_periph) |= LPUART_CTL1_ADDM & (addmod);
 }
 
 /*!
     \brief      enable mute mode
-    \param[in]  none
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[out] none
     \retval     none
 */
-void lpuart_mute_mode_enable(void)
+void lpuart_mute_mode_enable(uint32_t lpuart_periph)
 {
-    LPUART_CTL0 |= LPUART_CTL0_MEN;
+    LPUART_CTL0(lpuart_periph) |= LPUART_CTL0_MEN;
 }
 
 /*!
     \brief      disable mute mode
-    \param[in]  none
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[out] none
     \retval     none
 */
-void lpuart_mute_mode_disable(void)
+void lpuart_mute_mode_disable(uint32_t lpuart_periph)
 {
-    LPUART_CTL0 &= ~(LPUART_CTL0_MEN);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_MEN);
 }
 
 /*!
     \brief      configure wakeup method in mute mode
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  wmethod: two methods be used to enter or exit the mute mode
                 only one parameter can be selected which is shown as below:
       \arg        LPUART_WM_IDLE: idle line
@@ -366,45 +418,46 @@ void lpuart_mute_mode_disable(void)
     \param[out] none
     \retval     none
 */
-void lpuart_mute_mode_wakeup_config(uint32_t wmethod)
+void lpuart_mute_mode_wakeup_config(uint32_t lpuart_periph, uint32_t wmethod)
 {
     /* disable LPUART */
-    LPUART_CTL0 &= ~(LPUART_CTL0_UEN);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_UEN);
 
-    LPUART_CTL0 &= ~(LPUART_CTL0_WM);
-    LPUART_CTL0 |= wmethod;
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_WM);
+    LPUART_CTL0(lpuart_periph) |= wmethod;
 }
 
 /*!
     \brief      enable half-duplex mode
-    \param[in]  none
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[out] none
     \retval     none
 */
-void lpuart_halfduplex_enable(void)
+void lpuart_halfduplex_enable(uint32_t lpuart_periph)
 {
     /* disable LPUART */
-    LPUART_CTL0 &= ~(LPUART_CTL0_UEN);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_UEN);
 
-    LPUART_CTL2 |= LPUART_CTL2_HDEN;
+    LPUART_CTL2(lpuart_periph) |= LPUART_CTL2_HDEN;
 }
 
 /*!
     \brief      disable half-duplex mode
-    \param[in]  none
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[out] none
     \retval     none
 */
-void lpuart_halfduplex_disable(void)
+void lpuart_halfduplex_disable(uint32_t lpuart_periph)
 {
     /* disable LPUART */
-    LPUART_CTL0 &= ~(LPUART_CTL0_UEN);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_UEN);
 
-    LPUART_CTL2 &= ~(LPUART_CTL2_HDEN);
+    LPUART_CTL2(lpuart_periph) &= ~(LPUART_CTL2_HDEN);
 }
 
 /*!
     \brief      configure hardware flow control RTS
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  rtsconfig: enable or disable RTS
                 only one parameter can be selected which is shown as below:
       \arg        LPUART_RTS_ENABLE:  enable RTS
@@ -412,17 +465,18 @@ void lpuart_halfduplex_disable(void)
     \param[out] none
     \retval     none
 */
-void lpuart_hardware_flow_rts_config(uint32_t rtsconfig)
+void lpuart_hardware_flow_rts_config(uint32_t lpuart_periph, uint32_t rtsconfig)
 {
     /* disable LPUART */
-    LPUART_CTL0 &= ~(LPUART_CTL0_UEN);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_UEN);
 
-    LPUART_CTL2 &= ~(LPUART_CTL2_RTSEN);
-    LPUART_CTL2 |= rtsconfig;
+    LPUART_CTL2(lpuart_periph) &= ~(LPUART_CTL2_RTSEN);
+    LPUART_CTL2(lpuart_periph) |= rtsconfig;
 }
 
 /*!
     \brief      configure hardware flow control CTS
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  ctsconfig:  enable or disable CTS
                 only one parameter can be selected which is shown as below:
       \arg        LPUART_CTS_ENABLE:  enable CTS
@@ -430,17 +484,18 @@ void lpuart_hardware_flow_rts_config(uint32_t rtsconfig)
     \param[out] none
     \retval     none
 */
-void lpuart_hardware_flow_cts_config(uint32_t ctsconfig)
+void lpuart_hardware_flow_cts_config(uint32_t lpuart_periph, uint32_t ctsconfig)
 {
     /* disable LPUART */
-    LPUART_CTL0 &= ~(LPUART_CTL0_UEN);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_UEN);
 
-    LPUART_CTL2 &= ~LPUART_CTL2_CTSEN;
-    LPUART_CTL2 |= ctsconfig;
+    LPUART_CTL2(lpuart_periph) &= ~LPUART_CTL2_CTSEN;
+    LPUART_CTL2(lpuart_periph) |= ctsconfig;
 }
 
 /*!
     \brief      configure hardware flow control coherence mode
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  hcm:
                 only one parameter can be selected which is shown as below:
       \arg        LPUART_HCM_NONE: nRTS signal equals to the RBNE status register
@@ -448,72 +503,75 @@ void lpuart_hardware_flow_cts_config(uint32_t ctsconfig)
     \param[out] none
     \retval     none
 */
-void lpuart_hardware_flow_coherence_config(uint32_t hcm)
+void lpuart_hardware_flow_coherence_config(uint32_t lpuart_periph, uint32_t hcm)
 {
-    LPUART_CHC &= ~(LPUART_CHC_HCM);
-    LPUART_CHC |= (LPUART_CHC_HCM & hcm);
+    LPUART_CHC(lpuart_periph) &= ~(LPUART_CHC_HCM);
+    LPUART_CHC(lpuart_periph) |= (LPUART_CHC_HCM & hcm);
 }
 
 /*!
     \brief      enable RS485 driver
-    \param[in]  none
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[out] none
     \retval     none
 */
-void lpuart_rs485_driver_enable(void)
+void lpuart_rs485_driver_enable(uint32_t lpuart_periph)
 {
     /* disable LPUART */
-    LPUART_CTL0 &= ~(LPUART_CTL0_UEN);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_UEN);
 
-    LPUART_CTL2 |= LPUART_CTL2_DEM;
+    LPUART_CTL2(lpuart_periph) |= LPUART_CTL2_DEM;
 }
 
 /*!
     \brief      disable RS485 driver
-    \param[in]  none
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[out] none
     \retval     none
 */
-void lpuart_rs485_driver_disable(void)
+void lpuart_rs485_driver_disable(uint32_t lpuart_periph)
 {
     /* disable LPUART */
-    LPUART_CTL0 &= ~(LPUART_CTL0_UEN);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_UEN);
 
-    LPUART_CTL2 &= ~(LPUART_CTL2_DEM);
+    LPUART_CTL2(lpuart_periph) &= ~(LPUART_CTL2_DEM);
 }
 
 /*!
     \brief      configure driver enable assertion time
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  deatime: 0x00000000-0x0000001F
     \param[out] none
     \retval     none
 */
-void lpuart_driver_assertime_config(uint32_t deatime)
+void lpuart_driver_assertime_config(uint32_t lpuart_periph, uint32_t deatime)
 {
     /* disable LPUART */
-    LPUART_CTL0 &= ~(LPUART_CTL0_UEN);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_UEN);
 
-    LPUART_CTL0 &= ~(LPUART_CTL0_DEA);
-    LPUART_CTL0 |= (LPUART_CTL0_DEA & ((deatime) << 21U));
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_DEA);
+    LPUART_CTL0(lpuart_periph) |= (LPUART_CTL0_DEA & ((deatime) << CTL0_DEA_OFFSET));
 }
 
 /*!
     \brief      configure driver enable de-assertion time
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  dedtime: 0x00000000-0x0000001F
     \param[out] none
     \retval     none
 */
-void lpuart_driver_deassertime_config(uint32_t dedtime)
+void lpuart_driver_deassertime_config(uint32_t lpuart_periph, uint32_t dedtime)
 {
     /* disable LPUART */
-    LPUART_CTL0 &= ~(LPUART_CTL0_UEN);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_UEN);
 
-    LPUART_CTL0 &= ~(LPUART_CTL0_DED);
-    LPUART_CTL0 |= (LPUART_CTL0_DED & ((dedtime) << 16U));
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_DED);
+    LPUART_CTL0(lpuart_periph) |= (LPUART_CTL0_DED & ((dedtime) << CTL0_DED_OFFSET));
 }
 
 /*!
     \brief      configure driver enable polarity mode
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  dep: DE signal
                 only one parameter can be selected which is shown as below:
       \arg        LPUART_DEP_HIGH: DE signal is active high
@@ -521,99 +579,102 @@ void lpuart_driver_deassertime_config(uint32_t dedtime)
     \param[out] none
     \retval     none
 */
-void lpuart_depolarity_config(uint32_t dep)
+void lpuart_depolarity_config(uint32_t lpuart_periph, uint32_t dep)
 {
     /* disable LPUART */
-    LPUART_CTL0 &= ~(LPUART_CTL0_UEN);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_UEN);
     /* reset DEP bit */
-    LPUART_CTL2 &= ~(LPUART_CTL2_DEP);
-    LPUART_CTL2 |= (LPUART_CTL2_DEP & dep);
+    LPUART_CTL2(lpuart_periph) &= ~(LPUART_CTL2_DEP);
+    LPUART_CTL2(lpuart_periph) |= (LPUART_CTL2_DEP & dep);
 }
 
 /*!
     \brief      configure LPUART DMA for reception
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  dmacmd: enable or disable DMA for reception
                 only one parameter can be selected which is shown as below:
-      \arg        LPUART_DENR_ENABLE: DMA enable for reception
-      \arg        LPUART_DENR_DISABLE: DMA disable for reception
+      \arg        LPUART_RECEIVE_DMA_ENABLE: DMA enable for reception
+      \arg        LPUART_RECEIVE_DMA_DISABLE: DMA disable for reception
     \param[out] none
     \retval     none
 */
-void lpuart_dma_receive_config(uint32_t dmacmd)
+void lpuart_dma_receive_config(uint32_t lpuart_periph, uint32_t dmacmd)
 {
-    LPUART_CTL2 &= ~LPUART_CTL2_DENR;
+    LPUART_CTL2(lpuart_periph) &= ~LPUART_CTL2_DENR;
     /* configure DMA reception */
-    LPUART_CTL2 |= dmacmd;
+    LPUART_CTL2(lpuart_periph) |= dmacmd;
 }
 
 /*!
     \brief      configure LPUART DMA for transmission
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  dmacmd: enable or disable DMA for transmission
                 only one parameter can be selected which is shown as below:
-      \arg        LPUART_DENT_ENABLE: DMA enable for transmission
-      \arg        LPUART_DENT_DISABLE: DMA disable for transmission
+      \arg        LPUART_TRANSMIT_DMA_ENABLE: DMA enable for transmission
+      \arg        LPUART_TRANSMIT_DMA_DISABLE: DMA disable for transmission
     \param[out] none
     \retval     none
 */
-void lpuart_dma_transmit_config(uint32_t dmacmd)
+void lpuart_dma_transmit_config(uint32_t lpuart_periph, uint32_t dmacmd)
 {
-    LPUART_CTL2 &= ~LPUART_CTL2_DENT;
+    LPUART_CTL2(lpuart_periph) &= ~LPUART_CTL2_DENT;
     /* configure DMA transmission */
-    LPUART_CTL2 |= dmacmd;
+    LPUART_CTL2(lpuart_periph) |= dmacmd;
 }
 
 /*!
     \brief      disable DMA on reception error
-    \param[in]  none
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[out] none
     \retval     none
 */
-void lpuart_reception_error_dma_disable(void)
+void lpuart_reception_error_dma_disable(uint32_t lpuart_periph)
 {
     /* disable LPUART */
-    LPUART_CTL0 &= ~(LPUART_CTL0_UEN);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_UEN);
 
-    LPUART_CTL2 |= LPUART_CTL2_DDRE;
+    LPUART_CTL2(lpuart_periph) |= LPUART_CTL2_DDRE;
 }
 
 /*!
     \brief      enable DMA on reception error
-    \param[in]  none
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[out] none
     \retval     none
 */
-void lpuart_reception_error_dma_enable(void)
+void lpuart_reception_error_dma_enable(uint32_t lpuart_periph)
 {
     /* disable LPUART */
-    LPUART_CTL0 &= ~(LPUART_CTL0_UEN);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_UEN);
 
-    LPUART_CTL2 &= ~(LPUART_CTL2_DDRE);
+    LPUART_CTL2(lpuart_periph) &= ~(LPUART_CTL2_DDRE);
 }
 
 /*!
     \brief      enable LPUART to wakeup the mcu from deep-sleep mode
-    \param[in]  none
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[out] none
     \retval     none
 */
-void lpuart_wakeup_enable(void)
+void lpuart_wakeup_enable(uint32_t lpuart_periph)
 {
-    LPUART_CTL0 |= LPUART_CTL0_UESM;
+    LPUART_CTL0(lpuart_periph) |= LPUART_CTL0_UESM;
 }
 
 /*!
     \brief      disable LPUART to wakeup the mcu from deep-sleep mode
-    \param[in]  none
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[out] none
     \retval     none
 */
-void lpuart_wakeup_disable(void)
+void lpuart_wakeup_disable(uint32_t lpuart_periph)
 {
-    LPUART_CTL0 &= ~(LPUART_CTL0_UESM);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_UESM);
 }
 
 /*!
     \brief      configure the LPUART wakeup mode from deep-sleep mode
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  wum: wakeup mode
                 only one parameter can be selected which is shown as below:
       \arg        LPUART_WUM_ADDR: WUF active on address match
@@ -622,17 +683,18 @@ void lpuart_wakeup_disable(void)
     \param[out] none
     \retval     none
 */
-void lpuart_wakeup_mode_config(uint32_t wum)
+void lpuart_wakeup_mode_config(uint32_t lpuart_periph, uint32_t wum)
 {
     /* disable LPUART */
-    LPUART_CTL0 &= ~(LPUART_CTL0_UEN);
+    LPUART_CTL0(lpuart_periph) &= ~(LPUART_CTL0_UEN);
     /* reset WUM bit */
-    LPUART_CTL2 &= ~(LPUART_CTL2_WUM);
-    LPUART_CTL2 |= LPUART_CTL2_WUM & (wum);
+    LPUART_CTL2(lpuart_periph) &= ~(LPUART_CTL2_WUM);
+    LPUART_CTL2(lpuart_periph) |= LPUART_CTL2_WUM & (wum);
 }
 
 /*!
     \brief      get flag in STAT/CHC register
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  flag: flag type
                 only one parameter can be selected which is shown as below:
       \arg        LPUART_FLAG_PERR: parity error flag
@@ -655,17 +717,21 @@ void lpuart_wakeup_mode_config(uint32_t wum)
     \param[out] none
     \retval     FlagStatus: SET or RESET
 */
-FlagStatus lpuart_flag_get(lpuart_flag_enum flag)
+FlagStatus lpuart_flag_get(uint32_t lpuart_periph, lpuart_flag_enum flag)
 {
-    if(RESET != (LPUART_REG_VAL(LPUART, flag) & BIT(LPUART_BIT_POS(flag)))) {
-        return SET;
+    FlagStatus lpuart_flag = RESET;
+    
+    if(RESET != (LPUART_REG_VAL(lpuart_periph, flag) & BIT(LPUART_BIT_POS(flag)))) {
+        lpuart_flag = SET;
     } else {
-        return RESET;
+        lpuart_flag = RESET;
     }
+    return lpuart_flag;
 }
 
 /*!
     \brief      clear LPUART status
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  flag: flag type
                 only one parameter can be selected which is shown as below:
       \arg        LPUART_FLAG_PERR: parity error flag
@@ -681,13 +747,14 @@ FlagStatus lpuart_flag_get(lpuart_flag_enum flag)
     \param[out] none
     \retval     none
 */
-void lpuart_flag_clear(lpuart_flag_enum flag)
+void lpuart_flag_clear(uint32_t lpuart_periph, lpuart_flag_enum flag)
 {
-    LPUART_INTC |= BIT(LPUART_BIT_POS(flag));
+    LPUART_INTC(lpuart_periph) |= BIT(LPUART_BIT_POS(flag));
 }
 
 /*!
     \brief      enable LPUART interrupt
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  interrupt: interrupt type
                 only one parameter can be selected which is shown as below:
       \arg        LPUART_INT_IDLE: idle interrupt
@@ -703,13 +770,14 @@ void lpuart_flag_clear(lpuart_flag_enum flag)
     \param[out] none
     \retval     none
 */
-void lpuart_interrupt_enable(lpuart_interrupt_enum interrupt)
+void lpuart_interrupt_enable(uint32_t lpuart_periph, lpuart_interrupt_enum interrupt)
 {
-    LPUART_REG_VAL(LPUART, interrupt) |= BIT(LPUART_BIT_POS(interrupt));
+    LPUART_REG_VAL(lpuart_periph, interrupt) |= BIT(LPUART_BIT_POS(interrupt));
 }
 
 /*!
     \brief      disable LPUART interrupt
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  interrupt: interrupt type
                 only one parameter can be selected which is shown as below:
       \arg        LPUART_INT_IDLE: idle interrupt
@@ -719,20 +787,20 @@ void lpuart_interrupt_enable(lpuart_interrupt_enum interrupt)
       \arg        LPUART_INT_TBE: transmit data register empty interrupt
       \arg        LPUART_INT_PERR: parity error interrupt
       \arg        LPUART_INT_AM: address match interrupt
-      \arg        LPUART_INT_LBD: LIN break detection interrupt
       \arg        LPUART_INT_ERR: error interrupt enable in multibuffer communication
       \arg        LPUART_INT_CTS: CTS interrupt
       \arg        LPUART_INT_WU: wakeup from deep-sleep mode interrupt
     \param[out] none
     \retval     none
 */
-void lpuart_interrupt_disable(lpuart_interrupt_enum interrupt)
+void lpuart_interrupt_disable(uint32_t lpuart_periph, lpuart_interrupt_enum interrupt)
 {
-    LPUART_REG_VAL(LPUART, interrupt) &= ~BIT(LPUART_BIT_POS(interrupt));
+    LPUART_REG_VAL(lpuart_periph, interrupt) &= ~BIT(LPUART_BIT_POS(interrupt));
 }
 
 /*!
     \brief      get LPUART interrupt and flag status
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  int_flag: interrupt and flag type, refer to lpuart_interrupt_flag_enum
                 only one parameter can be selected which is shown as below:
       \arg        LPUART_INT_FLAG_AM: address match interrupt and flag
@@ -750,23 +818,27 @@ void lpuart_interrupt_disable(lpuart_interrupt_enum interrupt)
     \param[out] none
     \retval     FlagStatus: SET or RESET
 */
-FlagStatus lpuart_interrupt_flag_get(lpuart_interrupt_flag_enum int_flag)
+FlagStatus lpuart_interrupt_flag_get(uint32_t lpuart_periph, lpuart_interrupt_flag_enum int_flag)
 {
+    FlagStatus interrupt_flag = RESET;
     uint32_t intenable = 0U, flagstatus = 0U;
+
     /* get the interrupt enable bit status */
-    intenable = (LPUART_REG_VAL(LPUART, int_flag) & BIT(LPUART_BIT_POS(int_flag)));
+    intenable = (LPUART_REG_VAL(lpuart_periph, int_flag) & BIT(LPUART_BIT_POS(int_flag)));
     /* get the corresponding flag bit status */
-    flagstatus = (LPUART_REG_VAL2(LPUART, int_flag) & BIT(LPUART_BIT_POS2(int_flag)));
+    flagstatus = (LPUART_REG_VAL2(lpuart_periph, int_flag) & BIT(LPUART_BIT_POS2(int_flag)));
 
     if(flagstatus && intenable) {
-        return SET;
+        interrupt_flag =  SET;
     } else {
-        return RESET;
+        interrupt_flag =  RESET;
     }
-}
+    return interrupt_flag;
+}  
 
 /*!
     \brief      clear LPUART interrupt flag
+    \param[in]  lpuart_periph: LPUARTx(x=0,1), LPUART1 only valid for GD32L235 series
     \param[in]  int_flag: LPUART interrupt flag
                 only one parameter can be selected which is shown as below:
       \arg        LPUART_INT_FLAG_PERR: parity error flag
@@ -782,7 +854,7 @@ FlagStatus lpuart_interrupt_flag_get(lpuart_interrupt_flag_enum int_flag)
     \param[out] none
     \retval     none
 */
-void lpuart_interrupt_flag_clear(lpuart_interrupt_flag_enum int_flag)
+void lpuart_interrupt_flag_clear(uint32_t lpuart_periph, lpuart_interrupt_flag_enum int_flag)
 {
-    LPUART_INTC |= BIT(LPUART_BIT_POS2(int_flag));
+    LPUART_INTC(lpuart_periph) |= BIT(LPUART_BIT_POS2(int_flag));
 }

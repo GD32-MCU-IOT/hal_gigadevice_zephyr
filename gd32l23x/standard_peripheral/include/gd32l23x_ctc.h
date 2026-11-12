@@ -2,11 +2,11 @@
     \file    gd32l23x_ctc.h
     \brief   definitions for the CTC
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -38,13 +38,13 @@ OF SUCH DAMAGE.
 #include "gd32l23x.h"
 
 /* CTC definitions */
-#define CTC                          CTC_BASE
+#define CTC                          CTC_BASE                        /*!< CTC bsae address */
 
 /* registers definitions */
-#define CTC_CTL0                     REG32((CTC) + 0x00U)      /*!< CTC control register 0 */
-#define CTC_CTL1                     REG32((CTC) + 0x04U)      /*!< CTC control register 1 */
-#define CTC_STAT                     REG32((CTC) + 0x08U)      /*!< CTC status register */
-#define CTC_INTC                     REG32((CTC) + 0x0CU)      /*!< CTC interrupt clear register */
+#define CTC_CTL0                     REG32((CTC) + 0x00000000U)      /*!< CTC control register 0 */
+#define CTC_CTL1                     REG32((CTC) + 0x00000004U)      /*!< CTC control register 1 */
+#define CTC_STAT                     REG32((CTC) + 0x00000008U)      /*!< CTC status register */
+#define CTC_INTC                     REG32((CTC) + 0x0000000CU)      /*!< CTC interrupt clear register */
 
 /* bits definitions */
 /* CTC_CTL0 */
@@ -83,18 +83,17 @@ OF SUCH DAMAGE.
 
 /* constants definitions */
 /* hardware automatically trim mode definitions */
-#define CTC_HARDWARE_TRIM_MODE_ENABLE                    CTC_CTL0_AUTOTRIM           /*!< hardware automatically trim mode enable*/
-#define CTC_HARDWARE_TRIM_MODE_DISABLE                   ((uint32_t)0x00000000U)     /*!< hardware automatically trim mode disable*/
+#define CTC_HARDWARE_TRIM_MODE_ENABLE                    CTC_CTL0_AUTOTRIM           /*!< hardware automatically trim mode enable */
+#define CTC_HARDWARE_TRIM_MODE_DISABLE                   ((uint32_t)0x00000000U)     /*!< hardware automatically trim mode disable */
 
 /* reference signal source polarity definitions */
-#define CTC_REFSOURCE_POLARITY_FALLING                   CTC_CTL1_REFPOL             /*!< reference signal source polarity is falling edge*/
-#define CTC_REFSOURCE_POLARITY_RISING                    ((uint32_t)0x00000000U)     /*!< reference signal source polarity is rising edge*/
+#define CTC_REFSOURCE_POLARITY_FALLING                   CTC_CTL1_REFPOL             /*!< reference signal source polarity is falling edge */
+#define CTC_REFSOURCE_POLARITY_RISING                    ((uint32_t)0x00000000U)     /*!< reference signal source polarity is rising edge */
 
 /* reference signal source selection definitions */
 #define CTL1_REFSEL(regval)                              (BITS(28,29) & ((uint32_t)(regval) << 28))
 #define CTC_REFSOURCE_GPIO                               CTL1_REFSEL(0)              /*!< GPIO is selected */
 #define CTC_REFSOURCE_LXTAL                              CTL1_REFSEL(1)              /*!< LXTAL is selected */
-#define CTC_REFSOURCE_USBFS_SOF                          CTL1_REFSEL(2)              /*!< USBFS_SOF is selected */
 
 /* reference signal source prescaler definitions */
 #define CTL1_REFPSC(regval)                              (BITS(24,26) & ((uint32_t)(regval) << 24))
@@ -107,11 +106,11 @@ OF SUCH DAMAGE.
 #define CTC_REFSOURCE_PSC_DIV64                          CTL1_REFPSC(6)              /*!< reference signal divided by 64 */
 #define CTC_REFSOURCE_PSC_DIV128                         CTL1_REFPSC(7)              /*!< reference signal divided by 128 */
 
-/* CTC interrupt enable definitions */
-#define CTC_INT_CKOK                                     CTC_CTL0_CKOKIE             /*!< clock trim OK interrupt enable */
-#define CTC_INT_CKWARN                                   CTC_CTL0_CKWARNIE           /*!< clock trim warning interrupt enable */
-#define CTC_INT_ERR                                      CTC_CTL0_ERRIE              /*!< error interrupt enable */
-#define CTC_INT_EREF                                     CTC_CTL0_EREFIE             /*!< expect reference interrupt enable */
+/* CTC interrupt definitions */
+#define CTC_INT_CKOK                                     CTC_CTL0_CKOKIE             /*!< clock trim OK interrupt */
+#define CTC_INT_CKWARN                                   CTC_CTL0_CKWARNIE           /*!< clock trim warning interrupt */
+#define CTC_INT_ERR                                      CTC_CTL0_ERRIE              /*!< error interrupt */
+#define CTC_INT_EREF                                     CTC_CTL0_EREFIE             /*!< expect reference interrupt */
 
 /* CTC interrupt source definitions */
 #define CTC_INT_FLAG_CKOK                                CTC_STAT_CKOKIF             /*!< clock trim OK interrupt flag */
