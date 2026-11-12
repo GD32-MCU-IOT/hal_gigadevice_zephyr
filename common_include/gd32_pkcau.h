@@ -6,6 +6,8 @@
 
 #if defined(CONFIG_SOC_SERIES_GD32F527)
 #include <gd32f527_pkcau.h>
+#elif defined(CONFIG_SOC_SERIES_GD32H77X_78X)
+#include <gd32h77x_78x_pkcau.h>
 #elif defined(CONFIG_SOC_SERIES_GD32W51X_F5HC)
 #include <gd32w51x_f5hc_pkcau.h>
 #endif

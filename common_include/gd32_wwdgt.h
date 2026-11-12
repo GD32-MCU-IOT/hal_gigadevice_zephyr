@@ -36,6 +36,8 @@
 #include <gd32h73x_75x_wwdgt.h>
 #elif defined(CONFIG_SOC_SERIES_GD32H75E)
 #include <gd32h75e_wwdgt.h>
+#elif defined(CONFIG_SOC_SERIES_GD32H77X_78X)
+#include <gd32h77x_78x_wwdgt.h>
 #elif defined(CONFIG_SOC_SERIES_GD32H7XX)
 #include <gd32h7xx_wwdgt.h>
 #elif defined(CONFIG_SOC_SERIES_GD32L23X)
