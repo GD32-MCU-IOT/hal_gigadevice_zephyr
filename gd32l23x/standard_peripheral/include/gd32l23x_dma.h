@@ -2,11 +2,11 @@
     \file    gd32l23x_dma.h
     \brief   definitions for the DMA
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -126,7 +126,11 @@ OF SUCH DAMAGE.
 #define DMA_CHXMADDR_MADDR                BITS(0,31)                                                          /*!< memory base address */
 
 /* DMAMUX_RM_CHxCFG, x=0..6 */
+#ifdef GD32L235
+#define DMAMUX_RM_CHXCFG_MUXID            BITS(0,6)                                                           /*!< multiplexer input identification */
+#else
 #define DMAMUX_RM_CHXCFG_MUXID            BITS(0,5)                                                           /*!< multiplexer input identification */
+#endif
 #define DMAMUX_RM_CHXCFG_SOIE             BIT(8)                                                              /*!< synchronization overrun interrupt enable */
 #define DMAMUX_RM_CHXCFG_EVGEN            BIT(9)                                                              /*!< event generation enable */
 #define DMAMUX_RM_CHXCFG_SYNCEN           BIT(16)                                                             /*!< synchronization enable */
@@ -210,7 +214,7 @@ typedef enum {
     DMAMUX_INT_GENCH0_TO = DMAMUX_REGIDX_BIT(DMAMUX_RG_CH0CFG_REG_OFFSET, 8U),                                /*!< DMAMUX request generator channel 0 trigger overrun interrupt */
     DMAMUX_INT_GENCH1_TO = DMAMUX_REGIDX_BIT(DMAMUX_RG_CH1CFG_REG_OFFSET, 8U),                                /*!< DMAMUX request generator channel 1 trigger overrun interrupt */
     DMAMUX_INT_GENCH2_TO = DMAMUX_REGIDX_BIT(DMAMUX_RG_CH2CFG_REG_OFFSET, 8U),                                /*!< DMAMUX request generator channel 2 trigger overrun interrupt */
-    DMAMUX_INT_GENCH3_TO = DMAMUX_REGIDX_BIT(DMAMUX_RG_CH3CFG_REG_OFFSET, 8U),                                /*!< DMAMUX request generator channel 3 trigger overrun interrupt */
+    DMAMUX_INT_GENCH3_TO = DMAMUX_REGIDX_BIT(DMAMUX_RG_CH3CFG_REG_OFFSET, 8U)                                 /*!< DMAMUX request generator channel 3 trigger overrun interrupt */
 } dmamux_interrupt_enum;
 
 /* DMAMUX flags */
@@ -226,7 +230,7 @@ typedef enum {
     DMAMUX_FLAG_GENCH0_TO = DMAMUX_REGIDX_BIT(DMAMUX_RG_INTF_REG_OFFSET, 0U),                                 /*!< DMAMUX request generator channel 0 trigger overrun flag */
     DMAMUX_FLAG_GENCH1_TO = DMAMUX_REGIDX_BIT(DMAMUX_RG_INTF_REG_OFFSET, 1U),                                 /*!< DMAMUX request generator channel 1 trigger overrun flag */
     DMAMUX_FLAG_GENCH2_TO = DMAMUX_REGIDX_BIT(DMAMUX_RG_INTF_REG_OFFSET, 2U),                                 /*!< DMAMUX request generator channel 2 trigger overrun flag */
-    DMAMUX_FLAG_GENCH3_TO = DMAMUX_REGIDX_BIT(DMAMUX_RG_INTF_REG_OFFSET, 3U),                                 /*!< DMAMUX request generator channel 3 trigger overrun flag */
+    DMAMUX_FLAG_GENCH3_TO = DMAMUX_REGIDX_BIT(DMAMUX_RG_INTF_REG_OFFSET, 3U)                                  /*!< DMAMUX request generator channel 3 trigger overrun flag */
 } dmamux_flag_enum;
 
 /* DMAMUX interrupt flags */
@@ -242,7 +246,7 @@ typedef enum {
     DMAMUX_INT_FLAG_GENCH0_TO = DMAMUX_REGIDX_BIT2(DMAMUX_RG_INTF_REG_OFFSET, 0U, DMAMUX_RG_CH0CFG_REG_OFFSET, 8U), /*!< DMAMUX request generator channel 0 trigger overrun interrupt flag */
     DMAMUX_INT_FLAG_GENCH1_TO = DMAMUX_REGIDX_BIT2(DMAMUX_RG_INTF_REG_OFFSET, 1U, DMAMUX_RG_CH1CFG_REG_OFFSET, 8U), /*!< DMAMUX request generator channel 1 trigger overrun interrupt flag */
     DMAMUX_INT_FLAG_GENCH2_TO = DMAMUX_REGIDX_BIT2(DMAMUX_RG_INTF_REG_OFFSET, 2U, DMAMUX_RG_CH2CFG_REG_OFFSET, 8U), /*!< DMAMUX request generator channel 2 trigger overrun interrupt flag */
-    DMAMUX_INT_FLAG_GENCH3_TO = DMAMUX_REGIDX_BIT2(DMAMUX_RG_INTF_REG_OFFSET, 3U, DMAMUX_RG_CH3CFG_REG_OFFSET, 8U), /*!< DMAMUX request generator channel 3 trigger overrun interrupt flag */
+    DMAMUX_INT_FLAG_GENCH3_TO = DMAMUX_REGIDX_BIT2(DMAMUX_RG_INTF_REG_OFFSET, 3U, DMAMUX_RG_CH3CFG_REG_OFFSET, 8U)  /*!< DMAMUX request generator channel 3 trigger overrun interrupt flag */
 } dmamux_interrupt_flag_enum;
 
 /* DMA channel selection */
@@ -253,7 +257,7 @@ typedef enum {
     DMA_CH3,                                                                                                  /*!< DMA Channel 3 */
     DMA_CH4,                                                                                                  /*!< DMA Channel 4 */
     DMA_CH5,                                                                                                  /*!< DMA Channel 5 */
-    DMA_CH6,                                                                                                  /*!< DMA Channel 6 */
+    DMA_CH6                                                                                                   /*!< DMA Channel 6 */
 } dma_channel_enum;
 
 /* DMAMUX request multiplexer channel */
@@ -264,7 +268,7 @@ typedef enum {
     DMAMUX_MUXCH3,                                                                                            /*!< DMAMUX request multiplexer Channel3 */
     DMAMUX_MUXCH4,                                                                                            /*!< DMAMUX request multiplexer Channel4 */
     DMAMUX_MUXCH5,                                                                                            /*!< DMAMUX request multiplexer Channel5 */
-    DMAMUX_MUXCH6,                                                                                            /*!< DMAMUX request multiplexer Channel6 */
+    DMAMUX_MUXCH6                                                                                             /*!< DMAMUX request multiplexer Channel6 */
 } dmamux_multiplexer_channel_enum;
 
 /* DMAMUX request generator channel */
@@ -272,7 +276,7 @@ typedef enum {
     DMAMUX_GENCH0 = 0U,                                                                                       /*!< DMAMUX request generator Channel0 */
     DMAMUX_GENCH1,                                                                                            /*!< DMAMUX request generator Channel1 */
     DMAMUX_GENCH2,                                                                                            /*!< DMAMUX request generator Channel2 */
-    DMAMUX_GENCH3,                                                                                            /*!< DMAMUX request generator Channel3 */
+    DMAMUX_GENCH3                                                                                             /*!< DMAMUX request generator Channel3 */
 } dmamux_generator_channel_enum;
 
 /* DMA initialization structure */
@@ -309,7 +313,7 @@ typedef struct {
 #define DMA_CHPADDR_RESET_VALUE           ((uint32_t)0x00000000U)                                             /*!< the reset value of DMA channel CHXPADDR register */
 #define DMA_CHMADDR_RESET_VALUE           ((uint32_t)0x00000000U)                                             /*!< the reset value of DMA channel CHXMADDR register */
 #define DMA_CHINTF_RESET_VALUE            (DMA_INTF_GIF | DMA_INTF_FTFIF | \
-        DMA_INTF_HTFIF | DMA_INTF_ERRIF)                                   /*!< clear DMA channel DMA_INTF register */
+        DMA_INTF_HTFIF | DMA_INTF_ERRIF)                                                                      /*!< clear DMA channel DMA_INTF register */
 
 #define DMA_FLAG_ADD(flag,shift)          ((flag) << ((uint32_t)(shift) * 4U))                                /*!< DMA channel flag shift */
 
@@ -389,6 +393,71 @@ typedef struct {
 #define DMA_CHANNEL_CNT_MASK              DMA_CHXCNT_CNT                                                      /*!< transfer counter mask */
 
 /* DMAMUX request multiplexer channel input identification */
+#ifdef GD32L235
+#define RM_CHXCFG_MUXID(regval)           (BITS(0,6) & ((regval) << 0))                                       /*!< multiplexer input identification */
+#define DMA_REQUEST_M2M                   RM_CHXCFG_MUXID(0U)                                               /*!< memory to memory transfer */
+#define DMA_REQUEST_GENERATOR0            RM_CHXCFG_MUXID(1U)                                               /*!< DMAMUX request generator 0 */
+#define DMA_REQUEST_GENERATOR1            RM_CHXCFG_MUXID(2U)                                               /*!< DMAMUX request generator 1 */
+#define DMA_REQUEST_GENERATOR2            RM_CHXCFG_MUXID(3U)                                               /*!< DMAMUX request generator 2 */
+#define DMA_REQUEST_GENERATOR3            RM_CHXCFG_MUXID(4U)                                               /*!< DMAMUX request generator 3 */
+#define DMA_REQUEST_ADC                   RM_CHXCFG_MUXID(5U)                                               /*!< DMAMUX ADC request */
+#define DMA_REQUEST_DAC                   RM_CHXCFG_MUXID(6U)                                               /*!< DMAMUX DAC CH0 request */
+#define DMA_REQUEST_I2C0_RX               RM_CHXCFG_MUXID(10U)                                              /*!< DMAMUX I2C0 RX request */
+#define DMA_REQUEST_I2C0_TX               RM_CHXCFG_MUXID(11U)                                              /*!< DMAMUX I2C0 TX request */
+#define DMA_REQUEST_I2C1_RX               RM_CHXCFG_MUXID(12U)                                              /*!< DMAMUX I2C1 RX request */
+#define DMA_REQUEST_I2C1_TX               RM_CHXCFG_MUXID(13U)                                              /*!< DMAMUX I2C1 TX request */
+#define DMA_REQUEST_I2C2_RX               RM_CHXCFG_MUXID(14U)                                              /*!< DMAMUX I2C2 RX request */
+#define DMA_REQUEST_I2C2_TX               RM_CHXCFG_MUXID(15U)                                              /*!< DMAMUX I2C2 TX request */
+#define DMA_REQUEST_SPI0_RX               RM_CHXCFG_MUXID(16U)                                              /*!< DMAMUX SPI0 RX request */
+#define DMA_REQUEST_SPI0_TX               RM_CHXCFG_MUXID(17U)                                              /*!< DMAMUX SPI0 TX request */
+#define DMA_REQUEST_SPI1_RX               RM_CHXCFG_MUXID(18U)                                              /*!< DMAMUX SPI1 RX request */
+#define DMA_REQUEST_SPI1_TX               RM_CHXCFG_MUXID(19U)                                              /*!< DMAMUX SPI1 TX request */
+#define DMA_REQUEST_TIMER1_CH0            RM_CHXCFG_MUXID(25U)                                              /*!< DMAMUX TIMER1 CH0 request */
+#define DMA_REQUEST_TIMER1_CH1            RM_CHXCFG_MUXID(26U)                                              /*!< DMAMUX TIMER1 CH1 request */
+#define DMA_REQUEST_TIMER1_CH2            RM_CHXCFG_MUXID(27U)                                              /*!< DMAMUX TIMER1 CH2 request */
+#define DMA_REQUEST_TIMER1_CH3            RM_CHXCFG_MUXID(28U)                                              /*!< DMAMUX TIMER1 CH3 request */
+#define DMA_REQUEST_TIMER1_TRIG           RM_CHXCFG_MUXID(29U)                                              /*!< DMAMUX TIMER1 TRIG request */
+#define DMA_REQUEST_TIMER1_UP             RM_CHXCFG_MUXID(30U)                                              /*!< DMAMUX TIMER1 UP request */
+#define DMA_REQUEST_TIMER2_CH0            RM_CHXCFG_MUXID(32U)                                              /*!< DMAMUX TIMER2 CH0 request */
+#define DMA_REQUEST_TIMER2_CH1            RM_CHXCFG_MUXID(33U)                                              /*!< DMAMUX TIMER2 CH1 request */
+#define DMA_REQUEST_TIMER2_CH2            RM_CHXCFG_MUXID(34U)                                              /*!< DMAMUX TIMER2 CH2 request */
+#define DMA_REQUEST_TIMER2_CH3            RM_CHXCFG_MUXID(35U)                                              /*!< DMAMUX TIMER2 CH3 request */
+#define DMA_REQUEST_TIMER2_TRIG           RM_CHXCFG_MUXID(36U)                                              /*!< DMAMUX TIMER2 TRIG request */
+#define DMA_REQUEST_TIMER2_UP             RM_CHXCFG_MUXID(37U)                                              /*!< DMAMUX TIMER2 UP request */
+#define DMA_REQUEST_TIMER5_UP             RM_CHXCFG_MUXID(42U)                                              /*!< DMAMUX TIMER5 UP request */
+#define DMA_REQUEST_TIMER6_UP             RM_CHXCFG_MUXID(43U)                                              /*!< DMAMUX TIMER6 UP request */
+#define DMA_REQUEST_CAU_IN                RM_CHXCFG_MUXID(44U)                                              /*!< DMAMUX CAU IN request */
+#define DMA_REQUEST_CAU_OUT               RM_CHXCFG_MUXID(45U)                                              /*!< DMAMUX CAU OUT request */
+#define DMA_REQUEST_USART0_RX             RM_CHXCFG_MUXID(50U)                                              /*!< DMAMUX USART0 RX request */
+#define DMA_REQUEST_USART0_TX             RM_CHXCFG_MUXID(51U)                                              /*!< DMAMUX USART0 TX request */
+#define DMA_REQUEST_USART1_RX             RM_CHXCFG_MUXID(52U)                                              /*!< DMAMUX USART1 RX request */
+#define DMA_REQUEST_USART1_TX             RM_CHXCFG_MUXID(53U)                                              /*!< DMAMUX USART1 TX request */
+#define DMA_REQUEST_UART3_RX              RM_CHXCFG_MUXID(54U)                                              /*!< DMAMUX UART3 RX request */
+#define DMA_REQUEST_UART3_TX              RM_CHXCFG_MUXID(55U)                                              /*!< DMAMUX UART3 TX request */
+#define DMA_REQUEST_UART4_RX              RM_CHXCFG_MUXID(56U)                                              /*!< DMAMUX UART4 RX request */
+#define DMA_REQUEST_UART4_TX              RM_CHXCFG_MUXID(57U)                                              /*!< DMAMUX UART4 TX request */
+#define DMA_REQUEST_LPUART0_RX            RM_CHXCFG_MUXID(58U)                                              /*!< DMAMUX LPUART0 RX request */
+#define DMA_REQUEST_LPUART0_TX            RM_CHXCFG_MUXID(59U)                                              /*!< DMAMUX LPUART0 TX request */
+#define DMA_REQUEST_LPUART1_RX            RM_CHXCFG_MUXID(60U)                                              /*!< DMAMUX LPUART0 RX request */
+#define DMA_REQUEST_LPUART1_TX            RM_CHXCFG_MUXID(61U)                                              /*!< DMAMUX LPUART0 TX request */
+#define DMA_REQUEST_TIMER0_CH0            RM_CHXCFG_MUXID(64U)                                              /*!< DMAMUX TIMER0 CH0 request */
+#define DMA_REQUEST_TIMER0_CH1            RM_CHXCFG_MUXID(65U)                                              /*!< DMAMUX TIMER0 CH1 request */
+#define DMA_REQUEST_TIMER0_CH2            RM_CHXCFG_MUXID(66U)                                              /*!< DMAMUX TIMER0 CH2 request */
+#define DMA_REQUEST_TIMER0_CH3            RM_CHXCFG_MUXID(67U)                                              /*!< DMAMUX TIMER0 CH3 request */
+#define DMA_REQUEST_TIMER0_TRIG           RM_CHXCFG_MUXID(68U)                                              /*!< DMAMUX TIMER0 TRIG request */
+#define DMA_REQUEST_TIMER0_UP             RM_CHXCFG_MUXID(69U)                                              /*!< DMAMUX TIMER0 UP request */
+#define DMA_REQUEST_TIMER0_COM            RM_CHXCFG_MUXID(70U)                                              /*!< DMAMUX TIMER0 COM request */
+#define DMA_REQUEST_TIMER14_CH0           RM_CHXCFG_MUXID(71U)                                              /*!< DMAMUX TIMER14 CH0 request */
+#define DMA_REQUEST_TIMER14_CH1           RM_CHXCFG_MUXID(72U)                                              /*!< DMAMUX TIMER14 CH1 request */
+#define DMA_REQUEST_TIMER14_TRIG          RM_CHXCFG_MUXID(73U)                                              /*!< DMAMUX TIMER14 TRIG request */
+#define DMA_REQUEST_TIMER14_UP            RM_CHXCFG_MUXID(74U)                                              /*!< DMAMUX TIMER14 UP request */
+#define DMA_REQUEST_TIMER14_COM           RM_CHXCFG_MUXID(75U)                                              /*!< DMAMUX TIMER14 COM request */
+#define DMA_REQUEST_TIMER40_CH0           RM_CHXCFG_MUXID(76U)                                              /*!< DMAMUX TIMER40 CH0 request */
+#define DMA_REQUEST_TIMER40_CH1           RM_CHXCFG_MUXID(77U)                                              /*!< DMAMUX TIMER41 CH1 request */
+#define DMA_REQUEST_TIMER40_TRIG          RM_CHXCFG_MUXID(78U)                                              /*!< DMAMUX TIMER42 TRIG request */
+#define DMA_REQUEST_TIMER40_UP            RM_CHXCFG_MUXID(79U)                                              /*!< DMAMUX TIMER43 UP request */
+#define DMA_REQUEST_TIMER40_COM           RM_CHXCFG_MUXID(80U)                                              /*!< DMAMUX TIMER44 COM request */
+#else
 #define RM_CHXCFG_MUXID(regval)           (BITS(0,5) & ((regval) << 0))                                       /*!< multiplexer input identification */
 #define DMA_REQUEST_M2M                   RM_CHXCFG_MUXID(0U)                                               /*!< memory to memory transfer */
 #define DMA_REQUEST_GENERATOR0            RM_CHXCFG_MUXID(1U)                                               /*!< DMAMUX request generator 0 */
@@ -432,6 +501,7 @@ typedef struct {
 #define DMA_REQUEST_UART4_TX              RM_CHXCFG_MUXID(57U)                                              /*!< DMAMUX UART4 TX request */
 #define DMA_REQUEST_LPUART_RX             RM_CHXCFG_MUXID(58U)                                              /*!< DMAMUX LPUART RX request */
 #define DMA_REQUEST_LPUART_TX             RM_CHXCFG_MUXID(59U)                                              /*!< DMAMUX LPUART TX request */
+#endif
 
 /* DMAMUX request generator trigger input identification */
 #define RG_CHXCFG_TID(regval)             (BITS(0,4) & ((regval) << 0))                                       /*!< trigger input identification */
@@ -554,14 +624,14 @@ void dma_transfer_direction_config(dma_channel_enum channelx, uint32_t direction
 FlagStatus dma_flag_get(dma_channel_enum channelx, uint32_t flag);
 /* clear a DMA channel flag */
 void dma_flag_clear(dma_channel_enum channelx, uint32_t flag);
-/* check DMA flag and interrupt enable bit is set or not */
-FlagStatus dma_interrupt_flag_get(dma_channel_enum channelx, uint32_t int_flag);
-/* clear a DMA channel interrupt flag */
-void dma_interrupt_flag_clear(dma_channel_enum channelx, uint32_t int_flag);
 /* enable DMA interrupt */
 void dma_interrupt_enable(dma_channel_enum channelx, uint32_t source);
 /* disable DMA interrupt */
 void dma_interrupt_disable(dma_channel_enum channelx, uint32_t source);
+/* check DMA flag and interrupt enable bit is set or not */
+FlagStatus dma_interrupt_flag_get(dma_channel_enum channelx, uint32_t int_flag);
+/* clear a DMA channel interrupt flag */
+void dma_interrupt_flag_clear(dma_channel_enum channelx, uint32_t int_flag);
 
 /* DMAMUX functions */
 /* DMAMUX request multiplexer functions */
@@ -584,9 +654,9 @@ void dmamux_gen_struct_para_init(dmamux_gen_parameter_struct *init_struct);
 /* initialize DMAMUX request generator channel */
 void dmamux_request_generator_init(dmamux_generator_channel_enum channelx, dmamux_gen_parameter_struct *init_struct);
 /* enable DMAMUX request generator channel */
-void dmamux_request_generator_chennel_enable(dmamux_generator_channel_enum channelx);
+void dmamux_request_generator_channel_enable(dmamux_generator_channel_enum channelx);
 /* disable DMAMUX request generator channel */
-void dmamux_request_generator_chennel_disable(dmamux_generator_channel_enum channelx);
+void dmamux_request_generator_channel_disable(dmamux_generator_channel_enum channelx);
 
 /* DMAMUX configuration functions */
 /* configure synchronization input polarity */
@@ -609,13 +679,13 @@ void dmamux_trigger_id_config(dmamux_generator_channel_enum channelx, uint32_t i
 FlagStatus dmamux_flag_get(dmamux_flag_enum flag);
 /* clear DMAMUX flag */
 void dmamux_flag_clear(dmamux_flag_enum flag);
-/* get DMAMUX interrupt flag */
-FlagStatus dmamux_interrupt_flag_get(dmamux_interrupt_flag_enum int_flag);
-/* clear DMAMUX interrupt flag */
-void dmamux_interrupt_flag_clear(dmamux_interrupt_flag_enum int_flag);
 /* enable DMAMUX interrupt */
 void dmamux_interrupt_enable(dmamux_interrupt_enum interrupt);
 /* disable DMAMUX interrupt */
 void dmamux_interrupt_disable(dmamux_interrupt_enum interrupt);
+/* get DMAMUX interrupt flag */
+FlagStatus dmamux_interrupt_flag_get(dmamux_interrupt_flag_enum int_flag);
+/* clear DMAMUX interrupt flag */
+void dmamux_interrupt_flag_clear(dmamux_interrupt_flag_enum int_flag);
 
 #endif /* GD32L23X_DMA_H */

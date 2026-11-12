@@ -2,11 +2,11 @@
     \file    gd32l23x_lpuart.h
     \brief   definitions for the LPUART
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -38,19 +38,22 @@ OF SUCH DAMAGE.
 #include "gd32l23x.h"
 
 /* LPUART definitions */
-#define LPUART                        LPUART_BASE
+#define LPUART0                       LPUART_BASE
+#ifdef GD32L235
+#define LPUART1                       (LPUART_BASE - 0x00003800U)
+#endif
 
 /* registers definitions */
-#define LPUART_CTL0                   REG32(LPUART + 0x00000000U)         /*!< LPUART control register 0 */
-#define LPUART_CTL1                   REG32(LPUART + 0x00000004U)         /*!< LPUART control register 1 */
-#define LPUART_CTL2                   REG32(LPUART + 0x00000008U)         /*!< LPUART control register 2 */
-#define LPUART_BAUD                   REG32(LPUART + 0x0000000CU)         /*!< LPUART baud rate register */
-#define LPUART_CMD                    REG32(LPUART + 0x00000018U)         /*!< LPUART command register */
-#define LPUART_STAT                   REG32(LPUART + 0x0000001CU)         /*!< LPUART status register */
-#define LPUART_INTC                   REG32(LPUART + 0x00000020U)         /*!< LPUART status clear register */
-#define LPUART_RDATA                  REG32(LPUART + 0x00000024U)         /*!< LPUART receive data register */
-#define LPUART_TDATA                  REG32(LPUART + 0x00000028U)         /*!< LPUART transmit data register */
-#define LPUART_CHC                    REG32(LPUART + 0x000000C0U)         /*!< LPUART coherence control register */
+#define LPUART_CTL0(lpuartx)          REG32((lpuartx) + 0x00000000U)      /*!< LPUART control register 0 */
+#define LPUART_CTL1(lpuartx)          REG32((lpuartx) + 0x00000004U)      /*!< LPUART control register 1 */
+#define LPUART_CTL2(lpuartx)          REG32((lpuartx) + 0x00000008U)      /*!< LPUART control register 2 */
+#define LPUART_BAUD(lpuartx)          REG32((lpuartx) + 0x0000000CU)      /*!< LPUART baud rate register */
+#define LPUART_CMD(lpuartx)           REG32((lpuartx) + 0x00000018U)      /*!< LPUART command register */
+#define LPUART_STAT(lpuartx)          REG32((lpuartx) + 0x0000001CU)      /*!< LPUART status register */
+#define LPUART_INTC(lpuartx)          REG32((lpuartx) + 0x00000020U)      /*!< LPUART interrupt status clear register */
+#define LPUART_RDATA(lpuartx)         REG32((lpuartx) + 0x00000024U)      /*!< LPUART receive data register */
+#define LPUART_TDATA(lpuartx)         REG32((lpuartx) + 0x00000028U)      /*!< LPUART transmit data register */
+#define LPUART_CHC(lpuartx)           REG32((lpuartx) + 0x000000C0U)      /*!< LPUART coherence control register */
 
 /* bits definitions */
 /* LPUART CTL0 */
@@ -97,7 +100,7 @@ OF SUCH DAMAGE.
 #define LPUART_CTL2_DEP               BIT(15)                             /*!< driver enable polarity mode */
 #define LPUART_CTL2_WUM               BITS(20,21)                         /*!< wakeup mode from deep-sleep mode */
 #define LPUART_CTL2_WUIE              BIT(22)                             /*!< wakeup from deep-sleep mode interrupt enable */
-#define LPUART_CTL2_UCESM             BIT(23)                             /*!< LPUART clock enable in Deep-sleep mode */
+#define LPUART_CTL2_UCESM             BIT(23)                             /*!< LPUART clock enable in deep-sleep mode */
 
 /* LPUART BAUD */
 #define LPUART_BAUD_BRR               BITS(0,19)                          /*!< baud-rate divider */
@@ -167,7 +170,7 @@ typedef enum {
     /* flags in STAT register */
     LPUART_FLAG_REA = LPUART_REGIDX_BIT(LPUART_STAT_REG_OFFSET, 22U),      /*!< receive enable acknowledge flag */
     LPUART_FLAG_TEA = LPUART_REGIDX_BIT(LPUART_STAT_REG_OFFSET, 21U),      /*!< transmit enable acknowledge flag */
-    LPUART_FLAG_WU = LPUART_REGIDX_BIT(LPUART_STAT_REG_OFFSET, 20U),       /*!< wakeup from Deep-sleep mode flag */
+    LPUART_FLAG_WU = LPUART_REGIDX_BIT(LPUART_STAT_REG_OFFSET, 20U),       /*!< wakeup from deep-sleep mode flag */
     LPUART_FLAG_RWU = LPUART_REGIDX_BIT(LPUART_STAT_REG_OFFSET, 19U),      /*!< receiver wakeup from mute mode */
     LPUART_FLAG_AM = LPUART_REGIDX_BIT(LPUART_STAT_REG_OFFSET, 17U),       /*!< ADDR match flag */
     LPUART_FLAG_BSY = LPUART_REGIDX_BIT(LPUART_STAT_REG_OFFSET, 16U),      /*!< busy flag */
@@ -182,7 +185,7 @@ typedef enum {
     LPUART_FLAG_FERR = LPUART_REGIDX_BIT(LPUART_STAT_REG_OFFSET, 1U),      /*!< frame error flag */
     LPUART_FLAG_PERR = LPUART_REGIDX_BIT(LPUART_STAT_REG_OFFSET, 0U),      /*!< parity error flag */
     /* flags in CHC register */
-    LPUART_FLAG_EPERR = LPUART_REGIDX_BIT(LPUART_CHC_REG_OFFSET, 8U),      /*!< early parity error flag */
+    LPUART_FLAG_EPERR = LPUART_REGIDX_BIT(LPUART_CHC_REG_OFFSET, 8U)       /*!< early parity error flag */
 } lpuart_flag_enum;
 
 /* LPUART interrupt flags */
@@ -200,7 +203,7 @@ typedef enum {
     LPUART_INT_FLAG_CTS = LPUART_REGIDX_BIT2(LPUART_CTL2_REG_OFFSET, 10U, LPUART_STAT_REG_OFFSET, 9U),       /*!< CTS interrupt and flag */
     LPUART_INT_FLAG_ERR_NERR = LPUART_REGIDX_BIT2(LPUART_CTL2_REG_OFFSET, 0U, LPUART_STAT_REG_OFFSET, 2U),   /*!< error interrupt and noise error flag */
     LPUART_INT_FLAG_ERR_ORERR = LPUART_REGIDX_BIT2(LPUART_CTL2_REG_OFFSET, 0U, LPUART_STAT_REG_OFFSET, 3U),  /*!< error interrupt and overrun error flag */
-    LPUART_INT_FLAG_ERR_FERR = LPUART_REGIDX_BIT2(LPUART_CTL2_REG_OFFSET, 0U, LPUART_STAT_REG_OFFSET, 1U),   /*!< error interrupt and frame error flag */
+    LPUART_INT_FLAG_ERR_FERR = LPUART_REGIDX_BIT2(LPUART_CTL2_REG_OFFSET, 0U, LPUART_STAT_REG_OFFSET, 1U)    /*!< error interrupt and frame error flag */
 } lpuart_interrupt_flag_enum;
 
 /* LPUART interrupt enable or disable */
@@ -215,208 +218,208 @@ typedef enum {
     /* interrupt in CTL2 register */
     LPUART_INT_WU = LPUART_REGIDX_BIT(LPUART_CTL2_REG_OFFSET, 22U),         /*!< wakeup from deep-sleep mode interrupt */
     LPUART_INT_CTS = LPUART_REGIDX_BIT(LPUART_CTL2_REG_OFFSET, 10U),        /*!< CTS interrupt */
-    LPUART_INT_ERR = LPUART_REGIDX_BIT(LPUART_CTL2_REG_OFFSET, 0U),         /*!< error interrupt */
+    LPUART_INT_ERR = LPUART_REGIDX_BIT(LPUART_CTL2_REG_OFFSET, 0U)          /*!< error interrupt */
 } lpuart_interrupt_enum;
 
 /* LPUART invert configure */
 typedef enum {
     /* data bit level inversion */
-    LPUART_DINV_ENABLE = 0,                                          /*!< data bit level inversion */
-    LPUART_DINV_DISABLE,                                             /*!< data bit level not inversion */
+    LPUART_DINV_ENABLE = 0,                                                 /*!< data bit level inversion */
+    LPUART_DINV_DISABLE,                                                    /*!< data bit level not inversion */
     /* TX pin level inversion */
-    LPUART_TXPIN_ENABLE,                                             /*!< TX pin level inversion */
-    LPUART_TXPIN_DISABLE,                                            /*!< TX pin level not inversion */
+    LPUART_TXPIN_ENABLE,                                                    /*!< TX pin level inversion */
+    LPUART_TXPIN_DISABLE,                                                   /*!< TX pin level not inversion */
     /* RX pin level inversion */
-    LPUART_RXPIN_ENABLE,                                             /*!< RX pin level inversion */
-    LPUART_RXPIN_DISABLE,                                            /*!< RX pin level not inversion */
+    LPUART_RXPIN_ENABLE,                                                    /*!< RX pin level inversion */
+    LPUART_RXPIN_DISABLE,                                                   /*!< RX pin level not inversion */
     /* swap TX/RX pins */
-    LPUART_SWAP_ENABLE,                                              /*!< swap TX/RX pins */
-    LPUART_SWAP_DISABLE,                                             /*!< not swap TX/RX pins */
+    LPUART_SWAP_ENABLE,                                                     /*!< swap TX/RX pins */
+    LPUART_SWAP_DISABLE                                                     /*!< not swap TX/RX pins */
 } lpuart_invert_enum;
 
 /* LPUART receiver configure */
 #define CTL0_REN(regval)              (BIT(2) & ((uint32_t)(regval) << 2))
-#define LPUART_RECEIVE_ENABLE         CTL0_REN(1)                    /*!< enable receiver */
-#define LPUART_RECEIVE_DISABLE        CTL0_REN(0)                    /*!< disable receiver */
+#define LPUART_RECEIVE_ENABLE         CTL0_REN(1)                           /*!< enable receiver */
+#define LPUART_RECEIVE_DISABLE        CTL0_REN(0)                           /*!< disable receiver */
 
 /* LPUART transmitter configure */
 #define CTL0_TEN(regval)              (BIT(3) & ((uint32_t)(regval) << 3))
-#define LPUART_TRANSMIT_ENABLE        CTL0_TEN(1)                    /*!< enable transmitter */
-#define LPUART_TRANSMIT_DISABLE       CTL0_TEN(0)                    /*!< disable transmitter */
+#define LPUART_TRANSMIT_ENABLE        CTL0_TEN(1)                           /*!< enable transmitter */
+#define LPUART_TRANSMIT_DISABLE       CTL0_TEN(0)                           /*!< disable transmitter */
 
 /* LPUART parity bits definitions */
 #define CTL0_PM(regval)               (BITS(9,10) & ((uint32_t)(regval) << 9))
-#define LPUART_PM_NONE                CTL0_PM(0)                     /*!< no parity */
-#define LPUART_PM_EVEN                CTL0_PM(2)                     /*!< even parity */
-#define LPUART_PM_ODD                 CTL0_PM(3)                     /*!< odd parity */
+#define LPUART_PM_NONE                CTL0_PM(0)                            /*!< no parity */
+#define LPUART_PM_EVEN                CTL0_PM(2)                            /*!< even parity */
+#define LPUART_PM_ODD                 CTL0_PM(3)                            /*!< odd parity */
 
 /* LPUART wakeup method in mute mode */
 #define CTL0_WM(regval)               (BIT(11) & ((uint32_t)(regval) << 11))
-#define LPUART_WM_IDLE                CTL0_WM(0)                     /*!< idle line */
-#define LPUART_WM_ADDR                CTL0_WM(1)                     /*!< address match */
+#define LPUART_WM_IDLE                CTL0_WM(0)                            /*!< idle line */
+#define LPUART_WM_ADDR                CTL0_WM(1)                            /*!< address match */
 
 /* LPUART word length definitions */
 #define CTL0_WL01(regval1, regval2)   ((BIT(12) & ((uint32_t)(regval1) << 12))|(BIT(28) & ((uint32_t)(regval2) << 28)))
-#define LPUART_WL_7BIT                CTL0_WL01(0,1)                 /*!< 7 bits */
-#define LPUART_WL_8BIT                CTL0_WL01(0,0)                 /*!< 8 bits */
-#define LPUART_WL_9BIT                CTL0_WL01(1,0)                 /*!< 9 bits */
+#define LPUART_WL_7BIT                CTL0_WL01(0,1)                        /*!< 7 bits */
+#define LPUART_WL_8BIT                CTL0_WL01(0,0)                        /*!< 8 bits */
+#define LPUART_WL_9BIT                CTL0_WL01(1,0)                        /*!< 9 bits */
 
 /* LPUART address detection mode */
 #define CTL1_ADDM(regval)             (BIT(4) & ((uint32_t)(regval) << 4))
-#define LPUART_ADDM_4BIT              CTL1_ADDM(0)                   /*!< 4-bit address detection */
-#define LPUART_ADDM_FULLBIT           CTL1_ADDM(1)                   /*!< full-bit address detection */
+#define LPUART_ADDM_4BIT              CTL1_ADDM(0)                          /*!< 4-bit address detection */
+#define LPUART_ADDM_FULLBIT           CTL1_ADDM(1)                          /*!< full-bit address detection */
 
 /* LPUART stop bits definitions */
 #define CTL1_STB(regval)              (BITS(12,13) & ((uint32_t)(regval) << 12))
-#define LPUART_STB_1BIT               CTL1_STB(0)                    /*!< 1 bit */
-#define LPUART_STB_2BIT               CTL1_STB(2)                    /*!< 2 bits */
+#define LPUART_STB_1BIT               CTL1_STB(0)                           /*!< 1 bit */
+#define LPUART_STB_2BIT               CTL1_STB(2)                           /*!< 2 bits */
 
 /* LPUART data is transmitted/received with the LSB/MSB first */
 #define CTL1_MSBF(regval)             (BIT(19) & ((uint32_t)(regval) << 19))
-#define LPUART_MSBF_LSB               CTL1_MSBF(0)                   /*!< LSB first */
-#define LPUART_MSBF_MSB               CTL1_MSBF(1)                   /*!< MSB first */
+#define LPUART_MSBF_LSB               CTL1_MSBF(0)                          /*!< LSB first */
+#define LPUART_MSBF_MSB               CTL1_MSBF(1)                          /*!< MSB first */
 
 /* DMA enable for reception */
 #define CTL2_DENR(regval)             (BIT(6) & ((uint32_t)(regval) << 6))
-#define LPUART_DENR_ENABLE            CTL2_DENR(1)                   /*!< enable for reception */
-#define LPUART_DENR_DISABLE           CTL2_DENR(0)                   /*!< disable for reception */
+#define LPUART_RECEIVE_DMA_ENABLE     CTL2_DENR(1)                          /*!< enable for reception */
+#define LPUART_RECEIVE_DMA_DISABLE    CTL2_DENR(0)                          /*!< disable for reception */
 
 /* DMA enable for transmission */
 #define CTL2_DENT(regval)             (BIT(7) & ((uint32_t)(regval) << 7))
-#define LPUART_DENT_ENABLE            CTL2_DENT(1)                   /*!< enable for transmission */
-#define LPUART_DENT_DISABLE           CTL2_DENT(0)                   /*!< disable for transmission */
+#define LPUART_TRANSMIT_DMA_ENABLE    CTL2_DENT(1)                          /*!< enable for transmission */
+#define LPUART_TRANSMIT_DMA_DISABLE   CTL2_DENT(0)                          /*!< disable for transmission */
 
 /* LPUART RTS hardware flow control configure */
 #define CTL2_RTSEN(regval)            (BIT(8) & ((uint32_t)(regval) << 8))
-#define LPUART_RTS_ENABLE             CTL2_RTSEN(1)                  /*!< RTS hardware flow control enabled */
-#define LPUART_RTS_DISABLE            CTL2_RTSEN(0)                  /*!< RTS hardware flow control disabled */
+#define LPUART_RTS_ENABLE             CTL2_RTSEN(1)                         /*!< RTS hardware flow control enabled */
+#define LPUART_RTS_DISABLE            CTL2_RTSEN(0)                         /*!< RTS hardware flow control disabled */
 
 /* LPUART CTS hardware flow control configure */
 #define CTL2_CTSEN(regval)            (BIT(9) & ((uint32_t)(regval) << 9))
-#define LPUART_CTS_ENABLE             CTL2_CTSEN(1)                  /*!< CTS hardware flow control enabled */
-#define LPUART_CTS_DISABLE            CTL2_CTSEN(0)                  /*!< CTS hardware flow control disabled */
+#define LPUART_CTS_ENABLE             CTL2_CTSEN(1)                         /*!< CTS hardware flow control enabled */
+#define LPUART_CTS_DISABLE            CTL2_CTSEN(0)                         /*!< CTS hardware flow control disabled */
 
 /* LPUART driver enable polarity mode */
 #define CTL2_DEP(regval)              (BIT(15) & ((uint32_t)(regval) << 15))
-#define LPUART_DEP_HIGH               CTL2_DEP(0)                    /*!< DE signal is active high */
-#define LPUART_DEP_LOW                CTL2_DEP(1)                    /*!< DE signal is active low */
+#define LPUART_DEP_HIGH               CTL2_DEP(0)                           /*!< DE signal is active high */
+#define LPUART_DEP_LOW                CTL2_DEP(1)                           /*!< DE signal is active low */
 
 /* LPUART wakeup mode from deep-sleep mode */
 #define CTL2_WUM(regval)              (BITS(20,21) & ((uint32_t)(regval) << 20))
-#define LPUART_WUM_ADDR               CTL2_WUM(0)                    /*!< WUF active on address match */
-#define LPUART_WUM_STARTB             CTL2_WUM(2)                    /*!< WUF active on start bit */
-#define LPUART_WUM_RBNE               CTL2_WUM(3)                    /*!< WUF active on RBNE */
+#define LPUART_WUM_ADDR               CTL2_WUM(0)                           /*!< WUF active on address match */
+#define LPUART_WUM_STARTB             CTL2_WUM(2)                           /*!< WUF active on start bit */
+#define LPUART_WUM_RBNE               CTL2_WUM(3)                           /*!< WUF active on RBNE */
 
 /* LPUART hardware flow control coherence mode */
 #define CHC_HCM(regval)               (BIT(0) & ((uint32_t)(regval) << 0))
-#define LPUART_HCM_NONE               CHC_HCM(0)                     /*!< nRTS signal equals to the rxne status register */
-#define LPUART_HCM_EN                 CHC_HCM(1)                     /*!< nRTS signal is set when the last data bit has been sampled */
+#define LPUART_HCM_NONE               CHC_HCM(0)                            /*!< nRTS signal equals to the rxne status register */
+#define LPUART_HCM_EN                 CHC_HCM(1)                            /*!< nRTS signal is set when the last data bit has been sampled */
 
 /* function declarations */
 /* initialization functions */
 /* reset LPUART */
-void lpuart_deinit(void);
+void lpuart_deinit(uint32_t lpuart_periph);
 /* configure LPUART baud rate value */
-void lpuart_baudrate_set(uint32_t baudval);
+void lpuart_baudrate_set(uint32_t lpuart_periph, uint32_t baudval);
 /* configure LPUART parity */
-void lpuart_parity_config(uint32_t paritycfg);
+void lpuart_parity_config(uint32_t lpuart_periph, uint32_t paritycfg);
 /* configure LPUART word length */
-void lpuart_word_length_set(uint32_t wlen);
+void lpuart_word_length_set(uint32_t lpuart_periph, uint32_t wlen);
 /* configure LPUART stop bit length */
-void lpuart_stop_bit_set(uint32_t stblen);
+void lpuart_stop_bit_set(uint32_t lpuart_periph, uint32_t stblen);
 /* enable LPUART */
-void lpuart_enable(void);
+void lpuart_enable(uint32_t lpuart_periph);
 /* disable LPUART */
-void lpuart_disable(void);
+void lpuart_disable(uint32_t lpuart_periph);
 /* configure LPUART transmitter */
-void lpuart_transmit_config(uint32_t txconfig);
+void lpuart_transmit_config(uint32_t lpuart_periph, uint32_t txconfig);
 /* configure LPUART receiver */
-void lpuart_receive_config(uint32_t rxconfig);
+void lpuart_receive_config(uint32_t lpuart_periph, uint32_t rxconfig);
 
 /* LPUART normal mode communication */
 /* data is transmitted/received with the LSB/MSB first */
-void lpuart_data_first_config(uint32_t msbf);
+void lpuart_data_first_config(uint32_t lpuart_periph, uint32_t msbf);
 /* configure LPUART inverted */
-void lpuart_invert_config(lpuart_invert_enum invertpara);
+void lpuart_invert_config(uint32_t lpuart_periph, lpuart_invert_enum invertpara);
 /* enable the LPUART overrun function */
-void lpuart_overrun_enable(void);
+void lpuart_overrun_enable(uint32_t lpuart_periph);
 /* disable the LPUART overrun function */
-void lpuart_overrun_disable(void);
+void lpuart_overrun_disable(uint32_t lpuart_periph);
 /* LPUART transmit data function */
-void lpuart_data_transmit(uint32_t data);
+void lpuart_data_transmit(uint32_t lpuart_periph, uint32_t data);
 /* LPUART receive data function */
-uint16_t lpuart_data_receive(void);
+uint16_t lpuart_data_receive(uint32_t lpuart_periph);
 /* enable LPUART command */
-void lpuart_command_enable(uint32_t cmdtype);
+void lpuart_command_enable(uint32_t lpuart_periph, uint32_t cmdtype);
 
 /* multi-processor communication */
 /* configure address of the LPUART */
-void lpuart_address_config(uint8_t addr);
+void lpuart_address_config(uint32_t lpuart_periph, uint8_t addr);
 /* configure address detection mode */
-void lpuart_address_detection_mode_config(uint32_t addmod);
+void lpuart_address_detection_mode_config(uint32_t lpuart_periph, uint32_t addmod);
 /* enable mute mode */
-void lpuart_mute_mode_enable(void);
+void lpuart_mute_mode_enable(uint32_t lpuart_periph);
 /* disable mute mode */
-void lpuart_mute_mode_disable(void);
+void lpuart_mute_mode_disable(uint32_t lpuart_periph);
 /* configure wakeup method in mute mode */
-void lpuart_mute_mode_wakeup_config(uint32_t wmethod);
+void lpuart_mute_mode_wakeup_config(uint32_t lpuart_periph, uint32_t wmethod);
 
 /* half-duplex communication */
 /* enable half-duplex mode */
-void lpuart_halfduplex_enable(void);
+void lpuart_halfduplex_enable(uint32_t lpuart_periph);
 /* disable half-duplex mode */
-void lpuart_halfduplex_disable(void);
+void lpuart_halfduplex_disable(uint32_t lpuart_periph);
 
 /* hardware flow communication */
 /* configure hardware flow control RTS */
-void lpuart_hardware_flow_rts_config(uint32_t rtsconfig);
+void lpuart_hardware_flow_rts_config(uint32_t lpuart_periph, uint32_t rtsconfig);
 /* configure hardware flow control CTS */
-void lpuart_hardware_flow_cts_config(uint32_t ctsconfig);
+void lpuart_hardware_flow_cts_config(uint32_t lpuart_periph, uint32_t ctsconfig);
 
 /* coherence control */
 /* configure hardware flow control coherence mode */
-void lpuart_hardware_flow_coherence_config(uint32_t hcm);
+void lpuart_hardware_flow_coherence_config(uint32_t lpuart_periph, uint32_t hcm);
 
 /* enable RS485 driver */
-void lpuart_rs485_driver_enable(void);
+void lpuart_rs485_driver_enable(uint32_t lpuart_periph);
 /* disable RS485 driver */
-void lpuart_rs485_driver_disable(void);
+void lpuart_rs485_driver_disable(uint32_t lpuart_periph);
 /* configure driver enable assertion time */
-void lpuart_driver_assertime_config(uint32_t deatime);
+void lpuart_driver_assertime_config(uint32_t lpuart_periph, uint32_t deatime);
 /* configure driver enable de-assertion time */
-void lpuart_driver_deassertime_config(uint32_t dedtime);
+void lpuart_driver_deassertime_config(uint32_t lpuart_periph, uint32_t dedtime);
 /* configure driver enable polarity mode */
-void lpuart_depolarity_config(uint32_t dep);
+void lpuart_depolarity_config(uint32_t lpuart_periph, uint32_t dep);
 
 /* LPUART DMA */
 /* configure LPUART DMA for reception */
-void lpuart_dma_receive_config(uint32_t dmacmd);
+void lpuart_dma_receive_config(uint32_t lpuart_periph, uint32_t dmacmd);
 /* configure LPUART DMA for transmission */
-void lpuart_dma_transmit_config(uint32_t dmacmd);
+void lpuart_dma_transmit_config(uint32_t lpuart_periph, uint32_t dmacmd);
 /* disable DMA on reception error */
-void lpuart_reception_error_dma_disable(void);
+void lpuart_reception_error_dma_disable(uint32_t lpuart_periph);
 /* enable DMA on reception error */
-void lpuart_reception_error_dma_enable(void);
+void lpuart_reception_error_dma_enable(uint32_t lpuart_periph);
 
 /* enable LPUART to wakeup the mcu from deep-sleep mode */
-void lpuart_wakeup_enable(void);
+void lpuart_wakeup_enable(uint32_t lpuart_periph);
 /* disable LPUART to wakeup the mcu from deep-sleep mode */
-void lpuart_wakeup_disable(void);
+void lpuart_wakeup_disable(uint32_t lpuart_periph);
 /* configure the LPUART wakeup mode from deep-sleep mode */
-void lpuart_wakeup_mode_config(uint32_t wum);
+void lpuart_wakeup_mode_config(uint32_t lpuart_periph, uint32_t wum);
 
 /* flag & interrupt functions */
 /* get flag in STAT/CHC register */
-FlagStatus lpuart_flag_get(lpuart_flag_enum flag);
+FlagStatus lpuart_flag_get(uint32_t lpuart_periph, lpuart_flag_enum flag);
 /* clear LPUART status */
-void lpuart_flag_clear(lpuart_flag_enum flag);
+void lpuart_flag_clear(uint32_t lpuart_periph, lpuart_flag_enum flag);
 /* enable LPUART interrupt */
-void lpuart_interrupt_enable(lpuart_interrupt_enum interrupt);
+void lpuart_interrupt_enable(uint32_t lpuart_periph, lpuart_interrupt_enum interrupt);
 /* disable LPUART interrupt */
-void lpuart_interrupt_disable(lpuart_interrupt_enum interrupt);
+void lpuart_interrupt_disable(uint32_t lpuart_periph, lpuart_interrupt_enum interrupt);
 /* get LPUART interrupt and flag status */
-FlagStatus lpuart_interrupt_flag_get(lpuart_interrupt_flag_enum int_flag);
+FlagStatus lpuart_interrupt_flag_get(uint32_t lpuart_periph, lpuart_interrupt_flag_enum int_flag);
 /* clear LPUART interrupt flag */
-void lpuart_interrupt_flag_clear(lpuart_interrupt_flag_enum int_flag);
+void lpuart_interrupt_flag_clear(uint32_t lpuart_periph, lpuart_interrupt_flag_enum int_flag);
 
 #endif /* GD32L23X_LPUART_H */

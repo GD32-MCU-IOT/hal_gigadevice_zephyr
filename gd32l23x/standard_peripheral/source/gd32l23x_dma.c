@@ -2,11 +2,11 @@
     \file    gd32l23x_dma.c
     \brief   DMA driver
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -59,8 +59,8 @@ void dma_deinit(dma_channel_enum channelx)
 
 /*!
     \brief      initialize the parameters of DMA struct with the default values
-    \param[in]  init_struct: the initialization data needed to initialize DMA channel
-    \param[out] none
+    \param[in]  none
+    \param[out] init_struct: the initialization data needed to initialize DMA channel
     \retval     none
 */
 void dma_struct_para_init(dma_parameter_struct *init_struct)
@@ -97,7 +97,25 @@ void dma_struct_para_init(dma_parameter_struct *init_struct)
                   direction: DMA_PERIPHERAL_TO_MEMORY, DMA_MEMORY_TO_PERIPHERAL
                   number: the number of remaining data to be transferred by the DMA
                   priority: DMA_PRIORITY_LOW, DMA_PRIORITY_MEDIUM, DMA_PRIORITY_HIGH, DMA_PRIORITY_ULTRA_HIGH
-                  request: DMA_REQUEST_M2M, DMA_REQUEST_GENERATOR0, DMA_REQUEST_GENERATOR1, DMA_REQUEST_GENERATOR2,
+                  request: for GD32L235:
+                           DMA_REQUEST_M2M, DMA_REQUEST_GENERATOR0, DMA_REQUEST_GENERATOR1, DMA_REQUEST_GENERATOR2,
+                           DMA_REQUEST_GENERATOR3, DMA_REQUEST_ADC, DMA_REQUEST_DAC, DMA_REQUEST_I2C0_RX,
+                           DMA_REQUEST_I2C0_TX, DMA_REQUEST_I2C1_RX, DMA_REQUEST_I2C1_TX, DMA_REQUEST_I2C2_RX,
+                           DMA_REQUEST_I2C2_TX, DMA_REQUEST_SPI0_RX, DMA_REQUEST_SPI0_TX, DMA_REQUEST_SPI1_RX,
+                           DMA_REQUEST_SPI1_TX, DMA_REQUEST_TIMER1_CH0, DMA_REQUEST_TIMER1_CH1, DMA_REQUEST_TIMER1_CH2,
+                           DMA_REQUEST_TIMER1_CH3, DMA_REQUEST_TIMER1_TRIG, DMA_REQUEST_TIMER1_UP, DMA_REQUEST_TIMER2_CH0, 
+                           DMA_REQUEST_TIMER2_CH1,DMA_REQUEST_TIMER2_CH2, DMA_REQUEST_TIMER2_CH3, DMA_REQUEST_TIMER2_TRIG, 
+                           DMA_REQUEST_TIMER2_UP, DMA_REQUEST_TIMER5_UP, DMA_REQUEST_TIMER6_UP, DMA_REQUEST_CAU_IN, 
+                           DMA_REQUEST_CAU_OUT, DMA_REQUEST_USART0_RX, DMA_REQUEST_USART0_TX, DMA_REQUEST_USART1_RX, 
+                           DMA_REQUEST_USART1_TX, DMA_REQUEST_UART3_RX, DMA_REQUEST_UART3_TX, DMA_REQUEST_UART4_RX, 
+                           DMA_REQUEST_UART4_TX, DMA_REQUEST_LPUART0_RX, DMA_REQUEST_LPUART0_TX,DMA_REQUEST_LPUART1_RX,
+                           DMA_REQUEST_LPUART1_TX, DMA_REQUEST_TIMER0_CH0,DMA_REQUEST_TIMER0_CH1,DMA_REQUEST_TIMER0_CH2,
+                           DMA_REQUEST_TIMER0_CH3, DMA_REQUEST_TIMER0_TRIG,DMA_REQUEST_TIMER0_UP,DMA_REQUEST_TIMER0_COM,
+                           DMA_REQUEST_TIMER14_CH0, DMA_REQUEST_TIMER14_CH1,DMA_REQUEST_TIMER14_TRIG,DMA_REQUEST_TIMER14_UP,
+                           DMA_REQUEST_TIMER14_COM, DMA_REQUEST_TIMER40_CH0,DMA_REQUEST_TIMER40_CH1,DMA_REQUEST_TIMER40_TRIG,
+                           DMA_REQUEST_TIMER40_UP, DMA_REQUEST_TIMER40_COM
+                           for GD32L233:
+                           DMA_REQUEST_M2M, DMA_REQUEST_GENERATOR0, DMA_REQUEST_GENERATOR1, DMA_REQUEST_GENERATOR2,
                            DMA_REQUEST_GENERATOR3, DMA_REQUEST_ADC, DMA_REQUEST_DAC, DMA_REQUEST_I2C0_RX,
                            DMA_REQUEST_I2C0_TX, DMA_REQUEST_I2C1_RX, DMA_REQUEST_I2C1_TX, DMA_REQUEST_I2C2_RX,
                            DMA_REQUEST_I2C2_TX, DMA_REQUEST_SPI0_RX, DMA_REQUEST_SPI0_TX, DMA_REQUEST_SPI1_RX,
@@ -108,6 +126,7 @@ void dma_struct_para_init(dma_parameter_struct *init_struct)
                            DMA_REQUEST_USART0_RX, DMA_REQUEST_USART0_TX, DMA_REQUEST_USART1_RX, DMA_REQUEST_USART1_TX,
                            DMA_REQUEST_UART3_RX, DMA_REQUEST_UART3_TX, DMA_REQUEST_UART4_RX, DMA_REQUEST_UART4_TX,
                            DMA_REQUEST_LPUART_RX, DMA_REQUEST_LPUART_TX
+                           
     \param[out] none
     \retval     none
 */
@@ -491,66 +510,6 @@ void dma_flag_clear(dma_channel_enum channelx, uint32_t flag)
 }
 
 /*!
-    \brief      check DMA flag and interrupt enable bit is set or not
-    \param[in]  channelx: specify which DMA channel to get flag
-                only one parameter can be selected which is shown as below:
-      \arg        DMA_CHx(x=0..6)
-    \param[in]  flag: specify get which flag
-                only one parameter can be selected which is shown as below:
-      \arg        DMA_INT_FLAG_FTF: transfer finish flag of channel
-      \arg        DMA_INT_FLAG_HTF: half transfer finish flag of channel
-      \arg        DMA_INT_FLAG_ERR: error flag of channel
-    \param[out] none
-    \retval     FlagStatus: SET or RESET
-*/
-FlagStatus dma_interrupt_flag_get(dma_channel_enum channelx, uint32_t int_flag)
-{
-    uint32_t interrupt_enable = 0U, interrupt_flag = 0U;
-
-    switch(int_flag) {
-    case DMA_INT_FLAG_FTF:
-        interrupt_flag = DMA_INTF & DMA_FLAG_ADD(int_flag, channelx);
-        interrupt_enable = DMA_CHCTL(channelx) & DMA_CHXCTL_FTFIE;
-        break;
-    case DMA_INT_FLAG_HTF:
-        interrupt_flag = DMA_INTF & DMA_FLAG_ADD(int_flag, channelx);
-        interrupt_enable = DMA_CHCTL(channelx) & DMA_CHXCTL_HTFIE;
-        break;
-    case DMA_INT_FLAG_ERR:
-        interrupt_flag = DMA_INTF & DMA_FLAG_ADD(int_flag, channelx);
-        interrupt_enable = DMA_CHCTL(channelx) & DMA_CHXCTL_ERRIE;
-        break;
-    default:
-        break;
-    }
-
-    if(interrupt_flag && interrupt_enable) {
-        return SET;
-    } else {
-        return RESET;
-    }
-}
-
-/*!
-    \brief      clear a DMA channel interrupt flag
-    \param[in]  channelx: specify which DMA channel to clear flag
-                only one parameter can be selected which is shown as below:
-      \arg        DMA_CHx(x=0..6)
-    \param[in]  flag: specify get which flag
-                only one parameter can be selected which is shown as below:
-      \arg        DMA_INT_FLAG_G: global interrupt flag of channel
-      \arg        DMA_INT_FLAG_FTF: transfer finish flag of channel
-      \arg        DMA_INT_FLAG_HTF: half transfer finish flag of channel
-      \arg        DMA_INT_FLAG_ERR: error flag of channel
-    \param[out] none
-    \retval     none
-*/
-void dma_interrupt_flag_clear(dma_channel_enum channelx, uint32_t int_flag)
-{
-    DMA_INTC |= DMA_FLAG_ADD(int_flag, channelx);
-}
-
-/*!
     \brief      enable DMA interrupt
     \param[in]  channelx: specify which DMA channel to set
                 only one parameter can be selected which is shown as below:
@@ -584,6 +543,68 @@ void dma_interrupt_enable(dma_channel_enum channelx, uint32_t source)
 void dma_interrupt_disable(dma_channel_enum channelx, uint32_t source)
 {
     DMA_CHCTL(channelx) &= ~source;
+}
+
+/*!
+    \brief      check DMA flag and interrupt enable bit is set or not
+    \param[in]  channelx: specify which DMA channel to get flag
+                only one parameter can be selected which is shown as below:
+      \arg        DMA_CHx(x=0..6)
+    \param[in]  int_flag: specify get which interrupt flag
+                only one parameter can be selected which is shown as below:
+      \arg        DMA_INT_FLAG_FTF: transfer finish flag of channel
+      \arg        DMA_INT_FLAG_HTF: half transfer finish flag of channel
+      \arg        DMA_INT_FLAG_ERR: error flag of channel
+    \param[out] none
+    \retval     FlagStatus: SET or RESET
+*/
+FlagStatus dma_interrupt_flag_get(dma_channel_enum channelx, uint32_t int_flag)
+{
+    FlagStatus ret;
+    uint32_t interrupt_enable = 0U, interrupt_flag = 0U;
+
+    switch(int_flag) {
+    case DMA_INT_FLAG_FTF:
+        interrupt_flag = DMA_INTF & DMA_FLAG_ADD(int_flag, channelx);
+        interrupt_enable = DMA_CHCTL(channelx) & DMA_CHXCTL_FTFIE;
+        break;
+    case DMA_INT_FLAG_HTF:
+        interrupt_flag = DMA_INTF & DMA_FLAG_ADD(int_flag, channelx);
+        interrupt_enable = DMA_CHCTL(channelx) & DMA_CHXCTL_HTFIE;
+        break;
+    case DMA_INT_FLAG_ERR:
+        interrupt_flag = DMA_INTF & DMA_FLAG_ADD(int_flag, channelx);
+        interrupt_enable = DMA_CHCTL(channelx) & DMA_CHXCTL_ERRIE;
+        break;
+    default:
+        break;
+    }
+
+    if(interrupt_flag && interrupt_enable) {
+        ret = SET;
+    } else {
+        ret = RESET;
+    }
+    return ret;
+}
+
+/*!
+    \brief      clear a DMA channel interrupt flag
+    \param[in]  channelx: specify which DMA channel to clear flag
+                only one parameter can be selected which is shown as below:
+      \arg        DMA_CHx(x=0..6)
+    \param[in]  int_flag: specify get which interrupt flag
+                only one parameter can be selected which is shown as below:
+      \arg        DMA_INT_FLAG_G: global interrupt flag of channel
+      \arg        DMA_INT_FLAG_FTF: transfer finish flag of channel
+      \arg        DMA_INT_FLAG_HTF: half transfer finish flag of channel
+      \arg        DMA_INT_FLAG_ERR: error flag of channel
+    \param[out] none
+    \retval     none
+*/
+void dma_interrupt_flag_clear(dma_channel_enum channelx, uint32_t int_flag)
+{
+    DMA_INTC |= DMA_FLAG_ADD(int_flag, channelx);
 }
 
 /*!
@@ -692,8 +713,8 @@ void dmamux_event_generation_disable(dmamux_multiplexer_channel_enum channelx)
 
 /*!
     \brief      initialize the parameters of DMAMUX request generator structure with the default values
-    \param[in]  init_struct: the initialization data needed to initialize DMAMUX request generator channel
-    \param[out] none
+    \param[in]  none
+    \param[out] init_struct: the initialization data needed to initialize DMAMUX request generator channel
     \retval     none
 */
 void dmamux_gen_struct_para_init(dmamux_gen_parameter_struct *init_struct)
@@ -751,7 +772,7 @@ void dmamux_request_generator_init(dmamux_generator_channel_enum channelx, dmamu
     \param[out] none
     \retval     none
 */
-void dmamux_request_generator_chennel_enable(dmamux_generator_channel_enum channelx)
+void dmamux_request_generator_channel_enable(dmamux_generator_channel_enum channelx)
 {
     DMAMUX_RG_CHXCFG(channelx) |= DMAMUX_RG_CHXCFG_RGEN;
 }
@@ -764,7 +785,7 @@ void dmamux_request_generator_chennel_enable(dmamux_generator_channel_enum chann
     \param[out] none
     \retval     none
 */
-void dmamux_request_generator_chennel_disable(dmamux_generator_channel_enum channelx)
+void dmamux_request_generator_channel_disable(dmamux_generator_channel_enum channelx)
 {
     DMAMUX_RG_CHXCFG(channelx) &= (~DMAMUX_RG_CHXCFG_RGEN);
 }
@@ -803,7 +824,7 @@ void dmamux_synchronization_polarity_config(dmamux_multiplexer_channel_enum chan
 void dmamux_request_forward_number_config(dmamux_multiplexer_channel_enum channelx, uint32_t number)
 {
     DMAMUX_RM_CHXCFG(channelx) &= ~DMAMUX_RM_CHXCFG_NBR;
-    DMAMUX_RM_CHXCFG(channelx) |= (number - 1U);
+    DMAMUX_RM_CHXCFG(channelx) |= RM_CHXCFG_NBR(number - 1U);
 }
 
 /*!
@@ -890,8 +911,28 @@ void dmamux_sync_id_config(dmamux_multiplexer_channel_enum channelx, uint32_t id
       \arg        DMA_REQUEST_UART3_TX: DMAMUX UART3 TX request
       \arg        DMA_REQUEST_UART4_RX: DMAMUX UART4 RX request
       \arg        DMA_REQUEST_UART4_TX: DMAMUX UART4 TX request
-      \arg        DMA_REQUEST_LPUART_RX: DMAMUX LPUART RX request
-      \arg        DMA_REQUEST_LPUART_TX: DMAMUX LPUART TX request
+      \arg        DMA_REQUEST_LPUART_RX: DMAMUX LPUART RX request, only for GD32L233
+      \arg        DMA_REQUEST_LPUART_TX: DMAMUX LPUART TX request, only for GD32L233
+      \arg        DMA_REQUEST_LPUART0_RX: DMAMUX LPUART0 RX request, only for GD32L235
+      \arg        DMA_REQUEST_LPUART0_TX: DMAMUX LPUART0 TX request, only for GD32L235
+      \arg        DMA_REQUEST_LPUART1_RX: DMAMUX LPUART1 RX request, only for GD32L235
+      \arg        DMA_REQUEST_LPUART1_TX: DMAMUX LPUART1 TX request, only for GD32L235
+      \arg        DMA_REQUEST_TIMER0_CH0: DMAMUX TIMER0 CH0 request, only for GD32L235
+      \arg        DMA_REQUEST_TIMER0_CH1: DMAMUX TIMER0 CH1 request, only for GD32L235
+      \arg        DMA_REQUEST_TIMER0_CH2: DMAMUX TIMER0 CH2 request, only for GD32L235
+      \arg        DMA_REQUEST_TIMER0_CH3: DMAMUX TIMER0 CH3 request, only for GD32L235
+      \arg        DMA_REQUEST_TIMER0_UP: DMAMUX TIMER0 UP request, only for GD32L235
+      \arg        DMA_REQUEST_TIMER0_COM: DMAMUX TIMER0 COM request, only for GD32L235
+      \arg        DMA_REQUEST_TIMER14_CH0: DMAMUX TIMER14 CH0 request, only for GD32L235
+      \arg        DMA_REQUEST_TIMER14_CH1: DMAMUX TIMER14 CH1 request, only for GD32L235
+      \arg        DMA_REQUEST_TIMER14_TRIG: DMAMUX TIMER14 TRIG request, only for GD32L235
+      \arg        DMA_REQUEST_TIMER14_UP: DMAMUX TIMER14 UP request, only for GD32L235
+      \arg        DMA_REQUEST_TIMER14_COM: DMAMUX TIMER14 COM request, only for GD32L235
+      \arg        DMA_REQUEST_TIMER40_CH0: DMAMUX TIMER40 CH0 request, only for GD32L235
+      \arg        DMA_REQUEST_TIMER40_CH1: DMAMUX TIMER40 CH1 request, only for GD32L235
+      \arg        DMA_REQUEST_TIMER40_TRIG: DMAMUX TIMER40 TRIG request, only for GD32L235
+      \arg        DMA_REQUEST_TIMER40_UP: DMAMUX TIMER40 UP request, only for GD32L235
+      \arg        DMA_REQUEST_TIMER40_COM: DMAMUX TIMER40 COM request, only for GD32L235
     \param[out] none
     \retval     none
 */
@@ -935,7 +976,7 @@ void dmamux_trigger_polarity_config(dmamux_generator_channel_enum channelx, uint
 void dmamux_request_generate_number_config(dmamux_generator_channel_enum channelx, uint32_t number)
 {
     DMAMUX_RG_CHXCFG(channelx) &= ~DMAMUX_RG_CHXCFG_NBRG;
-    DMAMUX_RG_CHXCFG(channelx) |= (number - 1U);
+    DMAMUX_RG_CHXCFG(channelx) |= RG_CHXCFG_NBRG(number - 1U);
 }
 
 /*!
@@ -1030,6 +1071,52 @@ void dmamux_flag_clear(dmamux_flag_enum flag)
 }
 
 /*!
+    \brief      enable DMAMUX interrupt
+    \param[in]  interrupt: specify which interrupt to enable
+                only one parameter can be selected which is shown as below:
+      \arg        DMAMUX_INT_MUXCH0_SO: DMAMUX request multiplexer channel 0 synchronization overrun interrupt
+      \arg        DMAMUX_INT_MUXCH1_SO: DMAMUX request multiplexer channel 1 synchronization overrun interrupt
+      \arg        DMAMUX_INT_MUXCH2_SO: DMAMUX request multiplexer channel 2 synchronization overrun interrupt
+      \arg        DMAMUX_INT_MUXCH3_SO: DMAMUX request multiplexer channel 3 synchronization overrun interrupt
+      \arg        DMAMUX_INT_MUXCH4_SO: DMAMUX request multiplexer channel 4 synchronization overrun interrupt
+      \arg        DMAMUX_INT_MUXCH5_SO: DMAMUX request multiplexer channel 5 synchronization overrun interrupt
+      \arg        DMAMUX_INT_MUXCH6_SO: DMAMUX request multiplexer channel 6 synchronization overrun interrupt
+      \arg        DMAMUX_INT_GENCH0_TO: DMAMUX request generator channel 0 trigger overrun interrupt
+      \arg        DMAMUX_INT_GENCH1_TO: DMAMUX request generator channel 1 trigger overrun interrupt
+      \arg        DMAMUX_INT_GENCH2_TO: DMAMUX request generator channel 2 trigger overrun interrupt
+      \arg        DMAMUX_INT_GENCH3_TO: DMAMUX request generator channel 3 trigger overrun interrupt
+    \param[out] none
+    \retval     none
+*/
+void dmamux_interrupt_enable(dmamux_interrupt_enum interrupt)
+{
+    DMAMUX_REG_VAL(interrupt) |= BIT(DMAMUX_BIT_POS(interrupt));
+}
+
+/*!
+    \brief      disable DMAMUX interrupt
+    \param[in]  interrupt: specify which interrupt to disable
+                only one parameter can be selected which is shown as below:
+      \arg        DMAMUX_INT_MUXCH0_SO: DMAMUX request multiplexer channel 0 synchronization overrun interrupt
+      \arg        DMAMUX_INT_MUXCH1_SO: DMAMUX request multiplexer channel 1 synchronization overrun interrupt
+      \arg        DMAMUX_INT_MUXCH2_SO: DMAMUX request multiplexer channel 2 synchronization overrun interrupt
+      \arg        DMAMUX_INT_MUXCH3_SO: DMAMUX request multiplexer channel 3 synchronization overrun interrupt
+      \arg        DMAMUX_INT_MUXCH4_SO: DMAMUX request multiplexer channel 4 synchronization overrun interrupt
+      \arg        DMAMUX_INT_MUXCH5_SO: DMAMUX request multiplexer channel 5 synchronization overrun interrupt
+      \arg        DMAMUX_INT_MUXCH6_SO: DMAMUX request multiplexer channel 6 synchronization overrun interrupt
+      \arg        DMAMUX_INT_GENCH0_TO: DMAMUX request generator channel 0 trigger overrun interrupt
+      \arg        DMAMUX_INT_GENCH1_TO: DMAMUX request generator channel 1 trigger overrun interrupt
+      \arg        DMAMUX_INT_GENCH2_TO: DMAMUX request generator channel 2 trigger overrun interrupt
+      \arg        DMAMUX_INT_GENCH3_TO: DMAMUX request generator channel 3 trigger overrun interrupt
+    \param[out] none
+    \retval     none
+*/
+void dmamux_interrupt_disable(dmamux_interrupt_enum interrupt)
+{
+    DMAMUX_REG_VAL(interrupt) &= ~BIT(DMAMUX_BIT_POS(interrupt));
+}
+
+/*!
     \brief      get DMAMUX interrupt flag
     \param[in]  int_flag: flag type
                 only one parameter can be selected which is shown as below:
@@ -1087,50 +1174,4 @@ FlagStatus dmamux_interrupt_flag_get(dmamux_interrupt_flag_enum int_flag)
 void dmamux_interrupt_flag_clear(dmamux_interrupt_flag_enum int_flag)
 {
     DMAMUX_REG_VAL3(int_flag) = BIT(DMAMUX_BIT_POS(int_flag));
-}
-
-/*!
-    \brief      enable DMAMUX interrupt
-    \param[in]  interrupt: specify which interrupt to enable
-                only one parameter can be selected which is shown as below:
-      \arg        DMAMUX_INT_MUXCH0_SO: DMAMUX request multiplexer channel 0 synchronization overrun interrupt
-      \arg        DMAMUX_INT_MUXCH1_SO: DMAMUX request multiplexer channel 1 synchronization overrun interrupt
-      \arg        DMAMUX_INT_MUXCH2_SO: DMAMUX request multiplexer channel 2 synchronization overrun interrupt
-      \arg        DMAMUX_INT_MUXCH3_SO: DMAMUX request multiplexer channel 3 synchronization overrun interrupt
-      \arg        DMAMUX_INT_MUXCH4_SO: DMAMUX request multiplexer channel 4 synchronization overrun interrupt
-      \arg        DMAMUX_INT_MUXCH5_SO: DMAMUX request multiplexer channel 5 synchronization overrun interrupt
-      \arg        DMAMUX_INT_MUXCH6_SO: DMAMUX request multiplexer channel 6 synchronization overrun interrupt
-      \arg        DMAMUX_INT_GENCH0_TO: DMAMUX request generator channel 0 trigger overrun interrupt
-      \arg        DMAMUX_INT_GENCH1_TO: DMAMUX request generator channel 1 trigger overrun interrupt
-      \arg        DMAMUX_INT_GENCH2_TO: DMAMUX request generator channel 2 trigger overrun interrupt
-      \arg        DMAMUX_INT_GENCH3_TO: DMAMUX request generator channel 3 trigger overrun interrupt
-    \param[out] none
-    \retval     none
-*/
-void dmamux_interrupt_enable(dmamux_interrupt_enum interrupt)
-{
-    DMAMUX_REG_VAL(interrupt) |= BIT(DMAMUX_BIT_POS(interrupt));
-}
-
-/*!
-    \brief      disable DMAMUX interrupt
-    \param[in]  interrupt: specify which interrupt to disable
-                only one parameter can be selected which is shown as below:
-      \arg        DMAMUX_INT_MUXCH0_SO: DMAMUX request multiplexer channel 0 synchronization overrun interrupt
-      \arg        DMAMUX_INT_MUXCH1_SO: DMAMUX request multiplexer channel 1 synchronization overrun interrupt
-      \arg        DMAMUX_INT_MUXCH2_SO: DMAMUX request multiplexer channel 2 synchronization overrun interrupt
-      \arg        DMAMUX_INT_MUXCH3_SO: DMAMUX request multiplexer channel 3 synchronization overrun interrupt
-      \arg        DMAMUX_INT_MUXCH4_SO: DMAMUX request multiplexer channel 4 synchronization overrun interrupt
-      \arg        DMAMUX_INT_MUXCH5_SO: DMAMUX request multiplexer channel 5 synchronization overrun interrupt
-      \arg        DMAMUX_INT_MUXCH6_SO: DMAMUX request multiplexer channel 6 synchronization overrun interrupt
-      \arg        DMAMUX_INT_GENCH0_TO: DMAMUX request generator channel 0 trigger overrun interrupt
-      \arg        DMAMUX_INT_GENCH1_TO: DMAMUX request generator channel 1 trigger overrun interrupt
-      \arg        DMAMUX_INT_GENCH2_TO: DMAMUX request generator channel 2 trigger overrun interrupt
-      \arg        DMAMUX_INT_GENCH3_TO: DMAMUX request generator channel 3 trigger overrun interrupt
-    \param[out] none
-    \retval     none
-*/
-void dmamux_interrupt_disable(dmamux_interrupt_enum interrupt)
-{
-    DMAMUX_REG_VAL(interrupt) &= ~BIT(DMAMUX_BIT_POS(interrupt));
 }

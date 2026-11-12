@@ -2,12 +2,11 @@
     \file    gd32l23x_cau_aes.c
     \brief   CAU AES driver
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
-    \version 2021-08-12, V1.0.1, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -90,23 +89,34 @@ ErrStatus cau_aes_ecb(cau_parameter_struct *cau_parameter, uint8_t *output)
             counter++;
         } while((AESBSY_TIMEOUT != counter) && (RESET != busystatus));
 
-        if(RESET != busystatus) {
-            return ERROR;
+        if(RESET == busystatus) {
+            /* initialize the CAU peripheral */
+            cau_init(cau_parameter->alg_dir, CAU_MODE_AES_ECB, CAU_SWAPPING_8BIT);
+
+            /* flush the IN and OUT FIFOs */
+            cau_fifo_flush();
+
+            /* enable the CAU peripheral */
+            cau_enable();
+            /* AES calculate process */
+            ret = cau_aes_calculate(cau_parameter->input, cau_parameter->in_length, output);
+            /* disable the CAU peripheral */
+            cau_disable();
         }
+    } else {
+        /* initialize the CAU peripheral */
+        cau_init(cau_parameter->alg_dir, CAU_MODE_AES_ECB, CAU_SWAPPING_8BIT);
+
+        /* flush the IN and OUT FIFOs */
+        cau_fifo_flush();
+
+        /* enable the CAU peripheral */
+        cau_enable();
+        /* AES calculate process */
+        ret = cau_aes_calculate(cau_parameter->input, cau_parameter->in_length, output);
+        /* disable the CAU peripheral */
+        cau_disable();
     }
-
-    /* initialize the CAU peripheral */
-    cau_init(cau_parameter->alg_dir, CAU_MODE_AES_ECB, CAU_SWAPPING_8BIT);
-
-    /* flush the IN and OUT FIFOs */
-    cau_fifo_flush();
-
-    /* enable the CAU peripheral */
-    cau_enable();
-    /* AES calculate process */
-    ret = cau_aes_calculate(cau_parameter->input, cau_parameter->in_length, output);
-    /* disable the CAU peripheral */
-    cau_disable();
 
     return ret;
 }
@@ -156,34 +166,32 @@ ErrStatus cau_aes_cbc(cau_parameter_struct *cau_parameter, uint8_t *output)
             busystatus = cau_flag_get(CAU_FLAG_BUSY);
             counter++;
         } while((AESBSY_TIMEOUT != counter) && (RESET != busystatus));
-
-        if(RESET != busystatus) {
-            return ERROR;
-        }
     }
 
-    /* initialize the CAU peripheral */
-    cau_init(cau_parameter->alg_dir, CAU_MODE_AES_CBC, CAU_SWAPPING_8BIT);
+    if(RESET == busystatus) {
+        /* initialize the CAU peripheral */
+        cau_init(cau_parameter->alg_dir, CAU_MODE_AES_CBC, CAU_SWAPPING_8BIT);
 
-    /* vectors initialization */
-    iv_initpara.iv_0_high = __REV(*(uint32_t *)(ivaddr));
-    ivaddr += 4U;
-    iv_initpara.iv_0_low = __REV(*(uint32_t *)(ivaddr));
-    ivaddr += 4U;
-    iv_initpara.iv_1_high = __REV(*(uint32_t *)(ivaddr));
-    ivaddr += 4U;
-    iv_initpara.iv_1_low = __REV(*(uint32_t *)(ivaddr));
-    cau_iv_init(&iv_initpara);
+        /* vectors initialization */
+        iv_initpara.iv_0_high = __REV(*(uint32_t *)(ivaddr));
+        ivaddr += 4U;
+        iv_initpara.iv_0_low = __REV(*(uint32_t *)(ivaddr));
+        ivaddr += 4U;
+        iv_initpara.iv_1_high = __REV(*(uint32_t *)(ivaddr));
+        ivaddr += 4U;
+        iv_initpara.iv_1_low = __REV(*(uint32_t *)(ivaddr));
+        cau_iv_init(&iv_initpara);
 
-    /* flush the IN and OUT FIFOs */
-    cau_fifo_flush();
+        /* flush the IN and OUT FIFOs */
+        cau_fifo_flush();
 
-    /* enable the CAU peripheral */
-    cau_enable();
-    /* AES calculate process */
-    ret = cau_aes_calculate(cau_parameter->input, cau_parameter->in_length, output);
-    /* disable the CAU peripheral */
-    cau_disable();
+        /* enable the CAU peripheral */
+        cau_enable();
+        /* AES calculate process */
+        ret = cau_aes_calculate(cau_parameter->input, cau_parameter->in_length, output);
+        /* disable the CAU peripheral */
+        cau_disable();
+    }
 
     return ret;
 }
@@ -410,14 +418,10 @@ ErrStatus cau_aes_gcm(cau_parameter_struct *cau_parameter, uint8_t *output, uint
         cau_enable();
 
         ret = cau_fill_data(cau_parameter->aad, cau_parameter->aad_size);
-
-        if(ERROR == ret) {
-            return ret;
-        }
     }
 
     /* encrypt or dcrypt phase */
-    if((uint32_t)0U != cau_parameter->in_length) {
+    if((SUCCESS == ret) && ((uint32_t)0U != cau_parameter->in_length)) {
         /* select encrypt or dcrypt phase */
         cau_phase_config(CAU_ENCRYPT_DECRYPT_PHASE);
         /* flush the IN and OUT FIFOs */
@@ -427,45 +431,43 @@ ErrStatus cau_aes_gcm(cau_parameter_struct *cau_parameter, uint8_t *output, uint
 
         /* AES calculate process */
         ret = cau_aes_calculate(cau_parameter->input, cau_parameter->in_length, output);
-
-        if(ERROR == ret) {
-            return ret;
-        }
     }
 
     /* tag phase */
-    /* select tag phase */
-    cau_phase_config(CAU_TAG_PHASE);
-    /* flush the IN and OUT FIFOs */
-    cau_fifo_flush();
-    /* enable the CAU peripheral */
-    cau_enable();
+    if(SUCCESS == ret) {
+        /* select tag phase */
+        cau_phase_config(CAU_TAG_PHASE);
+        /* flush the IN and OUT FIFOs */
+        cau_fifo_flush();
+        /* enable the CAU peripheral */
+        cau_enable();
 
-    if(DISABLE == cau_enable_state_get()) {
-        return ERROR;
+        if(DISABLE == cau_enable_state_get()) {
+            ret = ERROR;
+        } else {
+            cau_data_write(__REV((uint32_t)(aadlength >> 32U)));
+            cau_data_write(__REV((uint32_t)aadlength));
+            cau_data_write(__REV((uint32_t)(inputlength >> 32U)));
+            cau_data_write(__REV((uint32_t)inputlength));
+
+            /* wait until the ONE flag is set */
+            while(RESET == cau_flag_get(CAU_FLAG_OUTFIFO_NO_EMPTY)) {
+            }
+
+            /* read the tag in the OUT FIFO */
+            *(uint32_t *)(tagaddr) = cau_data_read();
+            tagaddr += 4U;
+            *(uint32_t *)(tagaddr) = cau_data_read();
+            tagaddr += 4U;
+            *(uint32_t *)(tagaddr) = cau_data_read();
+            tagaddr += 4U;
+            *(uint32_t *)(tagaddr) = cau_data_read();
+            tagaddr += 4U;
+
+            /* disable the CAU peripheral */
+            cau_disable();
+        }
     }
-
-    cau_data_write(__REV((uint32_t)(aadlength >> 32U)));
-    cau_data_write(__REV((uint32_t)aadlength));
-    cau_data_write(__REV((uint32_t)(inputlength >> 32U)));
-    cau_data_write(__REV((uint32_t)inputlength));
-
-    /* wait until the ONE flag is set */
-    while(RESET == cau_flag_get(CAU_FLAG_OUTFIFO_NO_EMPTY)) {
-    }
-
-    /* read the tag in the OUT FIFO */
-    *(uint32_t *)(tagaddr) = cau_data_read();
-    tagaddr += 4U;
-    *(uint32_t *)(tagaddr) = cau_data_read();
-    tagaddr += 4U;
-    *(uint32_t *)(tagaddr) = cau_data_read();
-    tagaddr += 4U;
-    *(uint32_t *)(tagaddr) = cau_data_read();
-    tagaddr += 4U;
-
-    /* disable the CAU peripheral */
-    cau_disable();
 
     return ret;
 }
@@ -483,7 +485,7 @@ ErrStatus cau_aes_gcm(cau_parameter_struct *cau_parameter, uint8_t *output, uint
                   in_length: input data length in bytes
                   aad: additional authentication data
                   aad_size: aad size
-    \param[in]  mac_size: mac size (in bytes)
+    \param[in] tag_size: tag size
     \param[out] output: pointer to the returned output data buffer
     \param[out] tag: pointer to the returned tag buffer
     \param[out] aad_buf: pointer to the user buffer used when formatting aad block
@@ -551,155 +553,149 @@ ErrStatus cau_aes_ccm(cau_parameter_struct *cau_parameter, uint8_t *output, uint
     /* flags byte */
     blockb0[0] |= (0U | (((((uint8_t) tag_size - 2U) / 2U) & 0x07U) << 3U) | (((uint8_t)(15U - ivsize) - 1U) & 0x07U));
 
-    if(ivsize > MAX_CCM_IV_SIZE) {
-        return ERROR;
-    }
-
-    for(i = 0U; i < ivsize; i++) {
-        blockb0[i + 1U] = *(uint8_t *)((uint32_t)(ivaddr + i));
-    }
-
-    /* the byte length for payload length expressing, which plus the ivsize must equal to 15 bytes */
-    plen = 15U - ivsize;
-    /* if the byte length for payload length expressing is more than 4 bytes */
-    if(plen > 4U) {
-        /* pad the blockb0 after vectors, and before the last 4 bytes */
-        for(; i < 11U; i++) {
-            blockb0[i + 1U] = 0U;
+    if(ivsize <= MAX_CCM_IV_SIZE) {
+        for(i = 0U; i < ivsize; i++) {
+            blockb0[i + 1U] = *(uint8_t *)((uint32_t)(ivaddr + i));
         }
-        blockb0[12U] = (uint8_t)((inputsize >> 24U) & 0xFFU);
-        blockb0[13U] = (uint8_t)((inputsize >> 16U) & 0xFFU);
-        blockb0[14U] = (uint8_t)((inputsize >> 8U) & 0xFFU);
-        blockb0[15U] = (uint8_t)(inputsize & 0xFFU);
-    } else {
-        /* the payload length is expressed in plen bytes */
-        for(; i < 15U; i++) {
-            blockb0[i + 1U] = (uint8_t)((inputsize >> ((plen - 1U) * 8U)) & 0xFFU);
-            plen--;
+
+        /* the byte length for payload length expressing, which plus the ivsize must equal to 15 bytes */
+        plen = 15U - ivsize;
+        /* if the byte length for payload length expressing is more than 4 bytes */
+        if(plen > 4U) {
+            /* pad the blockb0 after vectors, and before the last 4 bytes */
+            for(; i < 11U; i++) {
+                blockb0[i + 1U] = 0U;
+            }
+            blockb0[12U] = (uint8_t)((inputsize >> 24U) & 0xFFU);
+            blockb0[13U] = (uint8_t)((inputsize >> 16U) & 0xFFU);
+            blockb0[14U] = (uint8_t)((inputsize >> 8U) & 0xFFU);
+            blockb0[15U] = (uint8_t)(inputsize & 0xFFU);
+        } else {
+            /* the payload length is expressed in plen bytes */
+            for(; i < 15U; i++) {
+                blockb0[i + 1U] = (uint8_t)((inputsize >> ((plen - 1U) * 8U)) & 0xFFU);
+                plen--;
+            }
         }
-    }
 
-    /* formatting the initial counter */
-    /* byte 0: bits 0-2 contain the same encoding of q as in B0 */
-    counter[0] = blockb0[0] & BLOCK_B0_MASK;
-    for(i = 1U; i < ivsize + 1U; i++) {
-        counter[i] = blockb0[i];
-    }
-    /* set the LSB to 1 */
-    counter[15] |= 0x01U;
+        /* formatting the initial counter */
+        /* byte 0: bits 0-2 contain the same encoding of q as in B0 */
+        counter[0] = blockb0[0] & BLOCK_B0_MASK;
+        for(i = 1U; i < ivsize + 1U; i++) {
+            counter[i] = blockb0[i];
+        }
+        /* set the LSB to 1 */
+        counter[15] |= 0x01U;
 
-    /* init phase */
-    /* flush the IN and OUT FIFOs */
-    cau_fifo_flush();
-    /* clear CAUEN bit to ensure CAU is disable */
-    cau_disable();
+        /* prepare phase */
+        /* flush the IN and OUT FIFOs */
+        cau_fifo_flush();
+        /* clear CAUEN bit to ensure CAU is disable */
+        cau_disable();
 
-    /* key structure initialization */
-    cau_key_struct_para_init(&key_initpara);
-    /* initialize the CAU peripheral */
-    cau_init(cau_parameter->alg_dir, CAU_MODE_AES_CCM, CAU_SWAPPING_8BIT);
-    /* select init phase */
-    cau_phase_config(CAU_PREPARE_PHASE);
+        /* key structure initialization */
+        cau_key_struct_para_init(&key_initpara);
+        /* initialize the CAU peripheral */
+        cau_init(cau_parameter->alg_dir, CAU_MODE_AES_CCM, CAU_SWAPPING_8BIT);
+        /* select prepare phase */
+        cau_phase_config(CAU_PREPARE_PHASE);
 
-    /* AES key structure parameter config */
-    cau_aes_key_config(cau_parameter->key, cau_parameter->key_size, &key_initpara);
-    /* key initialization */
-    cau_key_init(&key_initpara);
+        /* AES key structure parameter config */
+        cau_aes_key_config(cau_parameter->key, cau_parameter->key_size, &key_initpara);
+        /* key initialization */
+        cau_key_init(&key_initpara);
 
-    /* vectors initialization */
-    iv_initpara.iv_0_high = __REV(*(uint32_t *)(ctraddr));
-    ctraddr += 4U;
-    iv_initpara.iv_0_low = __REV(*(uint32_t *)(ctraddr));
-    ctraddr += 4U;
-    iv_initpara.iv_1_high = __REV(*(uint32_t *)(ctraddr));
-    ctraddr += 4U;
-    iv_initpara.iv_1_low = __REV(*(uint32_t *)(ctraddr));
-    cau_iv_init(&iv_initpara);
+        /* vectors initialization */
+        iv_initpara.iv_0_high = __REV(*(uint32_t *)(ctraddr));
+        ctraddr += 4U;
+        iv_initpara.iv_0_low = __REV(*(uint32_t *)(ctraddr));
+        ctraddr += 4U;
+        iv_initpara.iv_1_high = __REV(*(uint32_t *)(ctraddr));
+        ctraddr += 4U;
+        iv_initpara.iv_1_low = __REV(*(uint32_t *)(ctraddr));
+        cau_iv_init(&iv_initpara);
 
-    /* enable the CAU peripheral */
-    cau_enable();
-
-    /* write block B0 in the In FIFO */
-    cau_data_write(*(uint32_t *)(b0addr));
-    b0addr += 4U;
-    cau_data_write(*(uint32_t *)(b0addr));
-    b0addr += 4U;
-    cau_data_write(*(uint32_t *)(b0addr));
-    b0addr += 4U;
-    cau_data_write(*(uint32_t *)(b0addr));
-
-    /* wait for CAUEN bit to be 0 */
-    while(ENABLE == cau_enable_state_get()) {
-    }
-
-    /* aad phase */
-    if((uint32_t)0U != aadsize) {
-        /* select aad phase */
-        cau_phase_config(CAU_AAD_PHASE);
         /* enable the CAU peripheral */
         cau_enable();
 
-        ret = cau_fill_data((uint8_t *)aadaddr, aad_block_size);
+        /* write block B0 in the In FIFO */
+        cau_data_write(*(uint32_t *)(b0addr));
+        b0addr += 4U;
+        cau_data_write(*(uint32_t *)(b0addr));
+        b0addr += 4U;
+        cau_data_write(*(uint32_t *)(b0addr));
+        b0addr += 4U;
+        cau_data_write(*(uint32_t *)(b0addr));
 
-        if(ERROR == ret) {
-            return ret;
+        /* wait for CAUEN bit to be 0 */
+        while(ENABLE == cau_enable_state_get()) {
         }
-    }
 
-    /* encrypt or dcrypt phase */
-    inputsize = cau_parameter->in_length;
+        /* aad phase */
+        if((uint32_t)0U != aadsize) {
+            /* select aad phase */
+            cau_phase_config(CAU_AAD_PHASE);
+            /* enable the CAU peripheral */
+            cau_enable();
 
-    if((uint32_t)0U != inputsize) {
-        /* select encrypt or dcrypt phase */
-        cau_phase_config(CAU_ENCRYPT_DECRYPT_PHASE);
-        /* enable the CAU peripheral */
-        cau_enable();
-
-        /* AES calculate process */
-        ret = cau_aes_calculate((uint8_t *)inputaddr, inputsize, (uint8_t *)outputaddr);
-
-        if(ERROR == ret) {
-            return ret;
+            ret = cau_fill_data((uint8_t *)aadaddr, aad_block_size);
         }
-    }
 
-    /* tag phase */
-    /* select final phase */
-    cau_phase_config(CAU_TAG_PHASE);
-    /* enable the CAU peripheral */
-    cau_enable();
+        /* encrypt or dcrypt phase */
+        if(ERROR != ret) {
+            inputsize = cau_parameter->in_length;
 
-    if(DISABLE == cau_enable_state_get()) {
-        return ERROR;
-    }
+            if((uint32_t)0U != inputsize) {
+                /* select encrypt or dcrypt phase */
+                cau_phase_config(CAU_ENCRYPT_DECRYPT_PHASE);
+                /* enable the CAU peripheral */
+                cau_enable();
 
-    ctraddr = (uint32_t)counter;
+                /* AES calculate process */
+                ret = cau_aes_calculate((uint8_t *)inputaddr, inputsize, (uint8_t *)outputaddr);
+            }
+        }
 
-    cau_data_write(*(uint32_t *)(ctraddr));
-    ctraddr += 4U;
-    cau_data_write(*(uint32_t *)(ctraddr));
-    ctraddr += 4U;
-    cau_data_write(*(uint32_t *)(ctraddr));
-    ctraddr += 4U;
-    /* reset bit 0 (after 8-bit swap) is equivalent to reset bit 24 (before 8-bit swap) */
-    cau_data_write(*(uint32_t *)(ctraddr) & 0xFEFFFFFFU);
+        /* tag phase */
+        if(ERROR != ret) {
+            /* select final phase */
+            cau_phase_config(CAU_TAG_PHASE);
+            /* enable the CAU peripheral */
+            cau_enable();
 
-    /* wait until the ONE flag is set */
-    while(RESET == cau_flag_get(CAU_FLAG_OUTFIFO_NO_EMPTY)) {
-    }
+            if(DISABLE == cau_enable_state_get()) {
+                ret = ERROR;
+            } else {
+                ctraddr = (uint32_t)counter;
 
-    /* read the tag in the OUT FIFO */
-    temp_tag[0] = cau_data_read();
-    temp_tag[1] = cau_data_read();
-    temp_tag[2] = cau_data_read();
-    temp_tag[3] = cau_data_read();
+                cau_data_write(*(uint32_t *)(ctraddr));
+                ctraddr += 4U;
+                cau_data_write(*(uint32_t *)(ctraddr));
+                ctraddr += 4U;
+                cau_data_write(*(uint32_t *)(ctraddr));
+                ctraddr += 4U;
+                /* reset bit 0 (after 8-bit swap) is equivalent to reset bit 24 (before 8-bit swap) */
+                cau_data_write(*(uint32_t *)(ctraddr) & 0xFEFFFFFFU);
 
-    /* disable the CAU peripheral */
-    cau_disable();
+                /* wait until the ONE flag is set */
+                while(RESET == cau_flag_get(CAU_FLAG_OUTFIFO_NO_EMPTY)) {
+                }
 
-    /* Copy temporary authentication TAG in user TAG buffer */
-    for(i = 0U; i < tag_size; i++) {
-        tag[i] = (uint8_t)(temp_tag[i / 4U] >> (8U * (i % 4U)));
+                /* read the tag in the OUT FIFO */
+                temp_tag[0] = cau_data_read();
+                temp_tag[1] = cau_data_read();
+                temp_tag[2] = cau_data_read();
+                temp_tag[3] = cau_data_read();
+
+                /* disable the CAU peripheral */
+                cau_disable();
+
+                /* Copy temporary authentication TAG in user TAG buffer */
+                for(i = 0U; i < tag_size; i++) {
+                    tag[i] = (uint8_t)(temp_tag[i / 4U] >> (8U * (i % 4U)));
+                }
+            }
+        }
     }
 
     return ret;
@@ -783,57 +779,60 @@ static ErrStatus cau_fill_data(uint8_t *input, uint32_t in_length)
     uint32_t i = 0U;
     __IO uint32_t counter = 0U;
     uint32_t busystatus = 0U;
+    ErrStatus ret = ERROR;
 
     if(DISABLE == cau_enable_state_get()) {
-        return ERROR;
-    }
+        ret = ERROR;
+    } else {
+        for(i = 0U; i < in_length; i += BLOCK_DATA_SIZE) {
+            /* wait until the IEM flag is set */
+            while(RESET == cau_flag_get(CAU_FLAG_INFIFO_EMPTY)) {
+            }
 
-    for(i = 0U; i < in_length; i += BLOCK_DATA_SIZE) {
-        /* wait until the IEM flag is set */
-        while(RESET == cau_flag_get(CAU_FLAG_INFIFO_EMPTY)) {
-        }
+            if(i + BLOCK_DATA_SIZE > in_length) {
+                /* the last block data number is less than 128bit */
+                uint32_t block_data_temp[4] = {0U};
 
-        if(i + BLOCK_DATA_SIZE > in_length) {
-            /* the last block data number is less than 128bit */
-            uint32_t block_data_temp[4] = {0U};
+                /* fill the remaining bits with zero */
+                memcpy(block_data_temp, (uint32_t *)inputaddr, in_length - i);
+                inputaddr = (uint32_t)block_data_temp;
 
-            /* fill the remaining bits with zero */
-            memcpy(block_data_temp, (uint32_t *)inputaddr, in_length - i);
-            inputaddr = (uint32_t)block_data_temp;
-
-            /* if GCM encryption or CCM decryption, then configurate NBPILB bits in CTL register */
-            if((CAU_CTL & CAU_CTL_GCM_CCMPH) == CAU_ENCRYPT_DECRYPT_PHASE) {
-                if((CAU_CTL & (CAU_CTL_ALGM | CAU_CTL_CAUDIR)) == (CAU_MODE_AES_GCM | CAU_ENCRYPT)) {
-                    CAU_CTL |= CAU_PADDING_BYTES(i + BLOCK_DATA_SIZE - in_length);
-                } else if((CAU_CTL & (CAU_CTL_ALGM | CAU_CTL_CAUDIR)) == (CAU_MODE_AES_CCM | CAU_DECRYPT)) {
-                    CAU_CTL |= CAU_PADDING_BYTES(i + BLOCK_DATA_SIZE - in_length);
-                } else {
+                /* if GCM encryption or CCM decryption, then configurate NBPILB bits in CTL register */
+                if((CAU_CTL & CAU_CTL_GCM_CCMPH) == CAU_ENCRYPT_DECRYPT_PHASE) {
+                    if((CAU_CTL & (CAU_CTL_ALGM | CAU_CTL_CAUDIR)) == (CAU_MODE_AES_GCM | CAU_ENCRYPT)) {
+                        CAU_CTL |= CAU_PADDING_BYTES(i + BLOCK_DATA_SIZE - in_length);
+                    } else if((CAU_CTL & (CAU_CTL_ALGM | CAU_CTL_CAUDIR)) == (CAU_MODE_AES_CCM | CAU_DECRYPT)) {
+                        CAU_CTL |= CAU_PADDING_BYTES(i + BLOCK_DATA_SIZE - in_length);
+                    } else {
+                    }
                 }
             }
+
+            /* write data to the IN FIFO */
+            cau_data_write(*(uint32_t *)(inputaddr));
+            inputaddr += 4U;
+            cau_data_write(*(uint32_t *)(inputaddr));
+            inputaddr += 4U;
+            cau_data_write(*(uint32_t *)(inputaddr));
+            inputaddr += 4U;
+            cau_data_write(*(uint32_t *)(inputaddr));
+            inputaddr += 4U;
         }
+        /* wait until the complete message has been processed */
+        counter = 0U;
+        do {
+            busystatus = cau_flag_get(CAU_FLAG_BUSY);
+            counter++;
+        } while((AESBSY_TIMEOUT != counter) && (RESET != busystatus));
 
-        /* write data to the IN FIFO */
-        cau_data_write(*(uint32_t *)(inputaddr));
-        inputaddr += 4U;
-        cau_data_write(*(uint32_t *)(inputaddr));
-        inputaddr += 4U;
-        cau_data_write(*(uint32_t *)(inputaddr));
-        inputaddr += 4U;
-        cau_data_write(*(uint32_t *)(inputaddr));
-        inputaddr += 4U;
-    }
-    /* wait until the complete message has been processed */
-    counter = 0U;
-    do {
-        busystatus = cau_flag_get(CAU_FLAG_BUSY);
-        counter++;
-    } while((AESBSY_TIMEOUT != counter) && (RESET != busystatus));
-
-    if(RESET != busystatus) {
-        return ERROR;
+        if(RESET != busystatus) {
+            ret = ERROR;
+        } else {
+            ret = SUCCESS;
+        }
     }
 
-    return SUCCESS;
+    return ret;
 }
 
 /*!
@@ -850,66 +849,68 @@ static ErrStatus cau_aes_calculate(uint8_t *input, uint32_t in_length, uint8_t *
     uint32_t i = 0U;
     __IO uint32_t counter = 0U;
     uint32_t busystatus = 0U;
+    ErrStatus ret = SUCCESS;
 
     /* the clock is not enabled or there is no embeded CAU peripheral */
     if(DISABLE == cau_enable_state_get()) {
-        return ERROR;
-    }
+        ret = ERROR;
+    } else {
+        for(i = 0U; i < in_length; i += BLOCK_DATA_SIZE) {
+            /* wait until the IEM flag is set */
+            while(RESET == cau_flag_get(CAU_FLAG_INFIFO_EMPTY)) {
+            }
 
-    for(i = 0U; i < in_length; i += BLOCK_DATA_SIZE) {
-        /* wait until the IEM flag is set */
-        while(RESET == cau_flag_get(CAU_FLAG_INFIFO_EMPTY)) {
-        }
+            /* check if the last input data block */
+            if(i + BLOCK_DATA_SIZE > in_length) {
+                /* the last block data number is less than 128bit */
+                uint32_t block_data_temp[4] = {0};
 
-        /* check if the last input data block */
-        if(i + BLOCK_DATA_SIZE > in_length) {
-            /* the last block data number is less than 128bit */
-            uint32_t block_data_temp[4] = {0};
+                /* fill the remaining bits with zero */
+                memcpy(block_data_temp, (uint32_t *)inputaddr, in_length - i);
+                inputaddr = (uint32_t)block_data_temp;
 
-            /* fill the remaining bits with zero */
-            memcpy(block_data_temp, (uint32_t *)inputaddr, in_length - i);
-            inputaddr = (uint32_t)block_data_temp;
+                /* if GCM encryption or CCM decryption, then configurate NBPILB bits in CTL register */
+                if((CAU_CTL & (CAU_CTL_ALGM | CAU_CTL_CAUDIR)) == (CAU_MODE_AES_GCM | CAU_ENCRYPT)) {
+                    CAU_CTL |= CAU_PADDING_BYTES(i + BLOCK_DATA_SIZE - in_length);
+                } else if((CAU_CTL & (CAU_CTL_ALGM | CAU_CTL_CAUDIR)) == (CAU_MODE_AES_CCM | CAU_DECRYPT)) {
+                    CAU_CTL |= CAU_PADDING_BYTES(i + BLOCK_DATA_SIZE - in_length);
+                } else {
+                }
+            }
 
-            /* if GCM encryption or CCM decryption, then configurate NBPILB bits in CTL register */
-            if((CAU_CTL & (CAU_CTL_ALGM | CAU_CTL_CAUDIR)) == (CAU_MODE_AES_GCM | CAU_ENCRYPT)) {
-                CAU_CTL |= CAU_PADDING_BYTES(i + BLOCK_DATA_SIZE - in_length);
-            } else if((CAU_CTL & (CAU_CTL_ALGM | CAU_CTL_CAUDIR)) == (CAU_MODE_AES_CCM | CAU_DECRYPT)) {
-                CAU_CTL |= CAU_PADDING_BYTES(i + BLOCK_DATA_SIZE - in_length);
+            /* write data to the IN FIFO */
+            cau_data_write(*(uint32_t *)(inputaddr));
+            inputaddr += 4U;
+            cau_data_write(*(uint32_t *)(inputaddr));
+            inputaddr += 4U;
+            cau_data_write(*(uint32_t *)(inputaddr));
+            inputaddr += 4U;
+            cau_data_write(*(uint32_t *)(inputaddr));
+            inputaddr += 4U;
+
+            /* wait until the complete message has been processed */
+            counter = 0U;
+            do {
+                busystatus = cau_flag_get(CAU_FLAG_BUSY);
+                counter++;
+            } while((AESBSY_TIMEOUT != counter) && (RESET != busystatus));
+
+            if(RESET != busystatus) {
+                ret = ERROR;
+                break;
             } else {
+                /* read the output block from the output FIFO */
+                *(uint32_t *)(outputaddr) = cau_data_read();
+                outputaddr += 4U;
+                *(uint32_t *)(outputaddr) = cau_data_read();
+                outputaddr += 4U;
+                *(uint32_t *)(outputaddr) = cau_data_read();
+                outputaddr += 4U;
+                *(uint32_t *)(outputaddr) = cau_data_read();
+                outputaddr += 4U;
             }
         }
-
-        /* write data to the IN FIFO */
-        cau_data_write(*(uint32_t *)(inputaddr));
-        inputaddr += 4U;
-        cau_data_write(*(uint32_t *)(inputaddr));
-        inputaddr += 4U;
-        cau_data_write(*(uint32_t *)(inputaddr));
-        inputaddr += 4U;
-        cau_data_write(*(uint32_t *)(inputaddr));
-        inputaddr += 4U;
-
-        /* wait until the complete message has been processed */
-        counter = 0U;
-        do {
-            busystatus = cau_flag_get(CAU_FLAG_BUSY);
-            counter++;
-        } while((AESBSY_TIMEOUT != counter) && (RESET != busystatus));
-
-        if(RESET != busystatus) {
-            return ERROR;
-        } else {
-            /* read the output block from the output FIFO */
-            *(uint32_t *)(outputaddr) = cau_data_read();
-            outputaddr += 4U;
-            *(uint32_t *)(outputaddr) = cau_data_read();
-            outputaddr += 4U;
-            *(uint32_t *)(outputaddr) = cau_data_read();
-            outputaddr += 4U;
-            *(uint32_t *)(outputaddr) = cau_data_read();
-            outputaddr += 4U;
-        }
     }
 
-    return SUCCESS;
+    return ret;
 }

@@ -2,11 +2,11 @@
     \file    gd32l23x_trng.h
     \brief   definitions for the TRNG
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -48,7 +48,7 @@ OF SUCH DAMAGE.
 /* bits definitions */
 /* TRNG_CTL */
 #define TRNG_CTL_TRNGEN             BIT(2)                           /*!< TRNG enable bit */
-#define TRNG_CTL_IE                 BIT(3)                           /*!< interrupt enable bit */
+#define TRNG_CTL_TRNGIE             BIT(3)                           /*!< interrupt enable bit */
 
 /* TRNG_STAT */
 #define TRNG_STAT_DRDY              BIT(0)                           /*!< random data ready status bit */
@@ -58,12 +58,12 @@ OF SUCH DAMAGE.
 #define TRNG_STAT_SEIF              BIT(6)                           /*!< seed error interrupt flag */
 
 /* TRNG_DATA */
-#define TRNG_DATA_TRNDATA           BITS(0,31)                       /*!< 32-Bit Random data */
+#define TRNG_DATA_TRNGDATA          BITS(0,31)                       /*!< 32-bit random data */
 
 /* constants definitions */
 /* trng status flag */
 typedef enum {
-    TRNG_FLAG_DRDY = TRNG_STAT_DRDY,                                 /*!< random Data ready status */
+    TRNG_FLAG_DRDY = TRNG_STAT_DRDY,                                 /*!< random data ready status */
     TRNG_FLAG_CECS = TRNG_STAT_CECS,                                 /*!< clock error current status */
     TRNG_FLAG_SECS = TRNG_STAT_SECS                                  /*!< seed error current status */
 } trng_flag_enum;
@@ -84,17 +84,17 @@ void trng_enable(void);
 void trng_disable(void);
 /* get the true random data */
 uint32_t trng_get_true_random_data(void);
-/* get the trng status flags */
-FlagStatus trng_flag_get(trng_flag_enum flag);
 
 /* flag & interrupt functions */
-/* trng interrupt enable */
+/* get the TRNG status flags */
+FlagStatus trng_flag_get(trng_flag_enum flag);
+/*enable TRNG interrupt */
 void trng_interrupt_enable(void);
-/* trng interrupt disable */
+/* disable TRNG interrupt */
 void trng_interrupt_disable(void);
-/* get the trng interrupt flags */
+/* get the TRNG interrupt flags */
 FlagStatus trng_interrupt_flag_get(trng_int_flag_enum int_flag);
-/* clear the trng interrupt flags */
+/* clear the TRNG interrupt flags */
 void trng_interrupt_flag_clear(trng_int_flag_enum int_flag);
 
 #endif /* GD32L23X_TRNG_H */

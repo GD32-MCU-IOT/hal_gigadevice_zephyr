@@ -2,11 +2,11 @@
     \file    gd32l23x_rcu.c
     \brief   RCU driver
 
-    \version 2021-08-04, V1.0.0, firmware for GD32L23x
+    \version 2026-02-02, V2.4.0, firmware for GD32L23x, add support for GD32L235
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -38,6 +38,9 @@ OF SUCH DAMAGE.
 #define SEL_IRC16M      0x00U
 #define SEL_HXTAL       0x01U
 #define SEL_PLL         0x02U
+#define SEL_IRC48M      0x03U
+#define SEL_IRC32K      0x04U
+
 
 /* define startup timeout count */
 #define OSC_STARTUP_TIMEOUT         ((uint32_t)0x000FFFFFU)
@@ -56,15 +59,20 @@ void rcu_deinit(void)
     while(0U == (RCU_CTL & RCU_CTL_IRC16MSTB)) {
     }
     RCU_CFG0 &= ~RCU_CFG0_SCS;
-    RCU_CTL &= ~(RCU_CTL_HXTALEN | RCU_CTL_CKMEN | RCU_CTL_PLLEN | RCU_CTL_HXTALBPS);
+#ifdef  GD32L235
+    RCU_CFG1 &= ~RCU_CFG1_SCS_2;
+#endif /* GD32L235 */
+    RCU_CTL &= ~(RCU_CTL_HXTALEN | RCU_CTL_CKMEN | RCU_CTL_PLLEN | RCU_CTL_HXTALBPS | RCU_CTL_IRC48MEN);
     /* reset RCU */
     RCU_CFG0 &= ~(RCU_CFG0_SCS | RCU_CFG0_AHBPSC | RCU_CFG0_APB1PSC | RCU_CFG0_APB2PSC | \
-                  RCU_CFG0_ADCPSC | RCU_CFG0_CKOUTSEL | RCU_CFG0_CKOUTDIV | RCU_CFG0_PLLDV);
-    RCU_CFG0 &= ~(RCU_CFG0_PLLSEL | RCU_CFG0_PLLMF  | RCU_CFG0_PLLDV);
-    RCU_CFG1 &= ~(RCU_CFG1_PREDV);
-    RCU_CFG2 &= ~(RCU_CFG2_USART0SEL | RCU_CFG2_ADCSEL);
-    RCU_CFG2 &= ~RCU_CFG2_ADCPSC2;
+                  RCU_CFG0_ADCPSC | RCU_CFG0_CKOUTSEL | RCU_CFG0_CKOUTDIV);
+    RCU_CFG0 &= ~(RCU_CFG0_PLLSEL | RCU_CFG0_PLLMF | RCU_CFG0_PLLMF_6 | RCU_CFG0_PLLDV);
 
+    RCU_CFG1 &= ~(RCU_CFG1_PREDV);
+#ifdef  GD32L235
+    RCU_CFG1 &= ~RCU_CFG1_SCS_2;
+#endif /* GD32L235 */
+    RCU_CFG2 = 0x00000000U;
     RCU_INT = 0x00000000U;
 }
 
@@ -72,7 +80,7 @@ void rcu_deinit(void)
     \brief      enable the peripherals clock
     \param[in]  periph: RCU peripherals, refer to rcu_periph_enum
                 only one parameter can be selected which is shown as below:
-      \arg        RCU_GPIOx (x=A,B,C,D,F): GPIO ports clock
+      \arg        RCU_GPIOx (x = A,B,C,D,F): GPIO ports clock
       \arg        RCU_DMA: DMA clock
       \arg        RCU_CAU: CAU clock
       \arg        RCU_TRNG: TRNG clock
@@ -80,15 +88,18 @@ void rcu_deinit(void)
       \arg        RCU_CMP: CMP clock
       \arg        RCU_SYSCFG: SYSCFG clock
       \arg        RCU_ADC: ADC clock
-      \arg        RCU_TIMERx (x=1,2,5,6,8,11): TIMER clock
-      \arg        RCU_LPTIMER: LPTIMER clock
-      \arg        RCU_SPIx (x=0,1): SPI clock
-      \arg        RCU_USARTx (x=0,1): USART clock
-      \arg        RCU_UARTx (x=3,4): UART clock
-      \arg        RCU_LPUART: LPUART clock
+      \arg        RCU_TIMERx (x = 0,1,2,5,6,8,11,14,40, among 0,14 and 40 only for GD32L235xx series): TIMER clock
+      \arg        RCU_LPTIMER (only for GD32L233xx series): LPTIMER clock
+      \arg        RCU_LPTIMERx (x = 0,1,only for GD32L235xx series): LPTIMER clock
+      \arg        RCU_SPIx (x = 0,1): SPI clock
+      \arg        RCU_USARTx (x = 0,1): USART clock
+      \arg        RCU_UARTx (x = 3,4): UART clock
+      \arg        RCU_LPUART (only for GD32L233xx series): LPUART clock
+      \arg        RCU_LPUARTx(x = 0,1,only for GD32L235xx series): LPUART clock
       \arg        RCU_WWDGT: WWDGT clock
-      \arg        RCU_I2Cx (x=0,1,2): I2C clock
+      \arg        RCU_I2Cx (x = 0,1,2): I2C clock
       \arg        RCU_PMU: PMU clock
+      \arg        RCU_CAN (only for GD32L235xx series): CAN clock
       \arg        RCU_RTC: RTC clock
       \arg        RCU_DBGMCU: DBGMCU clock
       \arg        RCU_CAU: CAU clock
@@ -117,15 +128,18 @@ void rcu_periph_clock_enable(rcu_periph_enum periph)
       \arg        RCU_CMP: CMP clock
       \arg        RCU_SYSCFG: SYSCFG clock
       \arg        RCU_ADC: ADC clock
-      \arg        RCU_TIMERx (x=1,2,5,6,8,11): TIMER clock
-      \arg        RCU_LPTIMER: LPTIMER clock
+      \arg        RCU_TIMERx (x=0,1,2,5,6,8,11,14,40, among 0,14 and 40 only for GD32L235xx series): TIMER clock
+      \arg        RCU_LPTIMER (only for GD32L233xx series): LPTIMER clock
+      \arg        RCU_LPTIMERx (x=0,1,only for GD32L235xx series): LPTIMER clock
       \arg        RCU_SPIx (x=0,1): SPI clock
       \arg        RCU_USARTx (x=0,1): USART clock
       \arg        RCU_UARTx (x=3,4): UART clock
-      \arg        RCU_LPUART: LPUART clock
+      \arg        RCU_LPUART (only for GD32L233xx series): LPUART clock
+      \arg        RCU_LPUARTx(x=0,1,only for GD32L235xx series): LPUART clock
       \arg        RCU_WWDGT: WWDGT clock
       \arg        RCU_I2Cx (x=0,1,2): I2C clock
       \arg        RCU_PMU: PMU clock
+      \arg        RCU_CAN (only for GD32L235xx series): CAN clock
       \arg        RCU_RTC: RTC clock
       \arg        RCU_DBGMCU: DBGMCU clock
       \arg        RCU_CAU: CAU clock
@@ -182,17 +196,20 @@ void rcu_periph_clock_sleep_disable(rcu_periph_sleep_enum periph)
       \arg        RCU_CMPRST: reset CMP
       \arg        RCU_SYSCFGRST: reset SYSCFG
       \arg        RCU_ADCRST: reset ADC
-      \arg        RCU_TIMERxRST (x=1,2,5,6,8,11): reset TIMER
+      \arg        RCU_TIMERxRST (x=0,1,2,5,6,8,11,14,40,among 0,14 and 40 only for GD32L235xx series): reset TIMER
       \arg        RCU_SPIxRST (x=0,1): reset SPI
       \arg        RCU_USARTxRST (x=0,1): reset USART
-      \arg        RCU_LPTIMERRST: reset LPTIMER
+      \arg        RCU_LPTIMERRST (only for GD32L233xx series): reset LPTIMER
+      \arg        RCU_LPTIMERxRST (x=0,1,only for GD32L235xx series): reset LPTIMER
       \arg        RCU_SLCDRRST: reset SLCD
       \arg        RCU_WWDGTRST: reset WWDGT
-      \arg        RCU_LPUARTRST: reset LPUART
+      \arg        RCU_LPUARTRST (only for GD32L233xx series): reset LPUART
+      \arg        RCU_LPUARTxRST (x=0,1,only for GD32L235xx series): reset LPUART
       \arg        RCU_UARTxRST (x=3,4): reset UART
       \arg        RCU_I2CxRST (x=0,1,2): reset I2C
       \arg        RCU_USBDRST: reset USBD
       \arg        RCU_PMURST: reset PMU
+      \arg        RCU_CANRST (only for GD32L235xx series): reset CAN
       \arg        RCU_DACRST : reset DAC
       \arg        RCU_CTCRST : reset CTC
     \param[out] none
@@ -214,17 +231,20 @@ void rcu_periph_reset_enable(rcu_periph_reset_enum periph_reset)
       \arg        RCU_CMPRST: reset CMP
       \arg        RCU_SYSCFGRST: reset SYSCFG
       \arg        RCU_ADCRST: reset ADC
-      \arg        RCU_TIMERxRST (x=1,2,5,6,8,11): reset TIMER
+      \arg        RCU_TIMERxRST (x=0,1,2,5,6,8,11,14,40,among 0,14 and 40 only for GD32L235xx series): reset TIMER
       \arg        RCU_SPIxRST (x=0,1): reset SPI
       \arg        RCU_USARTxRST (x=0,1): reset USART
-      \arg        RCU_LPTIMERRST: reset LPTIMER
-      \arg        RCU_SLCDRRST: reset LPTIMER
+      \arg        RCU_LPTIMERRST (only for GD32L233xx series): reset LPTIMER
+      \arg        RCU_LPTIMERxRST (x=0,1,only for GD32L235xx series): reset LPTIMER
+      \arg        RCU_SLCDRRST: reset SLCD
       \arg        RCU_WWDGTRST: reset WWDGT
-      \arg        RCU_LPUARTRST: reset LPUART
+      \arg        RCU_LPUARTRST (only for GD32L233xx series): reset LPUART
+      \arg        RCU_LPUARTxRST (x=0,1,only for GD32L235xx series): reset LPUART
       \arg        RCU_UARTxRST (x=3,4): reset UART
       \arg        RCU_I2CxRST (x=0,1,2): reset I2C
       \arg        RCU_USBDRST: reset USBD
       \arg        RCU_PMURST: reset PMU
+      \arg        RCU_CANRST (only for GD32L235xx series): reset CAN
       \arg        RCU_DACRST : reset DAC
       \arg        RCU_CTCRST : reset CTC
     \param[out] none
@@ -265,16 +285,32 @@ void rcu_bkp_reset_disable(void)
       \arg        RCU_CKSYSSRC_HXTAL: select CK_HXTAL as the CK_SYS source
       \arg        RCU_CKSYSSRC_PLL: select CK_PLL as the CK_SYS source
       \arg        RCU_CKSYSSRC_IRC48M: select CK_IRC48M as the CK_SYS source
+      \arg        RCU_CKSYSSRC_IRC32K (only for GD32L235xx series): select CK_IRC32K as the CK_SYS source
     \param[out] none
     \retval     none
 */
 void rcu_system_clock_source_config(uint32_t ck_sys)
 {
-    uint32_t cksys_source = 0U;
-    cksys_source = RCU_CFG0;
-    /* reset the SCS bits and set according to ck_sys */
-    cksys_source &= ~RCU_CFG0_SCS;
-    RCU_CFG0 = (ck_sys | cksys_source);
+    uint32_t cfg0_reg = 0U, cfg1_reg = 0U;
+    if(ck_sys == RCU_CKSYSSRC_IRC32K) {
+        cfg1_reg = RCU_CFG1;
+        /* reset the SCS bit in RCU_CFG1 and set according to ck_sys */
+        RCU_CFG1 = (RCU_CFG1_SCS_2 | cfg1_reg);
+        cfg0_reg = RCU_CFG0;
+        /* reset the SCS bits in RCU_CFG0 and set according to ck_sys */
+        cfg0_reg &= ~RCU_CFG0_SCS;
+        RCU_CFG0 = (cfg0_reg);
+    } else {
+        cfg0_reg = RCU_CFG0;
+        /* reset the SCS bits in RCU_CFG0 and set according to ck_sys */
+        cfg0_reg &= ~RCU_CFG0_SCS;
+        RCU_CFG0 = (ck_sys | cfg0_reg);
+        cfg1_reg = RCU_CFG1;
+        /* reset the SCS bit in RCU_CFG1 and set according to ck_sys */
+        cfg1_reg &= ~RCU_CFG1_SCS_2;
+        RCU_CFG1 = (cfg1_reg);
+    }
+
 }
 
 /*!
@@ -286,17 +322,23 @@ void rcu_system_clock_source_config(uint32_t ck_sys)
       \arg        RCU_SCSS_HXTAL: select CK_HXTAL as the CK_SYS source
       \arg        RCU_SCSS_PLL: select CK_PLL as the CK_SYS source
       \arg        RCU_SCSS_IRC48M: select CK_IRC48M as the CK_SYS source
+      \arg        RCU_CKSYSSRC_IRC32K (only for GD32L235xx series): select CK_IRC32K as the CK_SYS source
 */
 uint32_t rcu_system_clock_source_get(void)
 {
-    return (RCU_CFG0 & RCU_CFG0_SCSS);
+    uint32_t cfg0_reg = 0U, cfg1_reg = 0U;
+    cfg0_reg = RCU_CFG0;
+    cfg0_reg = cfg0_reg & RCU_CFG0_SCSS;
+    cfg1_reg = RCU_CFG1;
+    cfg1_reg = cfg1_reg & RCU_CFG1_SCSS_2;
+    return (cfg0_reg | cfg1_reg);
 }
 
 /*!
     \brief      configure the AHB clock prescaler selection
     \param[in]  ck_ahb: AHB clock prescaler selection
                 only one parameter can be selected which is shown as below:
-      \arg        RCU_AHB_CKSYS_DIVx, x=1, 2, 4, 8, 16, 64, 128, 256, 512
+      \arg        RCU_AHB_CKSYS_DIVx, x=1, 2, 4, 8, 16, 64, 128, 256, 512: select CK_SYS/x as CK_AHB
     \param[out] none
     \retval     none
 */
@@ -452,18 +494,18 @@ void rcu_pll_config(uint32_t pll_src, uint32_t pll_mul)
 void rcu_usart_clock_config(usart_idx_enum usart_idx, uint32_t ck_usart)
 {
     switch(usart_idx) {
-    case IDX_USART0:
-        /* reset the USART0SEL bits and set according to ck_usart */
-        RCU_CFG2 &= ~RCU_CFG2_USART0SEL;
-        RCU_CFG2 |= ck_usart;
-        break;
-    case IDX_USART1:
-        /* reset the USART1SEL bits and set according to ck_usart */
-        RCU_CFG2 &= ~RCU_CFG2_USART1SEL;
-        RCU_CFG2 |= (uint32_t)ck_usart << 16U;
-        break;
-    default:
-        break;
+        case IDX_USART0:
+            /* reset the USART0SEL bits and set according to ck_usart */
+            RCU_CFG2 &= ~RCU_CFG2_USART0SEL;
+            RCU_CFG2 |= ck_usart;
+            break;
+        case IDX_USART1:
+            /* reset the USART1SEL bits and set according to ck_usart */
+            RCU_CFG2 &= ~RCU_CFG2_USART1SEL;
+            RCU_CFG2 |= (uint32_t)ck_usart << 16U;
+            break;
+        default:
+            break;
     }
 }
 
@@ -481,30 +523,32 @@ void rcu_usart_clock_config(usart_idx_enum usart_idx, uint32_t ck_usart)
 void rcu_i2c_clock_config(i2c_idx_enum i2c_idx, uint32_t ck_i2c)
 {
     switch(i2c_idx) {
-    case IDX_I2C0:
-        /* reset the I2C0SEL bits and set according to ck_i2c */
-        RCU_CFG2 &= ~RCU_CFG2_I2C0SEL;
-        RCU_CFG2 |= ck_i2c;
-        break;
-    case IDX_I2C1:
-        /* reset the I2C1SEL bits and set according to ck_i2c */
-        RCU_CFG2 &= ~RCU_CFG2_I2C1SEL;
-        RCU_CFG2 |= (uint32_t)ck_i2c << 2U;
-        break;
-    case IDX_I2C2:
-        /* reset the I2C2SEL bits and set according to ck_i2c */
-        RCU_CFG2 &= ~RCU_CFG2_I2C2SEL;
-        RCU_CFG2 |= (uint32_t)ck_i2c << 4U;
-        break;
-    default:
-        break;
+        case IDX_I2C0:
+            /* reset the I2C0SEL bits and set according to ck_i2c */
+            RCU_CFG2 &= ~RCU_CFG2_I2C0SEL;
+            RCU_CFG2 |= ck_i2c;
+            break;
+        case IDX_I2C1:
+            /* reset the I2C1SEL bits and set according to ck_i2c */
+            RCU_CFG2 &= ~RCU_CFG2_I2C1SEL;
+            RCU_CFG2 |= (uint32_t)ck_i2c << 2U;
+            break;
+        case IDX_I2C2:
+            /* reset the I2C2SEL bits and set according to ck_i2c */
+            RCU_CFG2 &= ~RCU_CFG2_I2C2SEL;
+            RCU_CFG2 |= (uint32_t)ck_i2c << 4U;
+            break;
+        default:
+            break;
     }
 }
+
+#ifdef GD32L233
 /*!
     \brief      configure the LPTIMER clock source selection
     \param[in]  ck_lptimer: LPTIMER clock source selection
                 only one parameter can be selected which is shown as below:
-      \arg        RCU_LPTIMERSRC_CKAPB1: CK_LPTIMER select CK_APB1
+      \arg        RCU_LPTIMERSRC_CKAPB2: CK_LPTIMER select CK_APB2
       \arg        RCU_LPTIMERSRC_IRC32K: CK_LPTIMER select CK_IRC32K
       \arg        RCU_LPTIMERSRC_LXTAL: CK_LPTIMER select CK_LXTAL
       \arg        RCU_LPTIMERSRC_IRC16MDIV: CK_LPTIMER select CK_IRC16MDIV
@@ -517,10 +561,44 @@ void rcu_lptimer_clock_config(uint32_t ck_lptimer)
     RCU_CFG2 &= ~RCU_CFG2_LPTIMERSEL;
     RCU_CFG2 |= ck_lptimer;
 }
+#endif /* GD32L233 */
 
+#ifdef GD32L235
+/*!
+    \brief      configure the LPTIMER clock source selection
+    \param[in]  lptimer_idx: IDX_LPTIMERx(x=0,1)
+    \param[in]  ck_lptimer: LPTIMER clock source selection
+                only one parameter can be selected which is shown as below:
+      \arg        RCU_LPTIMERSRC_CKAPB1: CK_LPTIMER select CK_APB1
+      \arg        RCU_LPTIMERSRC_IRC32K: CK_LPTIMER select CK_IRC32K
+      \arg        RCU_LPTIMERSRC_LXTAL: CK_LPTIMER select CK_LXTAL
+      \arg        RCU_LPTIMERSRC_IRC16MDIV: CK_LPTIMER select CK_IRC16MDIV
+    \param[out] none
+    \retval     none
+*/
+void rcu_lptimer_clock_config(lptimer_idx_enum lptimer_idx, uint32_t ck_lptimer)
+{
+    switch(lptimer_idx) {
+        case IDX_LPTIMER0:
+            /* reset the LPTIMER0SEL bits and set according to ck_lptimer */
+            RCU_CFG2 &= ~RCU_CFG2_LPTIMER0SEL;
+            RCU_CFG2 |= ck_lptimer;
+            break;
+        case IDX_LPTIMER1:
+            /* reset the LPTIMER0SEL bits and set according to ck_lptimer */
+            RCU_CFG2 &= ~RCU_CFG2_LPTIMER1SEL;
+            RCU_CFG2 |= (uint32_t)ck_lptimer << 12U;
+            break;
+        default:
+            break;
+    }
+}
+#endif /* GD32L235 */
+
+#ifdef GD32L233
 /*!
     \brief      configure the LPUART clock source selection
-    \param[in]  ck_lpusart: LPUART clock source selection
+    \param[in]  ck_lpuart: LPUART clock source selection
                 only one parameter can be selected which is shown as below:
       \arg        RCU_LPUARTSRC_CKAPB1: LPUART select CK_APB1
       \arg        RCU_LPUARTSRC_CKSYS: LPUART select CK_SYS
@@ -535,7 +613,40 @@ void rcu_lpuart_clock_config(uint32_t ck_lpuart)
     RCU_CFG2 &= ~RCU_CFG2_LPUARTSEL;
     RCU_CFG2 |= ck_lpuart;
 }
+#endif /* GD32L233 */
 
+#ifdef GD32L235
+/*!
+    \brief      configure the LPUART clock source selection
+    \param[in]  lpuart_idx: IDX_LPUARTx(x=0,1)
+    \param[in]  ck_lpuart: LPUART clock source selection
+                only one parameter can be selected which is shown as below:
+      \arg        RCU_LPUARTSRC_CKAPB1: LPUART select CK_APB1
+      \arg        RCU_LPUARTSRC_CKSYS: LPUART select CK_SYS
+      \arg        RCU_LPUARTSRC_LXTAL: LPUART select CK_LXTAL
+      \arg        RCU_LPUARTSRC_IRC16MDIV: LPUART select CK_IRC16MDIV
+    \param[out] none
+    \retval     none
+*/
+void rcu_lpuart_clock_config(lpuart_idx_enum lpuart_idx, uint32_t ck_lpuart)
+{
+    switch(lpuart_idx) {
+        case IDX_LPUART0:
+            /* reset the LPUART0SEL bits and set according to ck_usart */
+            RCU_CFG2 &= ~RCU_CFG2_LPUART0SEL;
+            RCU_CFG2 |= ck_lpuart;
+            break;
+        case IDX_LPUART1:
+            /* reset the LPUART1SEL bits and set according to ck_usart */
+            RCU_CFG2 &= ~RCU_CFG2_LPUART1SEL;
+            RCU_CFG2 |= (uint32_t)ck_lpuart << 13U;
+            break;
+        default:
+            break;
+    }
+
+}
+#endif /* GD32L235 */
 /*!
     \brief      configure the IRC16MDIV clock selection
     \param[in]  ck_irc16mdiv: IRC16MDIV clock selection
@@ -550,14 +661,14 @@ void rcu_lpuart_clock_config(uint32_t ck_lpuart)
 */
 void rcu_irc16mdiv_clock_config(uint32_t ck_irc16mdiv)
 {
-    /* reset the LPUARTSEL bits and set according to ck_lpuart */
+    /* reset the IRC16MDIVSEL bits and set according to ck_irc16mdiv */
     RCU_CFG2 &= ~RCU_CFG2_IRC16MDIVSEL;
     RCU_CFG2 |= ck_irc16mdiv;
 }
 
 /*!
     \brief      configure the USBD clock source selection
-    \param[in]  ck_usart: USBD clock source selection
+    \param[in]  ck_usbd: USBD clock source selection
                 only one parameter can be selected which is shown as below:
       \arg        RCU_USBDSRC_IRC48M: USBD select CK_IRC48M
       \arg        RCU_USBDSRC_PLL: USBD select CK_PLL
@@ -624,22 +735,7 @@ void rcu_lxtal_drive_capability_config(uint32_t lxtal_dricap)
     RCU_BDCTL |= lxtal_dricap;
 }
 
-/*!
-    \brief      configure the low power mode LDO voltage selection
-    \param[in]  lp_ldo_voltage: low power mode LDO voltage
-                only one parameter can be selected which is shown as below:
-      \arg        RCU_LP_LDO_V_0_8: LP_LDO output voltage 0.8V
-      \arg        RCU_LP_LDO_V_0_9: LP_LDO output voltage 0.9V
-    \param[out] none
-    \retval     none
-*/
-void rcu_lp_ldo_config(uint32_t lp_ldo_voltage)
-{
-    /* reset the RCU_LPB_LPBMODE bits and set according to lp_ldo_voltage */
-    RCU_LPLDO &= ~RCU_LPB_LPBMSEL;
-    RCU_LPLDO |= lp_ldo_voltage;
-}
-
+#if defined(GD32L233)
 /*!
     \brief      configure low power bandgap mode selection
     \param[in]  lp_bandgap_clock: low power bandgap clock
@@ -656,132 +752,41 @@ void rcu_lp_ldo_config(uint32_t lp_ldo_voltage)
 */
 void rcu_lp_bandgap_config(uint32_t lp_bandgap_clock)
 {
-    /* reset the RCU_LPB_LPBMODE bits and set according to lp_ldo_voltage */
+    /* reset the RCU_LPB_LPBMSEL bits and set according to lp_bandgap_clock */
     RCU_LPB &= ~RCU_LPB_LPBMSEL;
     RCU_LPB |= lp_bandgap_clock;
 }
-
+#elif defined(GD32L235)
 /*!
-    \brief      get the clock stabilization and periphral reset flags
-    \param[in]  flag: the clock stabilization and periphral reset flags, refer to rcu_flag_enum
+    \brief      configure low power bandgap mode selection
+    \param[in]  lp_bandgap_clock: low power bandgap clock
                 only one parameter can be selected which is shown as below:
-      \arg        RCU_FLAG_IRC32KSTB: IRC32K stabilization flag
-      \arg        RCU_FLAG_LXTALSTB: LXTAL stabilization flag
-      \arg        RCU_FLAG_IRC16MSTB: IRC16M stabilization flag
-      \arg        RCU_FLAG_HXTALSTB: HXTAL stabilization flag
-      \arg        RCU_FLAG_PLLSTB: PLL stabilization flag
-      \arg        RCU_FLAG_IRC48MSTB: IRC48M stabilization flag
-      \arg        RCU_FLAG_V12RST: V12 domain power reset flag
-      \arg        RCU_FLAG_EPRST: external pin reset flag
-      \arg        RCU_FLAG_PORRST: power reset flag
-      \arg        RCU_FLAG_SWRST: software reset flag
-      \arg        RCU_FLAG_FWDGTRST: free watchdog timer reset flag
-      \arg        RCU_FLAG_WWDGTRST: window watchdog timer reset flag
-      \arg        RCU_FLAG_LPRST: low-power reset flag
-    \param[out] none
-    \retval     FlagStatus: SET or RESET
-*/
-FlagStatus rcu_flag_get(rcu_flag_enum flag)
-{
-    if(RESET != (RCU_REG_VAL(flag) & BIT(RCU_BIT_POS(flag)))) {
-        return SET;
-    } else {
-        return RESET;
-    }
-}
-
-/*!
-    \brief      clear the reset flag
-    \param[in]  none
+      \arg        RCU_LPBM_32CLK： The length of holding phase is 3.2ms, 32 clock cycles
+      \arg        RCU_LPBM_64CLK： The length of holding phase is 6.4ms, 64 clock cycles
+      \arg        RCU_LPBM_128CLK： The length of holding phase is 12.8ms, 128 clock cycles
+      \arg        RCU_LPBM_256CLK: The length of holding phase is 25.6ms, 256 clock cycles
+      \arg        RCU_LPBM_512CLK: The length of holding phase is 51.2ms, 512 clock cycles
+      \arg        RCU_LPBM_1024CLK: he length of holding phase is 102.4ms, 1024 clock cycles
+      \arg        RCU_LPBM_2048CLK: he length of holding phase is 204.8ms, 2048 clock cycles
+      \arg        RCU_LPBM_3072CLK: he length of holding phase is 307.2ms, 3072 clock cycles
+      \arg        RCU_LPBM_4096CLK: he length of holding phase is 409.6ms, 4096 clock cycles
+      \arg        RCU_LPBM_5120CLK: he length of holding phase is 512ms, 5120 clock cycles
+      \arg        RCU_LPBM_6144CLK: he length of holding phase is 614.4ms, 6144 clock cycles
+      \arg        RCU_LPBM_7168CLK: he length of holding phase is 716.8ms, 7168 clock cycles
+      \arg        RCU_LPBM_8192CLK: he length of holding phase is 819.2ms, 8192 clock cycles
+      \arg        RCU_LPBM_10240CLK: The length of holding phase is 1024ms, 10240 clock cycles
+      \arg        RCU_LPBM_12288CLK: The length of holding phase is 1228.8ms, 12288 clock cycles
+      \arg        RCU_LPBM_16384CLK: The length of holding phase is 1638.4ms, 16384 clock cycles
     \param[out] none
     \retval     none
 */
-void rcu_all_reset_flag_clear(void)
+void rcu_lp_bandgap_config(uint32_t lp_bandgap_clock)
 {
-    RCU_RSTSCK |= RCU_RSTSCK_RSTFC;
+    /* reset the RCU_LPB_LPBMSEL bits and set according to lp_bandgap_clock */
+    RCU_LPB &= ~RCU_LPB_LPBMSEL;
+    RCU_LPB |= lp_bandgap_clock;
 }
-
-/*!
-    \brief      get the clock stabilization interrupt and ckm flags
-    \param[in]  int_flag: interrupt and ckm flags, refer to rcu_int_flag_enum
-                only one parameter can be selected which is shown as below:
-      \arg        RCU_INT_FLAG_IRC32KSTB: IRC32K stabilization interrupt flag
-      \arg        RCU_INT_FLAG_LXTALSTB: LXTAL stabilization interrupt flag
-      \arg        RCU_INT_FLAG_IRC16MSTB: IRC16M stabilization interrupt flag
-      \arg        RCU_INT_FLAG_HXTALSTB: HXTAL stabilization interrupt flag
-      \arg        RCU_INT_FLAG_PLLSTB: PLL stabilization interrupt flag
-      \arg        RCU_INT_FLAG_IRC48MSTB: IRC48M stabilization interrupt flag
-      \arg        RCU_INT_FLAG_LXTALCKM: LXTAL clock stuck interrupt flag
-      \arg        RCU_INT_FLAG_CKM: HXTAL clock stuck interrupt flag
-    \param[out] none
-    \retval     FlagStatus: SET or RESET
-*/
-FlagStatus rcu_interrupt_flag_get(rcu_int_flag_enum int_flag)
-{
-    if(RESET != (RCU_REG_VAL(int_flag) & BIT(RCU_BIT_POS(int_flag)))) {
-        return SET;
-    } else {
-        return RESET;
-    }
-}
-
-/*!
-    \brief      clear the interrupt flags
-    \param[in]  int_flag_clear: clock stabilization and stuck interrupt flags clear, refer to rcu_int_flag_clear_enum
-                only one parameter can be selected which is shown as below:
-      \arg        RCU_INT_FLAG_IRC32KSTB_CLR: IRC32K stabilization interrupt flag clear
-      \arg        RCU_INT_FLAG_LXTALSTB_CLR: LXTAL stabilization interrupt flag clear
-      \arg        RCU_INT_FLAG_IRC16MSTB_CLR: IRC16M stabilization interrupt flag clear
-      \arg        RCU_INT_FLAG_HXTALSTB_CLR: HXTAL stabilization interrupt flag clear
-      \arg        RCU_INT_FLAG_PLLSTB_CLR: PLL stabilization interrupt flag clear
-      \arg        RCU_INT_FLAG_IRC48MSTB_CLR: IRC48M stabilization interrupt flag clear
-      \arg        RCU_INT_FLAG_LXTALCKM_CLR: LXTAL clock stuck interrupt flag clear
-      \arg        RCU_INT_FLAG_CKM_CLR: clock stuck interrupt flag clear
-    \param[out] none
-    \retval     none
-*/
-void rcu_interrupt_flag_clear(rcu_int_flag_clear_enum int_flag_clear)
-{
-    RCU_REG_VAL(int_flag_clear) |= BIT(RCU_BIT_POS(int_flag_clear));
-}
-
-/*!
-    \brief      enable the stabilization interrupt
-    \param[in]  stab_int: clock stabilization interrupt, refer to rcu_int_enum
-                only one parameter can be selected which is shown as below:
-      \arg        RCU_INT_IRC32KSTB: IRC32K stabilization interrupt enable
-      \arg        RCU_INT_LXTALSTB: LXTAL stabilization interrupt enable
-      \arg        RCU_INT_IRC16MSTB: IRC16M stabilization interrupt enable
-      \arg        RCU_INT_HXTALSTB: HXTAL stabilization interrupt enable
-      \arg        RCU_INT_PLLSTB: PLL stabilization interrupt enable
-      \arg        RCU_INT_IRC48MSTB: IRC48M stabilization interrupt enable
-      \arg        RCU_INT_LXTALCKM: LXTAL clock stuck interrup enable
-    \param[out] none
-    \retval     none
-*/
-void rcu_interrupt_enable(rcu_int_enum stab_int)
-{
-    RCU_REG_VAL(stab_int) |= BIT(RCU_BIT_POS(stab_int));
-}
-
-/*!
-    \brief      disable the stabilization interrupt
-    \param[in]  stab_int: clock stabilization interrupt, refer to rcu_int_enum
-                only one parameter can be selected which is shown as below:
-      \arg        RCU_INT_IRC32KSTB: IRC32K stabilization interrupt disable
-      \arg        RCU_INT_LXTALSTB: LXTAL stabilization interrupt disable
-      \arg        RCU_INT_IRC16MSTB: IRC16M stabilization interrupt disable
-      \arg        RCU_INT_HXTALSTB: HXTAL stabilization interrupt disable
-      \arg        RCU_INT_PLLSTB: PLL stabilization interrupt disable
-      \arg        RCU_INT_IRC48MSTB: IRC48M stabilization interrupt disable
-      \arg        RCU_INT_LXTALCKM: LXTAL clock stuck interrup disable
-    \param[out] none
-    \retval     none
-*/
-void rcu_interrupt_disable(rcu_int_enum stab_int)
-{
-    RCU_REG_VAL(stab_int) &= ~BIT(RCU_BIT_POS(stab_int));
-}
+#endif
 
 /*!
     \brief      wait until oscillator stabilization flags is SET
@@ -802,80 +807,80 @@ ErrStatus rcu_osci_stab_wait(rcu_osci_type_enum osci)
     ErrStatus reval = ERROR;
     FlagStatus osci_stat = RESET;
     switch(osci) {
-    case RCU_HXTAL:
-        /* wait until HXTAL is stabilization and osci_stat is not more than timeout */
-        while((RESET == osci_stat) && (HXTAL_STARTUP_TIMEOUT != stb_cnt)) {
-            osci_stat = rcu_flag_get(RCU_FLAG_HXTALSTB);
-            stb_cnt++;
-        }
-        /* check whether flag is set or not */
-        if(RESET != rcu_flag_get(RCU_FLAG_HXTALSTB)) {
-            reval = SUCCESS;
-        }
-        break;
+        case RCU_HXTAL:
+            /* wait until HXTAL is stabilization and osci_stat is not more than timeout */
+            while((RESET == osci_stat) && (HXTAL_STARTUP_TIMEOUT != stb_cnt)) {
+                osci_stat = rcu_flag_get(RCU_FLAG_HXTALSTB);
+                stb_cnt++;
+            }
+            /* check whether flag is set or not */
+            if(RESET != rcu_flag_get(RCU_FLAG_HXTALSTB)) {
+                reval = SUCCESS;
+            }
+            break;
 
-    /* wait LXTAL stable */
-    case RCU_LXTAL:
-        while((RESET == osci_stat) && (LXTAL_STARTUP_TIMEOUT != stb_cnt)) {
-            osci_stat = rcu_flag_get(RCU_FLAG_LXTALSTB);
-            stb_cnt++;
-        }
-        /* check whether flag is set or not */
-        if(RESET != rcu_flag_get(RCU_FLAG_LXTALSTB)) {
-            reval = SUCCESS;
-        }
-        break;
+        /* wait LXTAL stable */
+        case RCU_LXTAL:
+            while((RESET == osci_stat) && (LXTAL_STARTUP_TIMEOUT != stb_cnt)) {
+                osci_stat = rcu_flag_get(RCU_FLAG_LXTALSTB);
+                stb_cnt++;
+            }
+            /* check whether flag is set or not */
+            if(RESET != rcu_flag_get(RCU_FLAG_LXTALSTB)) {
+                reval = SUCCESS;
+            }
+            break;
 
-    /* wait IRC16M stable */
-    case RCU_IRC16M:
-        while((RESET == osci_stat) && (IRC16M_STARTUP_TIMEOUT != stb_cnt)) {
-            osci_stat = rcu_flag_get(RCU_FLAG_IRC16MSTB);
-            stb_cnt++;
-        }
-        /* check whether flag is set or not */
-        if(RESET != rcu_flag_get(RCU_FLAG_IRC16MSTB)) {
-            reval = SUCCESS;
-        }
-        break;
+        /* wait IRC16M stable */
+        case RCU_IRC16M:
+            while((RESET == osci_stat) && (IRC16M_STARTUP_TIMEOUT != stb_cnt)) {
+                osci_stat = rcu_flag_get(RCU_FLAG_IRC16MSTB);
+                stb_cnt++;
+            }
+            /* check whether flag is set or not */
+            if(RESET != rcu_flag_get(RCU_FLAG_IRC16MSTB)) {
+                reval = SUCCESS;
+            }
+            break;
 
-    /* wait IRC48M stable */
-    case RCU_IRC48M:
-        while((RESET == osci_stat) && (OSC_STARTUP_TIMEOUT != stb_cnt)) {
-            osci_stat = rcu_flag_get(RCU_FLAG_IRC48MSTB);
-            stb_cnt++;
-        }
-        /* check whether flag is set or not */
-        if(RESET != rcu_flag_get(RCU_FLAG_IRC48MSTB)) {
-            reval = SUCCESS;
-        }
-        break;
+        /* wait IRC48M stable */
+        case RCU_IRC48M:
+            while((RESET == osci_stat) && (OSC_STARTUP_TIMEOUT != stb_cnt)) {
+                osci_stat = rcu_flag_get(RCU_FLAG_IRC48MSTB);
+                stb_cnt++;
+            }
+            /* check whether flag is set or not */
+            if(RESET != rcu_flag_get(RCU_FLAG_IRC48MSTB)) {
+                reval = SUCCESS;
+            }
+            break;
 
-    /* wait IRC32K stable */
-    case RCU_IRC32K:
-        while((RESET == osci_stat) && (OSC_STARTUP_TIMEOUT != stb_cnt)) {
-            osci_stat = rcu_flag_get(RCU_FLAG_IRC32KSTB);
-            stb_cnt++;
-        }
-        /* check whether flag is set or not */
-        if(RESET != rcu_flag_get(RCU_FLAG_IRC32KSTB)) {
-            reval = SUCCESS;
-        }
-        break;
+        /* wait IRC32K stable */
+        case RCU_IRC32K:
+            while((RESET == osci_stat) && (OSC_STARTUP_TIMEOUT != stb_cnt)) {
+                osci_stat = rcu_flag_get(RCU_FLAG_IRC32KSTB);
+                stb_cnt++;
+            }
+            /* check whether flag is set or not */
+            if(RESET != rcu_flag_get(RCU_FLAG_IRC32KSTB)) {
+                reval = SUCCESS;
+            }
+            break;
 
-    /* wait PLL stable */
-    case RCU_PLL_CK:
-        while((RESET == osci_stat) && (OSC_STARTUP_TIMEOUT != stb_cnt)) {
-            osci_stat = rcu_flag_get(RCU_FLAG_PLLSTB);
-            stb_cnt++;
-        }
-        /* check whether flag is set or not */
-        if(RESET != rcu_flag_get(RCU_FLAG_PLLSTB)) {
-            reval = SUCCESS;
-        }
-        break;
+        /* wait PLL stable */
+        case RCU_PLL_CK:
+            while((RESET == osci_stat) && (OSC_STARTUP_TIMEOUT != stb_cnt)) {
+                osci_stat = rcu_flag_get(RCU_FLAG_PLLSTB);
+                stb_cnt++;
+            }
+            /* check whether flag is set or not */
+            if(RESET != rcu_flag_get(RCU_FLAG_PLLSTB)) {
+                reval = SUCCESS;
+            }
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
     /* return value */
     return reval;
@@ -930,25 +935,25 @@ void rcu_osci_bypass_mode_enable(rcu_osci_type_enum osci)
 {
     uint32_t reg;
     switch(osci) {
-    case RCU_HXTAL:
-        /* HXTALEN must be reset before enable the oscillator bypass mode */
-        reg = RCU_CTL;
-        RCU_CTL &= ~RCU_CTL_HXTALEN;
-        RCU_CTL = (reg | RCU_CTL_HXTALBPS);
-        break;
-    case RCU_LXTAL:
-        /* LXTALEN must be reset before enable the oscillator bypass mode */
-        reg = RCU_BDCTL;
-        RCU_BDCTL &= ~RCU_BDCTL_LXTALEN;
-        RCU_BDCTL = (reg | RCU_BDCTL_LXTALBPS);
-        break;
-    case RCU_IRC16M:
-    case RCU_IRC48M:
-    case RCU_IRC32K:
-    case RCU_PLL_CK:
-        break;
-    default:
-        break;
+        case RCU_HXTAL:
+            /* HXTALEN must be reset before enable the oscillator bypass mode */
+            reg = RCU_CTL;
+            RCU_CTL &= ~RCU_CTL_HXTALEN;
+            RCU_CTL = (reg | RCU_CTL_HXTALBPS);
+            break;
+        case RCU_LXTAL:
+            /* LXTALEN must be reset before enable the oscillator bypass mode */
+            reg = RCU_BDCTL;
+            RCU_BDCTL &= ~RCU_BDCTL_LXTALEN;
+            RCU_BDCTL = (reg | RCU_BDCTL_LXTALBPS);
+            break;
+        case RCU_IRC16M:
+        case RCU_IRC48M:
+        case RCU_IRC32K:
+        case RCU_PLL_CK:
+            break;
+        default:
+            break;
     }
 }
 
@@ -965,26 +970,42 @@ void rcu_osci_bypass_mode_disable(rcu_osci_type_enum osci)
 {
     uint32_t reg;
     switch(osci) {
-    case RCU_HXTAL:
-        /* HXTALEN must be reset before disable the oscillator bypass mode */
-        reg = RCU_CTL;
-        RCU_CTL &= ~RCU_CTL_HXTALEN;
-        RCU_CTL = (reg & (~RCU_CTL_HXTALBPS));
-        break;
-    case RCU_LXTAL:
-        /* LXTALEN must be reset before disable the oscillator bypass mode */
-        reg = RCU_BDCTL;
-        RCU_BDCTL &= ~RCU_BDCTL_LXTALEN;
-        RCU_BDCTL = (reg & (~RCU_BDCTL_LXTALBPS));
-        break;
-    case RCU_IRC16M:
-    case RCU_IRC48M:
-    case RCU_IRC32K:
-    case RCU_PLL_CK:
-        break;
-    default:
-        break;
+        case RCU_HXTAL:
+            /* HXTALEN must be reset before disable the oscillator bypass mode */
+            reg = RCU_CTL;
+            RCU_CTL &= ~RCU_CTL_HXTALEN;
+            RCU_CTL = (reg & (~RCU_CTL_HXTALBPS));
+            break;
+        case RCU_LXTAL:
+            /* LXTALEN must be reset before disable the oscillator bypass mode */
+            reg = RCU_BDCTL;
+            RCU_BDCTL &= ~RCU_BDCTL_LXTALEN;
+            RCU_BDCTL = (reg & (~RCU_BDCTL_LXTALBPS));
+            break;
+        case RCU_IRC16M:
+        case RCU_IRC48M:
+        case RCU_IRC32K:
+        case RCU_PLL_CK:
+            break;
+        default:
+            break;
     }
+}
+
+
+/*!
+    \brief      set the IRC16M adjust value
+    \param[in]  irc16m_adjval: IRC16M adjust value, must be between 0 and 0x1F
+    \param[out] none
+    \retval     none
+*/
+void rcu_irc16m_adjust_value_set(uint8_t irc16m_adjval)
+{
+    uint32_t adjust = 0U;
+    adjust = RCU_CTL;
+    /* reset the IRC16MADJ bits and set according to irc16m_adjval */
+    adjust &= ~RCU_CTL_IRC16MADJ;
+    RCU_CTL = (adjust | (((uint32_t)irc16m_adjval) << 3));
 }
 
 /*!
@@ -1017,7 +1038,7 @@ void rcu_hxtal_clock_monitor_disable(void)
 */
 void rcu_lxtal_clock_monitor_enable(void)
 {
-    RCU_CTL |= RCU_CTL_LXTALCKMEN;
+    RCU_CTL |= RCU_CTL_LCKMEN;
 }
 
 /*!
@@ -1028,24 +1049,8 @@ void rcu_lxtal_clock_monitor_enable(void)
 */
 void rcu_lxtal_clock_monitor_disable(void)
 {
-    RCU_CTL &= ~RCU_CTL_LXTALCKMEN;
+    RCU_CTL &= ~RCU_CTL_LCKMEN;
 }
-
-/*!
-    \brief      set the IRC16M adjust value
-    \param[in]  irc16m_adjval: IRC16M adjust value, must be between 0 and 0x1F
-    \param[out] none
-    \retval     none
-*/
-void rcu_irc16m_adjust_value_set(uint8_t irc16m_adjval)
-{
-    uint32_t adjust = 0U;
-    adjust = RCU_CTL;
-    /* reset the IRC16MADJ bits and set according to irc16m_adjval */
-    adjust &= ~RCU_CTL_IRC16MADJ;
-    RCU_CTL = (adjust | (((uint32_t)irc16m_adjval) << 3));
-}
-
 
 /*!
     \brief      unlock the voltage key
@@ -1069,18 +1074,20 @@ void rcu_voltage_key_unlock(void)
       \arg        CK_APB1: APB1 clock frequency
       \arg        CK_APB2: APB2 clock frequency
       \arg        CK_ADC: ADC clock frequency
-      \arg        CK_USART0: USART0 clock frequency
-      \arg        CK_USART1: USART1 clock frequency
-      \arg        CK_LPTIMER: LPTIMER clock frequency
-      \arg        CK_LPUART: LPUART clock frequency
+      \arg        CK_USARTx (x = 0,1): USARTx clock frequency
+      \arg        CK_LPTIMER (only for GD32L233xx serias): LPTIMER clock frequency
+      \arg        CK_LPUART (only for GD32L233xx serias): LPUART clock frequency
+      \arg        CK_LPTIMERx (x=0,1,only for GD32L235xx series): LPTIMERx clock frequency
+      \arg        CK_LPUARTx (x=0,1,only for GD32L235xx series): LPUARTx clock frequency
+      \arg        CK_I2Cx (x=0,1,2): I2Cx clock frequency
     \param[out] none
-    \retval     clock frequency of system, AHB, APB1, APB2, ADC or USRAT0/1, LPUART, LPTIMER
+    \retval     clock frequency of system, AHB, APB1, APB2, ADC or USRAT0/1, LPUART, LPTIMER, LPUART0/1, LPTIMER0/1
 */
 uint32_t rcu_clock_freq_get(rcu_clock_freq_enum clock)
 {
-    uint32_t sws = 0U, adcps = 0U, adcps2 = 0U, ck_freq = 0U;
+    uint32_t sws = 0U, sws0 = 0U, sws1 = 0U, adcps = 0U, adcps2 = 0U, ck_freq = 0U;
     uint32_t cksys_freq = 0U, ahb_freq = 0U, apb1_freq = 0U, apb2_freq = 0U;
-    uint32_t adc_freq = 0U, usart_freq = 0U, lptimer_freq = 0U;
+    uint32_t adc_freq = 0U, usart_freq = 0U, lptimer_freq = 0U, i2c_freq = 0U;
     uint32_t pllmf = 0U, pllmf6 = 0U, pllsel = 0U, prediv = 0U, idx = 0U, clk_exp = 0U;
     /* exponent of AHB, APB1 and APB2 clock divider */
     const uint8_t ahb_exp[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 9};
@@ -1088,48 +1095,56 @@ uint32_t rcu_clock_freq_get(rcu_clock_freq_enum clock)
     const uint8_t apb2_exp[8] = {0, 0, 0, 0, 1, 2, 3, 4};
     const uint8_t IRC16M_exp[8] = {0, 0, 0, 0, 1, 2, 3, 4};
 
-    sws = GET_BITS(RCU_CFG0, 2, 3);
+    sws0 = GET_BITS(RCU_CFG0, 2, 3);
+    sws1 = (RCU_CFG1 & BIT(17)) >> 15;
+    sws = (sws0 | sws1);
     switch(sws) {
-    /* IRC16M is selected as CK_SYS */
-    case SEL_IRC16M:
-        cksys_freq = IRC16M_VALUE;
-        break;
-    /* HXTAL is selected as CK_SYS */
-    case SEL_HXTAL:
-        cksys_freq = HXTAL_VALUE;
-        break;
-    /* PLL is selected as CK_SYS */
-    case SEL_PLL:
-        /* get the value of PLLMF[5:0] */
-        pllmf  = GET_BITS(RCU_CFG0, 18, 23);
-        pllmf6 = GET_BITS(RCU_CFG0, 27, 27);
-        pllmf  = ((pllmf6 << 6) + pllmf);
-        /* high 16 bits */
-        if(14U <= pllmf) {
-            pllmf += 1U;
-        } else if(15U == pllmf) {
-            pllmf = 16U;
-        } else {
-            pllmf += 2U;
-        }
+        /* IRC16M is selected as CK_SYS */
+        case SEL_IRC16M:
+            cksys_freq = IRC16M_VALUE;
+            break;
+        /* HXTAL is selected as CK_SYS */
+        case SEL_HXTAL:
+            cksys_freq = HXTAL_VALUE;
+            break;
+        case SEL_IRC48M:
+            cksys_freq = IRC48M_VALUE;
+            break;
+        case SEL_IRC32K:
+            cksys_freq = IRC32K_VALUE;
+            break;
+        /* PLL is selected as CK_SYS */
+        case SEL_PLL:
+            /* get the value of PLLMF[5:0] */
+            pllmf  = GET_BITS(RCU_CFG0, 18, 23);
+            pllmf6 = GET_BITS(RCU_CFG0, 27, 27);
+            pllmf  = ((pllmf6 << 6) + pllmf);
+            /* high 16 bits */
+            if(14U < pllmf) {
+                pllmf += 1U;
+            } else if(15U == pllmf) {
+                pllmf = 16U;
+            } else {
+                pllmf += 2U;
+            }
 
-        /* PLL clock source selection, HXTAL or IRC16M_VALUE or IRC48M_VALUE */
-        pllsel = GET_BITS(RCU_CFG0, 16, 17);
-        if(0U == pllsel) {
-            prediv = (GET_BITS(RCU_CFG1, 0, 3) + 1U);
-            cksys_freq = (IRC16M_VALUE / prediv) * pllmf;
-        } else if(1U == pllsel) {
-            prediv = (GET_BITS(RCU_CFG1, 0, 3) + 1U);
-            cksys_freq = (HXTAL_VALUE / prediv) * pllmf;
-        } else {
-            prediv = (GET_BITS(RCU_CFG1, 0, 3) + 1U);
-            cksys_freq = (IRC48M_VALUE / prediv) * pllmf;
-        }
-        break;
-    /* IRC16M is selected as CK_SYS */
-    default:
-        cksys_freq = IRC16M_VALUE;
-        break;
+            /* PLL clock source selection, HXTAL or IRC16M_VALUE or IRC48M_VALUE */
+            pllsel = GET_BITS(RCU_CFG0, 16, 17);
+            if(0U == pllsel) {
+                prediv = (GET_BITS(RCU_CFG1, 0, 3) + 1U);
+                cksys_freq = (IRC16M_VALUE / prediv) * pllmf;
+            } else if(1U == pllsel) {
+                prediv = (GET_BITS(RCU_CFG1, 0, 3) + 1U);
+                cksys_freq = (HXTAL_VALUE / prediv) * pllmf;
+            } else {
+                prediv = (GET_BITS(RCU_CFG1, 0, 3) + 1U);
+                cksys_freq = (IRC48M_VALUE / prediv) * pllmf;
+            }
+            break;
+        /* IRC16M is selected as CK_SYS */
+        default:
+            cksys_freq = IRC16M_VALUE;
+            break;
     }
     /* calculate AHB clock frequency */
     idx = GET_BITS(RCU_CFG0, 4, 7);
@@ -1148,151 +1163,398 @@ uint32_t rcu_clock_freq_get(rcu_clock_freq_enum clock)
 
     /* return the clocks frequency */
     switch(clock) {
-    case CK_SYS:
-        ck_freq = cksys_freq;
-        break;
-    case CK_AHB:
-        ck_freq = ahb_freq;
-        break;
-    case CK_APB1:
-        ck_freq = apb1_freq;
-        break;
-    case CK_APB2:
-        ck_freq = apb2_freq;
-        break;
-    case CK_ADC:
-        /* calculate ADC clock frequency */
-        if(RCU_ADCSRC_AHB_APB2DIV != (RCU_CFG2 & RCU_CFG2_ADCSEL)) {
-            adc_freq = IRC48M_VALUE;
-        } else {
-            /* ADC clock select CK_APB2 divided by 2/4/6/8 or CK_AHB divided by 3/5/7/9 */
-            adcps = GET_BITS(RCU_CFG0, 14, 15);
-            adcps2 = GET_BITS(RCU_CFG2, 30, 31);
-            switch(adcps) {
-            case 0:
-                if(0U == adcps2) {
-                    adc_freq = apb2_freq / 2U;
-                } else if(1U == adcps2) {
-                    adc_freq = apb2_freq / 10U;
-                } else if(2U == adcps2) {
-                    adc_freq = ahb_freq / 3U;
-                } else if(3U == adcps2) {
-                    adc_freq = ahb_freq / 11U;
-                } else {
+        case CK_SYS:
+            ck_freq = cksys_freq;
+            break;
+        case CK_AHB:
+            ck_freq = ahb_freq;
+            break;
+        case CK_APB1:
+            ck_freq = apb1_freq;
+            break;
+        case CK_APB2:
+            ck_freq = apb2_freq;
+            break;
+        case CK_ADC:
+            /* calculate ADC clock frequency */
+            if(RCU_ADCSRC_AHB_APB2DIV != (RCU_CFG2 & RCU_CFG2_ADCSEL)) {
+                adc_freq = IRC48M_VALUE;
+            } else {
+                /* ADC clock select CK_APB2 divided by 2/4/6/8 or CK_AHB divided by 3/5/7/9 */
+                adcps = GET_BITS(RCU_CFG0, 14, 15);
+                adcps2 = GET_BITS(RCU_CFG2, 30, 31);
+                switch(adcps) {
+                    case 0:
+                        if(0U == adcps2) {
+                            adc_freq = apb2_freq / 2U;
+                        } else if(1U == adcps2) {
+                            adc_freq = apb2_freq / 10U;
+                        } else if(2U == adcps2) {
+                            adc_freq = ahb_freq / 3U;
+                        } else if(3U == adcps2) {
+                            adc_freq = ahb_freq / 11U;
+                        } else {
+                        }
+                        break;
+                    case 1:
+                        if(0U == adcps2) {
+                            adc_freq = apb2_freq / 4U;
+                        } else if(1U == adcps2) {
+                            adc_freq = apb2_freq / 12U;
+                        } else if(2U == adcps2) {
+                            adc_freq = ahb_freq / 5U;
+                        } else if(3U == adcps2) {
+                            adc_freq = ahb_freq / 13U;
+                        } else {
+                        }
+                        break;
+                    case 2:
+                        if(0U == adcps2) {
+                            adc_freq = apb2_freq / 6U;
+                        } else if(1U == adcps2) {
+                            adc_freq = apb2_freq / 14U;
+                        } else if(2U == adcps2) {
+                            adc_freq = ahb_freq /  7U;
+                        } else if(3U == adcps2) {
+                            adc_freq = ahb_freq / 15U;
+                        } else {
+                        }
+                        break;
+                    case 3:
+                        if(0U == adcps2) {
+                            adc_freq = apb2_freq / 8U;
+                        } else if(1U == adcps2) {
+                            adc_freq = apb2_freq / 16U;
+                        } else if(2U == adcps2) {
+                            adc_freq = ahb_freq /  9U;
+                        } else if(3U == adcps2) {
+                            adc_freq = ahb_freq / 17U;
+                        } else {
+                        }
+                        break;
+                    default:
+                        break;
                 }
-                break;
-            case 1:
-                if(0U == adcps2) {
-                    adc_freq = apb2_freq / 4U;
-                } else if(1U == adcps2) {
-                    adc_freq = apb2_freq / 12U;
-                } else if(2U == adcps2) {
-                    adc_freq = ahb_freq / 5U;
-                } else if(3U == adcps2) {
-                    adc_freq = ahb_freq / 13U;
-                } else {
-                }
-                break;
-            case 2:
-                if(0U == adcps2) {
-                    adc_freq = apb2_freq / 6U;
-                } else if(1U == adcps2) {
-                    adc_freq = apb2_freq / 14U;
-                } else if(2U == adcps2) {
-                    adc_freq = ahb_freq /  7U;
-                } else if(3U == adcps2) {
-                    adc_freq = ahb_freq / 15U;
-                } else {
-                }
-                break;
-            case 3:
-                if(0U == adcps2) {
-                    adc_freq = apb2_freq / 8U;
-                } else if(1U == adcps2) {
-                    adc_freq = apb2_freq / 16U;
-                } else if(2U == adcps2) {
-                    adc_freq = ahb_freq /  9U;
-                } else if(3U == adcps2) {
-                    adc_freq = ahb_freq / 17U;
-                } else {
-                }
-                break;
-            default:
-                break;
             }
-        }
-        ck_freq = adc_freq;
-        break;
-    case CK_USART0:
-        /* calculate USART0 clock frequency */
-        if(RCU_USART0SRC_CKAPB2 == (RCU_CFG2 & RCU_CFG2_USART0SEL)) {
-            usart_freq = apb2_freq;
-        } else if(RCU_USART0SRC_CKSYS == (RCU_CFG2 & RCU_CFG2_USART0SEL)) {
-            usart_freq = cksys_freq;
-        } else if(RCU_USART0SRC_LXTAL == (RCU_CFG2 & RCU_CFG2_USART0SEL)) {
-            usart_freq = LXTAL_VALUE;
-        } else if(RCU_USART0SRC_IRC16MDIV == (RCU_CFG2 & RCU_CFG2_USART0SEL)) {
-            /* calculate IRC16MDIV clock frequency */
-            idx = GET_BITS(RCU_CFG2, 18, 20);
-            clk_exp = IRC16M_exp[idx];
-            usart_freq = IRC16M_VALUE >> clk_exp;
-        } else {
-        }
-        ck_freq = usart_freq;
-        break;
-    case CK_USART1:
-        /* calculate USART1 clock frequency */
-        if(RCU_USART1SRC_CKAPB1 == (RCU_CFG2 & RCU_CFG2_USART1SEL)) {
-            usart_freq = apb1_freq;
-        } else if(RCU_USART1SRC_CKSYS == (RCU_CFG2 & RCU_CFG2_USART1SEL)) {
-            usart_freq = cksys_freq;
-        } else if(RCU_USART1SRC_LXTAL == (RCU_CFG2 & RCU_CFG2_USART1SEL)) {
-            usart_freq = LXTAL_VALUE;
-        } else if(RCU_USART1SRC_IRC16MDIV == (RCU_CFG2 & RCU_CFG2_USART1SEL)) {
-            /* calculate IRC16MDIV clock frequency */
-            idx = GET_BITS(RCU_CFG2, 18, 20);
-            clk_exp = IRC16M_exp[idx];
-            usart_freq = IRC16M_VALUE >> clk_exp;
-        } else {
-        }
-        ck_freq = usart_freq;
-        break;
-    case CK_LPUART:
-        /* calculate LPUART clock frequency */
-        if(RCU_LPUARTSRC_CKAPB1 == (RCU_CFG2 & RCU_CFG2_LPUARTSEL)) {
-            usart_freq = apb1_freq;
-        } else if(RCU_LPUARTSRC_CKSYS == (RCU_CFG2 & RCU_CFG2_LPUARTSEL)) {
-            usart_freq = cksys_freq;
-        } else if(RCU_LPUARTSRC_LXTAL == (RCU_CFG2 & RCU_CFG2_LPUARTSEL)) {
-            usart_freq = LXTAL_VALUE;
-        } else if(RCU_LPUARTSRC_IRC16MDIV == (RCU_CFG2 & RCU_CFG2_LPUARTSEL)) {
-            /* calculate IRC16MDIV clock frequency */
-            idx = GET_BITS(RCU_CFG2, 18, 20);
-            clk_exp = IRC16M_exp[idx];
-            usart_freq = IRC16M_VALUE >> clk_exp;
-        } else {
-        }
-        ck_freq = usart_freq;
-        break;
-    case CK_LPTIMER:
-        /* calculate LPTIMER clock frequency */
-        if(RCU_LPTIMERSRC_CKAPB1 == (RCU_CFG2 & RCU_CFG2_LPTIMERSEL)) {
-            lptimer_freq = apb1_freq;
-        } else if(RCU_LPTIMERSRC_IRC32K == (RCU_CFG2 & RCU_CFG2_LPTIMERSEL)) {
-            lptimer_freq = IRC32K_VALUE;
-        } else if(RCU_LPTIMERSRC_LXTAL == (RCU_CFG2 & RCU_CFG2_LPTIMERSEL)) {
-            lptimer_freq = LXTAL_VALUE;
-        } else if(RCU_LPTIMERSRC_IRC16MDIV == (RCU_CFG2 & RCU_CFG2_LPTIMERSEL)) {
-            /* calculate IRC16MDIV clock frequency */
-            idx = GET_BITS(RCU_CFG2, 18, 20);
-            clk_exp = IRC16M_exp[idx];
-            usart_freq = IRC16M_VALUE >> clk_exp;
-        } else {
-        }
-        ck_freq = lptimer_freq;
-        break;
-    default:
-        break;
+            ck_freq = adc_freq;
+            break;
+        case CK_USART0:
+            /* calculate USART0 clock frequency */
+            if(RCU_USART0SRC_CKAPB2 == (RCU_CFG2 & RCU_CFG2_USART0SEL)) {
+                usart_freq = apb2_freq;
+            } else if(RCU_USART0SRC_CKSYS == (RCU_CFG2 & RCU_CFG2_USART0SEL)) {
+                usart_freq = cksys_freq;
+            } else if(RCU_USART0SRC_LXTAL == (RCU_CFG2 & RCU_CFG2_USART0SEL)) {
+                usart_freq = LXTAL_VALUE;
+            } else if(RCU_USART0SRC_IRC16MDIV == (RCU_CFG2 & RCU_CFG2_USART0SEL)) {
+                /* calculate IRC16MDIV clock frequency */
+                idx = GET_BITS(RCU_CFG2, 18, 20);
+                clk_exp = IRC16M_exp[idx];
+                usart_freq = IRC16M_VALUE >> clk_exp;
+            } else {
+            }
+            ck_freq = usart_freq;
+            break;
+        case CK_USART1:
+            /* calculate USART1 clock frequency */
+            if(RCU_USART1SRC_CKAPB1 == (RCU_CFG2 & RCU_CFG2_USART1SEL)) {
+                usart_freq = apb1_freq;
+            } else if(RCU_USART1SRC_CKSYS == (RCU_CFG2 & RCU_CFG2_USART1SEL)) {
+                usart_freq = cksys_freq;
+            } else if(RCU_USART1SRC_LXTAL == (RCU_CFG2 & RCU_CFG2_USART1SEL)) {
+                usart_freq = LXTAL_VALUE;
+            } else if(RCU_USART1SRC_IRC16MDIV == (RCU_CFG2 & RCU_CFG2_USART1SEL)) {
+                /* calculate IRC16MDIV clock frequency */
+                idx = GET_BITS(RCU_CFG2, 18, 20);
+                clk_exp = IRC16M_exp[idx];
+                usart_freq = IRC16M_VALUE >> clk_exp;
+            } else {
+            }
+            ck_freq = usart_freq;
+            break;
+#ifdef GD32L233
+        case CK_LPUART:
+            /* calculate LPUART0 clock frequency */
+            if(RCU_LPUARTSRC_CKAPB1 == (RCU_CFG2 & RCU_CFG2_LPUARTSEL)) {
+                usart_freq = apb1_freq;
+            } else if(RCU_LPUARTSRC_CKSYS == (RCU_CFG2 & RCU_CFG2_LPUARTSEL)) {
+                usart_freq = cksys_freq;
+            } else if(RCU_LPUARTSRC_LXTAL == (RCU_CFG2 & RCU_CFG2_LPUARTSEL)) {
+                usart_freq = LXTAL_VALUE;
+            } else if(RCU_LPUARTSRC_IRC16MDIV == (RCU_CFG2 & RCU_CFG2_LPUARTSEL)) {
+                /* calculate IRC16MDIV clock frequency */
+                idx = GET_BITS(RCU_CFG2, 18, 20);
+                clk_exp = IRC16M_exp[idx];
+                usart_freq = IRC16M_VALUE >> clk_exp;
+            } else {
+            }
+            ck_freq = usart_freq;
+            break;
+        case CK_LPTIMER:
+            /* calculate LPTIMER clock frequency */
+            if(RCU_LPTIMERSRC_CKAPB2 == (RCU_CFG2 & RCU_CFG2_LPTIMERSEL)) {
+                lptimer_freq = apb2_freq;
+            } else if(RCU_LPTIMERSRC_IRC32K == (RCU_CFG2 & RCU_CFG2_LPTIMERSEL)) {
+                lptimer_freq = IRC32K_VALUE;
+            } else if(RCU_LPTIMERSRC_LXTAL == (RCU_CFG2 & RCU_CFG2_LPTIMERSEL)) {
+                lptimer_freq = LXTAL_VALUE;
+            } else if(RCU_LPTIMERSRC_IRC16MDIV == (RCU_CFG2 & RCU_CFG2_LPTIMERSEL)) {
+                /* calculate IRC16MDIV clock frequency */
+                idx = GET_BITS(RCU_CFG2, 18, 20);
+                clk_exp = IRC16M_exp[idx];
+                lptimer_freq = IRC16M_VALUE >> clk_exp;
+            } else {
+            }
+            ck_freq = lptimer_freq;
+            break;
+#endif /* GD32L233 */
+#ifdef GD32L235
+        case CK_LPUART0:
+            /* calculate LPUART0 clock frequency */
+            if(RCU_LPUARTSRC_CKAPB1 == (RCU_CFG2 & RCU_CFG2_LPUART0SEL)) {
+                usart_freq = apb1_freq;
+            } else if(RCU_LPUARTSRC_CKSYS == (RCU_CFG2 & RCU_CFG2_LPUART0SEL)) {
+                usart_freq = cksys_freq;
+            } else if(RCU_LPUARTSRC_LXTAL == (RCU_CFG2 & RCU_CFG2_LPUART0SEL)) {
+                usart_freq = LXTAL_VALUE;
+            } else if(RCU_LPUARTSRC_IRC16MDIV == (RCU_CFG2 & RCU_CFG2_LPUART0SEL)) {
+                /* calculate IRC16MDIV clock frequency */
+                idx = GET_BITS(RCU_CFG2, 18, 20);
+                clk_exp = IRC16M_exp[idx];
+                usart_freq = IRC16M_VALUE >> clk_exp;
+            } else {
+            }
+            ck_freq = usart_freq;
+            break;
+        case CK_LPUART1:
+            /* calculate LPUART1 clock frequency */
+            if(RCU_LPUARTSRC_CKAPB1 == CFG2_LPUARTSEL(GET_BITS(RCU_CFG2, 24, 25))) {
+                usart_freq = apb1_freq;
+            } else if(RCU_LPUARTSRC_CKSYS == CFG2_LPUARTSEL(GET_BITS(RCU_CFG2, 24, 25))) {
+                usart_freq = cksys_freq;
+            } else if(RCU_LPUARTSRC_LXTAL == CFG2_LPUARTSEL(GET_BITS(RCU_CFG2, 24, 25))) {
+                usart_freq = LXTAL_VALUE;
+            } else if(RCU_LPUARTSRC_IRC16MDIV == CFG2_LPUARTSEL(GET_BITS(RCU_CFG2, 24, 25))) {
+                /* calculate IRC16MDIV clock frequency */
+                idx = GET_BITS(RCU_CFG2, 18, 20);
+                clk_exp = IRC16M_exp[idx];
+                usart_freq = IRC16M_VALUE >> clk_exp;
+            } else {
+            }
+            ck_freq = usart_freq;
+            break;
+        case CK_LPTIMER0:
+            /* calculate LPTIMER clock frequency */
+            if(RCU_LPTIMERSRC_CKAPB1 == (RCU_CFG2 & RCU_CFG2_LPTIMER0SEL)) {
+                lptimer_freq = apb1_freq;
+            } else if(RCU_LPTIMERSRC_IRC32K == (RCU_CFG2 & RCU_CFG2_LPTIMER0SEL)) {
+                lptimer_freq = IRC32K_VALUE;
+            } else if(RCU_LPTIMERSRC_LXTAL == (RCU_CFG2 & RCU_CFG2_LPTIMER0SEL)) {
+                lptimer_freq = LXTAL_VALUE;
+            } else if(RCU_LPTIMERSRC_IRC16MDIV == (RCU_CFG2 & RCU_CFG2_LPTIMER0SEL)) {
+                /* calculate IRC16MDIV clock frequency */
+                idx = GET_BITS(RCU_CFG2, 18, 20);
+                clk_exp = IRC16M_exp[idx];
+                lptimer_freq = IRC16M_VALUE >> clk_exp;
+            } else {
+            }
+            ck_freq = lptimer_freq;
+            break;
+        case CK_LPTIMER1:
+            /* calculate LPTIMER clock frequency */
+            if(RCU_LPTIMERSRC_CKAPB1 == CFG2_LPTIMERSEL(GET_BITS(RCU_CFG2, 21, 22))) {
+                lptimer_freq = apb1_freq;
+            } else if(RCU_LPTIMERSRC_IRC32K == CFG2_LPTIMERSEL(GET_BITS(RCU_CFG2, 21, 22))) {
+                lptimer_freq = IRC32K_VALUE;
+            } else if(RCU_LPTIMERSRC_LXTAL == CFG2_LPTIMERSEL(GET_BITS(RCU_CFG2, 21, 22))) {
+                lptimer_freq = LXTAL_VALUE;
+            } else if(RCU_LPTIMERSRC_IRC16MDIV == CFG2_LPTIMERSEL(GET_BITS(RCU_CFG2, 21, 22))) {
+                /* calculate IRC16MDIV clock frequency */
+                idx = GET_BITS(RCU_CFG2, 18, 20);
+                clk_exp = IRC16M_exp[idx];
+                lptimer_freq = IRC16M_VALUE >> clk_exp;
+            } else {
+            }
+            ck_freq = lptimer_freq;
+            break;
+#endif /* GD32L235 */
+        case CK_I2C0:
+            /* calculate I2C clock frequency */
+            if(RCU_I2CSRC_CKAPB1 == (RCU_CFG2 & RCU_CFG2_I2C0SEL)) {
+                i2c_freq = apb1_freq;
+            } else if(RCU_I2CSRC_CKSYS == (RCU_CFG2 & RCU_CFG2_I2C0SEL)) {
+                i2c_freq = cksys_freq;
+            } else if(RCU_I2CSRC_IRC16MDIV == (RCU_CFG2 & RCU_CFG2_I2C0SEL)) {
+                /* calculate IRC16MDIV clock frequency */
+                idx = GET_BITS(RCU_CFG2, 18, 20);
+                clk_exp = IRC16M_exp[idx];
+                i2c_freq = IRC16M_VALUE >> clk_exp;
+            } else {
+            }
+            ck_freq = i2c_freq;
+            break;
+        case CK_I2C1:
+            /* calculate I2C clock frequency */
+            if(RCU_I2CSRC_CKAPB1 == CFG2_I2C0SEL(GET_BITS(RCU_CFG2, 4, 5))) {
+                i2c_freq = apb1_freq;
+            } else if(RCU_I2CSRC_CKSYS == CFG2_I2C0SEL(GET_BITS(RCU_CFG2, 4, 5))) {
+                i2c_freq = cksys_freq;
+            } else if(RCU_I2CSRC_IRC16MDIV == CFG2_I2C0SEL(GET_BITS(RCU_CFG2, 4, 5))) {
+                /* calculate IRC16MDIV clock frequency */
+                idx = GET_BITS(RCU_CFG2, 18, 20);
+                clk_exp = IRC16M_exp[idx];
+                i2c_freq = IRC16M_VALUE >> clk_exp;
+            } else {
+            }
+            ck_freq = i2c_freq;
+            break;
+        case CK_I2C2:
+            /* calculate I2C clock frequency */
+            if(RCU_I2CSRC_CKAPB1 == CFG2_I2C0SEL(GET_BITS(RCU_CFG2, 6, 7))) {
+                i2c_freq = apb1_freq;
+            } else if(RCU_I2CSRC_CKSYS == CFG2_I2C0SEL(GET_BITS(RCU_CFG2, 6, 7))) {
+                i2c_freq = cksys_freq;
+            } else if(RCU_I2CSRC_IRC16MDIV == CFG2_I2C0SEL(GET_BITS(RCU_CFG2, 6, 7))) {
+                /* calculate IRC16MDIV clock frequency */
+                idx = GET_BITS(RCU_CFG2, 18, 20);
+                clk_exp = IRC16M_exp[idx];
+                i2c_freq = IRC16M_VALUE >> clk_exp;
+            } else {
+            }
+            ck_freq = i2c_freq;
+            break;
+        default:
+            break;
     }
     return ck_freq;
+}
+
+
+/*!
+    \brief      get the clock stabilization and periphral reset flags
+    \param[in]  flag: the clock stabilization and periphral reset flags, refer to rcu_flag_enum
+                only one parameter can be selected which is shown as below:
+      \arg        RCU_FLAG_IRC32KSTB: IRC32K stabilization flag
+      \arg        RCU_FLAG_LXTALSTB: LXTAL stabilization flag
+      \arg        RCU_FLAG_IRC16MSTB: IRC16M stabilization flag
+      \arg        RCU_FLAG_HXTALSTB: HXTAL stabilization flag
+      \arg        RCU_FLAG_PLLSTB: PLL stabilization flag
+      \arg        RCU_FLAG_IRC48MSTB: IRC48M stabilization flag
+      \arg        RCU_FLAG_V11RST: V11 domain power reset flag
+      \arg        RCU_FLAG_EPRST: external pin reset flag
+      \arg        RCU_FLAG_PORRST: power reset flag
+      \arg        RCU_FLAG_SWRST: software reset flag
+      \arg        RCU_FLAG_FWDGTRST: free watchdog timer reset flag
+      \arg        RCU_FLAG_WWDGTRST: window watchdog timer reset flag
+      \arg        RCU_FLAG_LPRST: low-power reset flag
+      \arg        RCU_FLAG_LCMD: LXTAL clock failure detection flag
+    \param[out] none
+    \retval     FlagStatus: SET or RESET
+*/
+FlagStatus rcu_flag_get(rcu_flag_enum flag)
+{
+    FlagStatus status;
+  
+    if(RESET != (RCU_REG_VAL(flag) & BIT(RCU_BIT_POS(flag)))) {
+        status = SET;
+    } else {
+        status = RESET;
+    }
+    return status;
+}
+
+/*!
+    \brief      clear the reset flag
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void rcu_all_reset_flag_clear(void)
+{
+    RCU_RSTSCK |= RCU_RSTSCK_RSTFC;
+}
+
+
+/*!
+    \brief      enable the stabilization interrupt
+    \param[in]  stab_int: clock stabilization interrupt, refer to rcu_int_enum
+                only one parameter can be selected which is shown as below:
+      \arg        RCU_INT_IRC32KSTB: IRC32K stabilization interrupt enable
+      \arg        RCU_INT_LXTALSTB: LXTAL stabilization interrupt enable
+      \arg        RCU_INT_IRC16MSTB: IRC16M stabilization interrupt enable
+      \arg        RCU_INT_HXTALSTB: HXTAL stabilization interrupt enable
+      \arg        RCU_INT_PLLSTB: PLL stabilization interrupt enable
+      \arg        RCU_INT_IRC48MSTB: IRC48M stabilization interrupt enable
+      \arg        RCU_INT_LCKM: LXTAL clock stuck interrup enable
+    \param[out] none
+    \retval     none
+*/
+void rcu_interrupt_enable(rcu_int_enum stab_int)
+{
+    RCU_REG_VAL(stab_int) |= BIT(RCU_BIT_POS(stab_int));
+}
+
+/*!
+    \brief      disable the stabilization interrupt
+    \param[in]  stab_int: clock stabilization interrupt, refer to rcu_int_enum
+                only one parameter can be selected which is shown as below:
+      \arg        RCU_INT_IRC32KSTB: IRC32K stabilization interrupt disable
+      \arg        RCU_INT_LXTALSTB: LXTAL stabilization interrupt disable
+      \arg        RCU_INT_IRC16MSTB: IRC16M stabilization interrupt disable
+      \arg        RCU_INT_HXTALSTB: HXTAL stabilization interrupt disable
+      \arg        RCU_INT_PLLSTB: PLL stabilization interrupt disable
+      \arg        RCU_INT_IRC48MSTB: IRC48M stabilization interrupt disable
+      \arg        RCU_INT_LCKM: LXTAL clock stuck interrup disable
+    \param[out] none
+    \retval     none
+*/
+void rcu_interrupt_disable(rcu_int_enum stab_int)
+{
+    RCU_REG_VAL(stab_int) &= ~BIT(RCU_BIT_POS(stab_int));
+}
+
+/*!
+    \brief      get the clock stabilization interrupt and ckm flags
+    \param[in]  int_flag: interrupt and ckm flags, refer to rcu_int_flag_enum
+                only one parameter can be selected which is shown as below:
+      \arg        RCU_INT_FLAG_IRC32KSTB: IRC32K stabilization interrupt flag
+      \arg        RCU_INT_FLAG_LXTALSTB: LXTAL stabilization interrupt flag
+      \arg        RCU_INT_FLAG_IRC16MSTB: IRC16M stabilization interrupt flag
+      \arg        RCU_INT_FLAG_HXTALSTB: HXTAL stabilization interrupt flag
+      \arg        RCU_INT_FLAG_PLLSTB: PLL stabilization interrupt flag
+      \arg        RCU_INT_FLAG_IRC48MSTB: IRC48M stabilization interrupt flag
+      \arg        RCU_INT_FLAG_LCKM: LXTAL clock stuck interrupt flag
+      \arg        RCU_INT_FLAG_CKM: HXTAL clock stuck interrupt flag
+    \param[out] none
+    \retval     FlagStatus: SET or RESET
+*/
+FlagStatus rcu_interrupt_flag_get(rcu_int_flag_enum int_flag)
+{
+    FlagStatus status;
+    if(RESET != (RCU_REG_VAL(int_flag) & BIT(RCU_BIT_POS(int_flag)))) {
+        status =  SET;
+    } else {
+        status =  RESET;
+    }
+    return status;
+}
+
+/*!
+    \brief      clear the interrupt flags
+    \param[in]  int_flag_clear: clock stabilization and stuck interrupt flags clear, refer to rcu_int_flag_clear_enum
+                only one parameter can be selected which is shown as below:
+      \arg        RCU_INT_FLAG_IRC32KSTB_CLR: IRC32K stabilization interrupt flag clear
+      \arg        RCU_INT_FLAG_LXTALSTB_CLR: LXTAL stabilization interrupt flag clear
+      \arg        RCU_INT_FLAG_IRC16MSTB_CLR: IRC16M stabilization interrupt flag clear
+      \arg        RCU_INT_FLAG_HXTALSTB_CLR: HXTAL stabilization interrupt flag clear
+      \arg        RCU_INT_FLAG_PLLSTB_CLR: PLL stabilization interrupt flag clear
+      \arg        RCU_INT_FLAG_IRC48MSTB_CLR: IRC48M stabilization interrupt flag clear
+      \arg        RCU_INT_FLAG_LCKM_CLR: LXTAL clock stuck interrupt flag clear
+      \arg        RCU_INT_FLAG_CKM_CLR: clock stuck interrupt flag clear
+    \param[out] none
+    \retval     none
+*/
+void rcu_interrupt_flag_clear(rcu_int_flag_clear_enum int_flag_clear)
+{
+    RCU_REG_VAL(int_flag_clear) |= BIT(RCU_BIT_POS(int_flag_clear));
 }
