@@ -6,4 +6,6 @@
 
 #if defined(CONFIG_SOC_SERIES_GD32G5X3)
 #include <gd32g5x3_fft.h>
+#elif defined(CONFIG_SOC_SERIES_GD32H77X_78X)
+#include <gd32h77x_78x_fft.h>
 #endif
