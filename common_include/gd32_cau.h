@@ -12,6 +12,8 @@
 #include <gd32g5x3_cau.h>
 #elif defined(CONFIG_SOC_SERIES_GD32H73X_75X)
 #include <gd32h73x_75x_cau.h>
+#elif defined(CONFIG_SOC_SERIES_GD32H77X_78X)
+#include <gd32h77x_78x_cau.h>
 #elif defined(CONFIG_SOC_SERIES_GD32H7XX)
 #include <gd32h7xx_cau.h>
 #elif defined(CONFIG_SOC_SERIES_GD32L23X)
